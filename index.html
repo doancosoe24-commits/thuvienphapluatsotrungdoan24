@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tủ Sách Pháp Luật</title>
+  <link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      width: 70%;
+      margin: 0 auto;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background: #f7f9fb;
+    }
+    main { flex: 1; box-sizing: border-box; }
+
+    /* Skeleton loading */
+    .skeleton {
+      background: #e0e0e0;
+      height: 50px;
+      margin: 15px 0;
+      border-radius: 4px;
+      animation: shimmer 1.5s infinite linear;
+    }
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .arrow {
+      display: inline-block;
+      width: 150px;
+      height: 60px;
+      background-color: #f9f2db;
+      position: relative;
+      margin-left: 10px;
+      clip-path: polygon(0% 0%,80% 0%,100% 50%,80% 100%,0% 100%,20% 50%);
+    }
+
+    .item {
+      background: #004aad;
+      width: 100%;
+      display: flex;
+      text-align: center;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      padding: 10px 0;
+      margin: 15px 0;
+      cursor: pointer;
+    }
+
+    .flag-vn {
+      width: 84px;
+      height: auto;
+      display: block;
+      margin-right: 12px;
+    }
+
+    .flag-vn svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      transform-origin: 50% 50%;
+      animation: flag-wave 4s ease-in-out infinite;
+    }
+
+    @keyframes flag-wave {
+      0% { transform: perspective(300px) rotateY(0deg) skewX(0deg); }
+      25% { transform: perspective(300px) rotateY(-1.2deg) skewX(-0.8deg); }
+      50% { transform: perspective(300px) rotateY(0deg) skewX(0deg); }
+      75% { transform: perspective(300px) rotateY(1.2deg) skewX(0.8deg); }
+      100% { transform: perspective(300px) rotateY(0deg) skewX(0deg); }
+    }
+
+    .item p { margin:0; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; }
+
+    @media (max-width:768px){
+      body { width:100%; overflow:hidden; }
+      .flag-vn{ width:54px; }
+      .arrow{ width:60px; height:40px; }
+      .item p { font-size:10px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Main content -->
+  <main>
+    <div class="list" id="list">
+      <!-- Skeleton loading -->
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+<script src="main.js"></script>
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyIN9wn1ewTZDkx4E1fjyMTa35POlfUGFvjHeoPLFvtuEKiPtNa-z3LvE0Rjf0phVTL/exec";
+
+   // Load header/footer và gắn sự kiện search
+function loadHTML(id, url) {
+  fetch(url)
+    .then(res => res.ok ? res.text() : Promise.reject('Network error'))
+    .then(html => {
+      document.getElementById(id).innerHTML = html;
+
+      if(id === 'header'){
+        const searchBtn = document.getElementById("searchBtn");
+        const searchInput = document.getElementById("searchInput");
+
+        // Chỉ nút tìm kiếm → chuyển sang timkiem.html
+        searchBtn.addEventListener("click", ()=>{
+          const key = searchInput.value.trim();
+          if(!key) return;
+          window.location.href = `timkiem.html?key=${encodeURIComponent(key)}`;
+        });
+      }
+    })
+    .catch(err => console.error(`Error loading ${url}:`, err));
+}
+
+loadHTML('header','header.html');
+loadHTML('footer','footer.html');
+
+    // Tạo HTML item
+   function createItemHTML(item){
+  return `
+    <div class="item" onclick="goToList(${item.slug})">
+      <div class="arrow"></div>
+      <p>${item.category}</p>
+      <div class="flag-vn" role="img" aria-label="Cờ Việt Nam">
+        <svg viewBox="0 0 512 341" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <rect width="512" height="341" fill="#DA251D"/>
+          <polygon fill="#FFD200" stroke="#E6C100" stroke-width="1.6"
+            points="256.0,80.5 276.206,142.688 341.595,142.688 288.694,181.123 308.901,243.312
+                    256.0,204.877 203.099,243.312 223.306,181.123 170.405,142.688 235.794,142.688"/>
+        </svg>
+      </div>
+    </div>`;
+}
+ // sẽ là http://127.0.0.1:5500
+    // Lấy dữ liệu từ Web App và render
+    fetch(`${webAppUrl}?ref=${encodeURIComponent(ref)}`)
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById("list");
+        let html = "";
+        data.forEach(item => html += createItemHTML(item));
+        list.innerHTML = html;
+         console.log("Dữ liệu nhận được:", data); 
+      })
+      .catch(err => {
+        console.error("Lỗi khi lấy dữ liệu:", err);
+        document.getElementById("list").innerHTML = "<p>Không thể tải dữ liệu.</p>";
+      });
+
+      function goToList(slug){
+  window.location.href = `list.html?slug=${slug}`;
+}
+  </script>
+
+</body>
+</html>

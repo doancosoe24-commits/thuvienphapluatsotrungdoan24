@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+<title>Search Example</title>
+<style>
+    header{
+        width: 100%;
+        padding:0;
+    }
+    .logo{
+        display: flex;
+        justify-content: space-between;
+    }
+    .logo img{
+        width: 80px;
+        height: 80px;
+    }
+    .search{
+        margin-top: 10px;
+        text-align: right;
+        position: relative;
+    }
+    .search input{
+        padding: 10px;
+        background: #004aad;
+        border: none;
+        border-radius: 5px;
+        color: white;
+    }
+    .search button{
+        padding: 10px;
+        background:none;
+        border: none;
+        color: rgb(6, 6, 6);
+    }
+    .search button i{
+        font-size: 16px;
+    }
+    .results{
+        position: absolute;
+        right: 0;
+        background: #ccae6e;
+        width: 100%;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #004aad;
+        border-radius: 5px;
+        display: none;
+        z-index: 10;
+        color: black;
+        margin-top: 20px;
+    }
+    .results div{
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    hr{
+        height: 4px;
+        background: #004aad;
+    }
+    .search_item { display: flex; align-items: center; margin-bottom: 0px; }
+
+    .btn-new-search {
+        width: 100px; height: 35px;
+        background: #ff3131;
+        clip-path: polygon(0% 0%, 78% 0%, 100% 50%, 78% 100%, 0% 100%, 18% 50%);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; color: #8c6d2a; font-size: 13px;
+        margin-right: 12px;
+    }
+
+    .item_con {
+        background: #004aad;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 10px 5px;
+        color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    .item_con p { margin: 0 0 6px 0; font-size: 14px; font-weight: 700; }
+
+    .btn-new-search {
+        background: #ff3131; color: #ffde59; font-weight: 700;
+        border: none; padding: 8px 16px; border-radius: 10px;
+        cursor: pointer; font-size: 12px; align-self: flex-end;
+        transition: 0.2s;
+    }
+
+</style>
+</head>
+<body>
+<header>
+    <div class="logo">
+        <a href="index.html"><img src="./img/logo.png" alt=""></a>
+        <img src="./img/z7265685068761_8f537423848b7220300016fed448a3d9.jpg" alt="">
+    </div>
+    <div class="search">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm">
+        <button id="searchBtn" type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <div class="results" id="results"></div>
+    </div>
+</header>
+<hr>
+<script src="main.js">
+</script>
+</body>
+</html>

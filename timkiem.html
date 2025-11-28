@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kết quả tìm kiếm</title>
+<style>
+     html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      width: 70%;
+      margin: 0 auto;
+      font-family: Arial, sans-serif;
+    }
+    main { flex: 1; box-sizing: border-box; }
+    h2 { color: #004aad; }
+    .keyword { color: #ff3131; font-weight: bold; }
+    main h2{
+        width: 100%;
+        background: #004aad;
+        color: #fff;
+        font-size: 20px;
+    }
+    .item_list { display: flex; align-items: center; width: 100%; margin: 10px 0;}
+    .arrow {
+        width: 120px; height: 45px;
+        background: #ccae6e;
+        clip-path: polygon(0% 0%, 78% 0%, 100% 50%, 78% 100%, 0% 100%, 18% 50%);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; color: #8c6d2a; font-size: 13px;
+        margin-right: 12px;
+    }
+
+    .items {
+        background: #004aad;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 10px 5px;
+        color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    .items p { margin: 0 0 6px 0; font-size: 16px; font-weight: 700; }
+
+    .btn-new {
+        background: #ff3131; color: #ffde59; font-weight: 700;
+        border: none; padding: 8px 16px; border-radius: 10px;
+        cursor: pointer; font-size: 12px; align-self: flex-end;
+        transition: 0.2s;
+    }
+    @media (max-width:768px) {
+        body{
+            width: 100%;
+        }
+        .arrow {
+            width: 80px;
+            height: 35px;
+        }
+        .items p{
+            font-size: 14px;
+        }
+    }
+</style>
+</head>
+<body>
+<div id="header"></div>
+<main>
+<h2>Từ khóa: <span id="searchKey"></span></h2>
+<div id="results"></div>
+</main>
+<div id="footer"></div>
+<script>
+const apiURL = "https://script.google.com/macros/s/AKfycbzeupjkaYuRSJaf-AYOY_NfDHZgDtJL4nEY5EZH1H5b6RXM8VYcwOiGudoxEJ4AJ0yo/exec"; 
+async function loadAndFilter() {
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get("key")?.trim() || "";
+    const keyLower = key.toLowerCase();
+    document.getElementById("searchKey").textContent = key || "không có";
+
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
+const ref = window.location.origin;
+    if(!key) {
+        resultsDiv.innerHTML = "<p>Không có từ khóa.</p>";
+        return;
+    }
+
+    try {
+        const res = await fetch(`${apiURL}?ref=${encodeURIComponent(ref)}`);
+        const items = await res.json();
+
+        // Lọc các item có chứa keyword trong title
+        const filtered = items.filter(item => item.title && item.title.toLowerCase().includes(keyLower));
+
+        if(filtered.length === 0){
+            resultsDiv.innerHTML = "<p>Không tìm thấy kết quả.</p>";
+            return;
+        }
+
+        filtered.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = 
+            `
+                <div class="item_list">
+                    <div class="arrow"></div>
+                    <div class="items" onclick="goDetail(${item.slug})">
+                        <p>${item.title}</p>
+                        <button class="btn-new">Có hiệu lực</button>
+                    </div>
+                </div>
+        `;
+            resultsDiv.appendChild(div);
+        });
+    } catch(err) {
+        console.error("Lỗi load API", err);
+        resultsDiv.innerHTML = "<p>Không thể tải dữ liệu.</p>";
+    }
+}
+
+loadAndFilter();
+function goDetail(slug){
+    window.location.href = "detail.html?slug=" + slug;
+}
+function loadHTML(id, url) {
+  fetch(url)
+    .then(res => res.ok ? res.text() : Promise.reject('Network error'))
+    .then(html => {
+      document.getElementById(id).innerHTML = html;
+
+      if(id === 'header'){
+        const searchBtn = document.getElementById("searchBtn");
+        const searchInput = document.getElementById("searchInput");
+
+        // Chỉ nút tìm kiếm → chuyển sang timkiem.html
+        searchBtn.addEventListener("click", ()=>{
+          const key = searchInput.value.trim();
+          if(!key) return;
+          window.location.href = `timkiem.html?key=${encodeURIComponent(key)}`;
+        });
+      }
+    })
+    .catch(err => console.error(`Error loading ${url}:`, err));
+}
+
+loadHTML('header','header.html');
+loadHTML('footer','footer.html');
+</script>
+</body>
+</html>

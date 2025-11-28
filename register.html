@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 90vh;
+        margin: 0 auto;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .login{
+        background: #004aad;
+        padding: 25px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+       .logo{
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+    }
+    
+    form h2{
+        text-align: center;
+        color: #ccae6e;
+        font-size: 24px;
+    }
+    .input-form{
+        margin: 10px 0;
+    }
+    .input-form input{
+        padding:10px;
+        width: 300px;
+        border-radius: 5px;
+        border: none;
+        background: #ccae6e;
+        color: #fff;
+    }
+    .input-form input::placeholder{
+        color: #fff;
+    }
+    .input-form input{
+        color: #fff;
+    }
+    .btn-login{
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 16px;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+    .login p{
+       text-align: right;
+       color: #fff;
+       font-size: 14px;
+    }
+    .login p span{
+        text-decoration: underline;
+        font-weight: 700;
+        cursor: pointer;
+    }
+</style>
+<body>
+    <div id="header"></div>
+     <div class="login">
+        <img src="./img/logo.png" alt="" class="logo">
+         <form action="">
+            <h2>Đăng ký</h2>
+            <div class="input-form">
+                <input type="email" placeholder="Email" required>
+            </div>
+            <div class="input-form">
+                <input type="text" placeholder="Tài  khoản" required>
+            </div>
+            <div class="input-form">
+                <input type="password" placeholder="Mật khẩu" required>
+            </div>
+            <div class="input-form">
+                <input type="password" placeholder="Nhập lại mật khẩu" required>
+            </div>
+            <button class="btn-login">Đăng nhập</button>
+         </form>
+         <p>Bạn có tài khoản chưa?<span>Đăng ký</span></p>
+     </div>
+     <div id="footer"></div>
+</body>
+<script>
+    
+</script>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chi tiết văn bản</title>
+<style>
+html, body { height: 100%; margin: 0; }
+body {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background: #f7f9fb;
+}
+main { flex: 1; box-sizing: border-box; }
+h2 { text-align: center; color: #004aad; font-weight: 700; }
+
+/* TAB MENU */
+.tabs-container { position: relative; display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #d0d6e0; padding-bottom: 8px; }
+.tab-btn { font-size: 14px; font-weight: 600; background: #004aad; cursor: pointer; padding: 10px 10px; border-radius: 5px; color: white; transition: 0.25s; }
+.tab-btn.active { background: #ccae6e; }
+.tab-underline { position: absolute; bottom: -2px; height: 4px; background: #ccae6e; width: 100%; border-radius: 10px; transition: 0.3s; }
+
+/* TAB CONTENT */
+.tab-detail { padding: 20px; background: #fff9e8; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); min-height: 500px; position: relative; }
+
+.watermark {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  font-size: 40px;
+  color: rgba(200,0,0,0.15);
+  transform: translate(-50%, -50%) rotate(-15deg);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media(max-width: 768px){
+    body { width: 100%; }
+    h2 { text-align: start; padding: 0 10px; }
+}
+</style>
+</head>
+<body>
+
+<main>
+    <div id="header"></div>
+
+    <span onclick="history.back()" style="color:#ccae6e;padding:10px;font-weight:600;text-decoration:underline;cursor:pointer;">
+        Quay lại
+    </span>
+
+    <h2 id="docTitle"></h2>
+
+    <div class="tabs-container">
+        <div class="tab-btn active" data-tab="source">Văn bản PDF</div>
+        <div class="tab-underline"></div>
+    </div>
+
+    <div class="tab-detail" id="tabContent"></div>
+</main>
+
+<div id="footer"></div>
+<script src="main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.10.100/pdf.min.js"></script>
+<script>
+const webAppUrl = "https://script.google.com/macros/s/AKfycbxLORzxJ3lCC0iQ39FkCQR7FZBVZNx30Ama4Tr1T5u9QNgmqbO3RSS3gzLUWwsv_Ds/exec";
+const slugFromURL = new URLSearchParams(window.location.search).get("slug");
+const tabContent = document.getElementById("tabContent");
+const docTitle = document.getElementById("docTitle");
+const tabs = document.querySelectorAll(".tab-btn");
+const underline = document.querySelector(".tab-underline");
+let currentData = null;
+
+// Biến name thành chuỗi liền, giữ D/Đ, bỏ dấu, viết hoa
+function normalizeNameForComparison(name){
+    return String(name || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"") // bỏ dấu
+        .replace(/[^a-zA-Z0-9Đđ]/g,"") // chỉ giữ chữ, số, D/Đ liền
+        .toUpperCase();
+}
+
+// Lấy ID Google Drive từ link đầy đủ
+function getDriveID(link){
+    if(!link) return "";
+    const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : link; // nếu chỉ ID thì dùng luôn
+}
+
+// underline animation
+function updateUnderline(activeTab){
+    if(!activeTab) return;
+    underline.style.width = activeTab.offsetWidth + "px";
+    underline.style.transform = `translateX(${activeTab.offsetLeft}px)`;
+}
+updateUnderline(document.querySelector(".tab-btn.active"));
+
+// Hiển thị tab PDF
+function showTab(data){
+    if(!data) return;
+    
+    if(!data.url || data.url.trim() === ""){
+        // Nếu URL rỗng
+        tabContent.innerHTML = `
+        <div style="position:relative; width:100%; height:700px; border-radius:10px; overflow:hidden; background:#fcf8e8; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:flex; justify-content:center; align-items:center; font-size:18px; color:#ff3131;">
+            Dữ liệu PDF chưa có
+        </div>`;
+    } else {
+        const pdfID = getDriveID(data.url); // hoặc data.pdf_url tùy sheet
+        console.log("PDF ID:", pdfID);
+
+        tabContent.innerHTML = `
+        <div style="position:relative; width:100%; height:700px; border-radius:10px; overflow:hidden; background:#fcf8e8; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+            <iframe src="https://drive.google.com/file/d/${pdfID}/preview" style="width:100%; height:100%; border:none;"></iframe>
+            <div class="watermark">Thư viện số Sư đoàn 10</div>
+        </div>`;
+    }
+
+    docTitle.innerText = data.name || "Không có tên tài liệu";
+}
+
+// Tab click
+tabs.forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+        const oldActive = document.querySelector(".tab-btn.active");
+        if(oldActive) oldActive.classList.remove("active");
+        tab.classList.add("active");
+        showTab(currentData);
+        updateUnderline(tab);
+    });
+});
+
+// Lấy dữ liệu sheet TaiLieuTapHuan
+if(slugFromURL){
+    console.log("Slug từ URL:", slugFromURL);
+
+    fetch(`${webAppUrl}?ref=${encodeURIComponent(window.location.origin)}`)
+        .then(res=>res.json())
+        .then(res=>{
+            const rawList = res.TaiLieuThamKhao || [];
+            console.log("Danh sách TaiLieuTapHuan:", rawList);
+
+            const matched = rawList.find(row => normalizeNameForComparison(row.name) === slugFromURL.toUpperCase());
+            console.log("Dữ liệu khớp:", matched);
+
+            if(matched){
+                currentData = matched;
+                showTab(currentData);
+            } else {
+                docTitle.innerText = "Không tìm thấy văn bản";
+                tabContent.innerHTML = "<p>Không tìm thấy dữ liệu.</p>";
+            }
+        })
+        .catch(err=>{
+            console.error("Lỗi tải dữ liệu:", err);
+            docTitle.innerText = "Lỗi tải dữ liệu";
+            tabContent.innerHTML = "<p>Không thể tải dữ liệu.</p>";
+        });
+}else{
+    docTitle.innerText = "Không xác định văn bản";
+    tabContent.innerHTML = "<p>Không có slug.</p>";
+}
+
+</script>
+
+</body>
+</html>

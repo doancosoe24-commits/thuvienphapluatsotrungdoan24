@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư Viện Pháp Luật Số - Tài Liệu Ngành</title>
+
+  <style>
+    html, body {
+      margin:0;
+      height:100%;
+      font-family: Arial, sans-serif;
+      background:#f7f9fb;
+      color:#333;
+    }
+
+    body {
+      display:flex;
+      flex-direction:column;
+      width:70%;
+      margin:0 auto;
+    }
+
+    main { flex:1; padding:20px 0; }
+
+    .item_list { 
+      display:flex;
+      align-items:center;
+      margin-bottom:18px; 
+    }
+
+    .item {
+      background:#004aad;
+      flex:1;
+      padding:15px 0;
+      color:#ccae6e;
+      box-shadow:0 3px 6px rgba(0,0,0,0.15);
+      cursor:pointer;
+      transition:0.3s;
+      text-align:center;
+    }
+
+    .item p { margin:0; font-size:16px; }
+
+    .item:hover {
+      background:#ccae6e;
+      color:#fff;
+    }
+
+    .back-link {
+      color:#ccae6e;
+      padding:10px;
+      font-weight:600;
+      text-decoration:underline;
+      cursor:pointer;
+      display:inline-block;
+    }
+
+    /* ---------------------- LOADING --------------------- */
+    #loadingBox {
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:40px 0;
+      color:#ccae6e;
+      font-size:17px;
+      font-weight:600;
+    }
+
+    .loader {
+      width:45px;
+      height:45px;
+      border:4px solid #ccae6e;
+      border-top-color:transparent;
+      border-radius:50%;
+      animation:spin 0.5s linear infinite;
+      margin-bottom:12px;
+    }
+
+    @keyframes spin {
+      to { transform:rotate(360deg); }
+    }
+
+    @media(max-width:768px){
+      body{ width:100%; }
+      .item p{ font-size:14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header"></div>
+
+<main>
+  <span class="back-link" onclick="history.back()">Quay lại</span>
+
+  <h2 id="pageTitle" style="text-align:center; color:#ccae6e; text-transform:uppercase;">
+  </h2>
+
+  <!-- Hiệu ứng loading -->
+  <div id="loadingBox">
+      <div class="loader"></div>
+      Đang tải dữ liệu...
+  </div>
+
+  <div id="list" style="display:none;"></div>
+</main>
+
+<div id="footer"></div>
+
+<script src="main.js"></script>
+<script>
+const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
+
+let ALL_DOCUMENTS = [];
+let ALL_CATEGORIES = [];
+
+// Escape HTML
+function escapeHtml(str){
+  if(!str) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+// Convert text → slug PascalCase
+function toSlug(text){
+  if(!text) return "";
+  text = text.replace(/Đ/g,"D").replace(/đ/g,"d");
+  let str = text.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  return str.split(/\s+/).map(w =>
+    w.replace(/[^a-zA-Z0-9]/g,"").replace(/^./, c=>c.toUpperCase())
+  ).join("");
+}
+
+// Lấy query param
+function getQueryParam(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+// Cập nhật pageTitle từ slug
+function updatePageTitleFromSlug(slug){
+  if(!slug) return;
+  const cat = ALL_CATEGORIES.find(c => c.slug === slug);
+  if(cat){
+    document.getElementById("pageTitle").innerText = cat.title;
+  } else {
+    // fallback hiển thị slug
+    document.getElementById("pageTitle").innerText = slug;
+  }
+}
+
+// Load tất cả dữ liệu
+async function loadPage(){
+  try{
+    const [ res] = await Promise.all([
+      fetch(webAppUrl).then(r=>r.json())
+    ]);
+
+    ALL_DOCUMENTS = res.TaiLieuNganh || [];
+    ALL_CATEGORIES = res.Category || [];
+
+    if(!ALL_DOCUMENTS.length){
+      showError("Không tìm thấy tài liệu nào.");
+      return;
+    }
+
+    renderList(ALL_DOCUMENTS);
+
+    // Cập nhật pageTitle ngay khi load nếu có slug trong URL
+    const slugFromURL = getQueryParam("slug");
+    if(slugFromURL){
+      updatePageTitleFromSlug(slugFromURL);
+    }
+
+  } catch(err){
+    console.log("❌ Lỗi loadPage:", err);
+    showError("Không thể tải dữ liệu.");
+  }
+}
+
+// Show error
+function showError(msg){
+  document.getElementById("loadingBox").innerHTML = msg;
+}
+
+// Render danh sách
+function renderList(data){
+  const list = document.getElementById("list");
+  const loading = document.getElementById("loadingBox");
+
+  const uniqueMap = new Map();
+
+  // Lọc trùng title trong TaiLieuNganh
+  data.forEach(i=>{
+    if(i.slug !== "TaiLieuNganh") return;
+    const key = i.title.trim().toLowerCase();
+    if(!uniqueMap.has(key)) uniqueMap.set(key, i);
+  });
+
+  list.innerHTML = "";
+  const frag = document.createDocumentFragment();
+
+  uniqueMap.forEach(i=>{
+    const div = document.createElement("div");
+    div.className = "item_list";
+    div.innerHTML = `
+      <div class="item" data-title="${i.title}">
+        <p>${escapeHtml(i.title)}</p>
+      </div>
+    `;
+    frag.appendChild(div);
+  });
+
+  list.appendChild(frag);
+
+  loading.style.display = "none";
+  list.style.display = "block";
+
+  // Click vào item
+  list.onclick = e=>{
+    const item = e.target.closest(".item");
+    if(item){
+      const slug = toSlug(item.dataset.title);
+
+      // Tìm Category trùng slug
+      const cat = ALL_CATEGORIES.find(c=>c.slug === slug);
+      if(cat){
+        document.getElementById("pageTitle").innerText = cat.title;
+      } else {
+        document.getElementById("pageTitle").innerText = item.dataset.title;
+      }
+
+      // Chuyển trang
+      window.location.href = `TaiLieuNganh_detail.html?slug=${slug}`;
+    }
+  };
+}
+
+loadPage();
+</script>
+
+
+
+</body>
+</html>

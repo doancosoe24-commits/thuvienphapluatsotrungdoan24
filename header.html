@@ -15,8 +15,8 @@
         justify-content: space-between;
     }
     .logo img{
-        width: 80px;
-        height: 80px;
+        width: 120px;
+        height: 120px;
     }
     .search{
         margin-top: 10px;
@@ -91,14 +91,17 @@
         cursor: pointer; font-size: 12px; align-self: flex-end;
         transition: 0.2s;
     }
-
+#chay{
+    color: black;
+}
 </style>
 </head>
 <body>
+<!-- header.html -->
 <header>
     <div class="logo">
-        <a href="index.html"><img src="./img/logo.png" alt=""></a>
-        <img src="./img/z7265685068761_8f537423848b7220300016fed448a3d9.jpg" alt="">
+        <a href="/"><img src="./img/logo.png" alt=""></a>
+        <a href="/"><img src="./img/z7265685068761_8f537423848b7220300016fed448a3d9.jpg" alt=""></a>
     </div>
     <div class="search">
         <input type="text" id="searchInput" placeholder="Tìm kiếm">
@@ -107,7 +110,28 @@
     </div>
 </header>
 <hr>
-<script src="main.js">
+
+<script>
+    // Đảm bảo nút search redirect sang timkiem.html
+    const searchBtn = document.getElementById("searchBtn");
+    const searchInput = document.getElementById("searchInput");
+
+    if(searchBtn && searchInput){
+        searchBtn.addEventListener("click", ()=>{
+            const key = searchInput.value.trim();
+            if(!key) return;
+            // Redirect sang timkiem.html với query param
+            window.location.href = `timkiem.html?key=${encodeURIComponent(key)}`;
+        });
+
+        // Nếu muốn Enter cũng search được
+        searchInput.addEventListener("keyup", (e)=>{
+            if(e.key === "Enter"){
+                searchBtn.click();
+            }
+        });
+    }
 </script>
+
 </body>
 </html>

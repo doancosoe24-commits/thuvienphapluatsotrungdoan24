@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+     html, body { height: 100%; margin: 0; }
+body {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  background: #f7f9fb;
+}
+main h2{
+    text-align: center;
+    color: #ccae6e;
+    font-size: 28px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+}
+main .list .item{
+    padding: 10px;
+    background: #004aad;
+    margin: 20px 0;
+    transition: 0.3s;
+    color: #ccae6e;
+    cursor: pointer;
+}
+main .list .item:hover{
+    background: #ccae6e;
+    color: #fff;
+}
+main .list .item p{
+    text-align: center;
+    text-transform: uppercase;
+}
+.back-link{
+    color: #ccae6e;
+    text-decoration: underline;
+    padding: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+main { flex: 1; box-sizing: border-box; }
+@media (max-width:768px){
+    body{
+        width: 100%;
+    }
+    main .list .item p{
+        font-size: 14px;
+    }
+}
+</style>
+<body>
+    <div id="header"></div>
+                <span class="back-link" onclick="history.back()">Quay lại</span>
+    <main>
+        <h2>Tủ Sách Pháp Luật</h2>
+       <div class="list">
+           <div class="item">
+                 <p>Quy chế hoạt động</p>
+           </div>
+           <div class="item">
+                 <p>Văn kiện chỉ thị nghị quyết</p>
+           </div>
+           <div class="item">
+                 <p>Văn bản pháp luật liên quan đến chức năng nhiệm vụ</p>
+           </div>
+           <div class="item">
+                 <p>Sách, báo chí, tạp chí, tài liệu pháp luật</p>
+           </div>
+           <div class="item">
+                 <p>Sách, tài liệu phục vụ quản lý, hướng dẫn học tập, tìm hiểu pháp luật</p>
+           </div>
+       </div>
+    </main>
+    <div id="footer"></div>
+</body>
+<script>
+    function loadHTML(id, url) {
+  fetch(url)
+    .then(res => res.text())
+    .then(html => { document.getElementById(id).innerHTML = html; })
+    .catch(err => console.error(err));
+}
+loadHTML("header", "header.html");
+loadHTML("footer", "footer.html");
+</script>
+</html>

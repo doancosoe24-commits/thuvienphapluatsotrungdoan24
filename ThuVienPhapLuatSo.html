@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thư Viện Pháp Luật Số</title>
+<style>
+html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      width: 70%;
+      margin: 0 auto;
+      font-family: Arial, sans-serif;
+      background: #f7f9fb;
+    }
+    main { flex: 1; box-sizing: border-box; }
+.item_list { display:flex; align-items:center; margin-bottom:18px; }
+.arrow { width:120px;height:45px;background:#ccae6e; clip-path: polygon(0% 0%,78% 0%,100% 50%,78% 100%,0% 100%,18% 50%); display:flex; align-items:center; justify-content:center; font-weight:700; color:#8c6d2a; margin-right:12px; }
+.item { background:#004aad; flex:1; display:flex; flex-direction:column; padding:10px 5px; color:#fff; border-radius:5px; box-shadow:0 3px 6px rgba(0,0,0,0.15); cursor:pointer; }
+.item p { margin:0 0 6px 0; font-weight:700; font-size:16px; }
+.btn-new { background:#ff3131; color:#ffde59; font-weight:700; border:none; padding:8px 16px; border-radius:10px; align-self:flex-end; cursor:pointer; font-size:12px; transition:0.2s; }
+.back-link { color:#ccae6e; padding:10px; font-weight:600; text-decoration:underline; cursor:pointer; display:inline-block; }
+
+@media(max-width:768px){ 
+  body{width:100%;} 
+  .arrow{width:50px;height:35px;font-size:11px;} 
+  .item p{font-size:12px;} 
+  .btn-new{padding:6px 12px;font-size:11px;} 
+}
+
+.filter-box { background:#fff; padding:15px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.12); display:flex; gap:12px; flex-wrap:wrap; margin-bottom:25px; }
+.filter-box select, .filter-box button { padding:10px 14px; border-radius:8px; border:1px solid #ccc; font-size:14px; cursor:pointer; background:#fff; transition:0.2s; }
+.filter-box button { background:#004aad; color:#fff; border:none; font-weight:600; }
+.filter-box button:hover { opacity:0.9; }
+
+.pagination { text-align:center; margin-top:20px; }
+.pagination button { margin:0 3px; padding:5px 10px; border:none; border-radius:5px; cursor:pointer; background:#ccae6e; color:#fff; font-weight:600; transition:0.2s; }
+.pagination button.active { background:#004aad; }
+.pagination button:hover { opacity:0.8; }
+/* --- LOADING SPINNER --- */
+#loadingBox {
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:40px 0;
+      color:#ccae6e;
+      font-size:17px;
+      font-weight:600;
+    }
+
+    .loader {
+      width:45px;
+      height:45px;
+      border:4px solid #ccae6e;
+      border-top-color:transparent;
+      border-radius:50%;
+      animation:spin 0.5s linear infinite;
+      margin-bottom:12px;
+      margin:0 auto;
+    }
+
+    @keyframes spin {
+      to { transform:rotate(360deg); }
+    }
+
+</style>
+</head>
+<body>
+
+<div id="header"></div>
+
+<main>
+  <span class="back-link" onclick="history.back()">Quay lại</span>
+  <h2 id="pageTitle" style="text-align:center;color:#ccae6e;text-transform:uppercase;">THƯ VIỆN PHÁP LUẬT SỐ</h2>
+
+  <div class="filter-box">
+    <select id="filterCategory">
+      <option value="">-- Loại văn bản --</option>
+    </select>
+    <select id="filterPublisher">
+      <option value="">-- Cơ quan ban hành --</option>
+    </select>
+    <button id="btnAll">Hiển thị TẤT CẢ</button>
+  </div>
+<div id="loading">
+  <div class="loader"></div>
+</div>
+  <div id="list"></div>
+  <div class="pagination" id="pagination"></div>
+</main>
+
+<div id="footer"></div>
+<script src="main.js"></script>
+<script>
+  function showLoading(){ document.getElementById("loading").style.display = "flex"; }
+function hideLoading(){ document.getElementById("loading").style.display = "none"; }
+
+const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
+const ITEMS_PER_PAGE = 10;
+
+let ALL_DOCUMENTS = [];
+let FILTERED = [];
+let currentPage = 1;
+
+// Escape HTML
+function escapeHtml(str){
+  if(!str) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+// Chuyển text thành slug
+function toSlug(text){
+  if(!text) return "";
+  return String(text).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9\s]/g,"").trim().replace(/\s+/g,"");
+}
+
+// Load header/footer và dữ liệu
+async function loadPage(){
+  showLoading();
+  try{
+    const [ res] = await Promise.all([
+      fetch(webAppUrl).then(r=>r.json())
+    ]);
+
+    ALL_DOCUMENTS = (res.ThuVienPhapLuatSo || []).filter(d => d.slug === "ThuVienPhapLuatSo");
+    if(!ALL_DOCUMENTS.length){
+      document.getElementById("list").textContent = "Không tìm thấy văn bản nào.";
+      return;
+    }
+    FILTERED = ALL_DOCUMENTS;
+
+    loadFilterOptions(FILTERED);
+    renderList(FILTERED);
+    attachFilterEvents();
+hideLoading()
+  } catch(err){
+    console.log("❌ Lỗi loadPage:", err);
+    document.getElementById("list").textContent = "Không thể tải dữ liệu.";
+  }
+}
+
+// Load options lọc
+function loadFilterOptions(data){
+  const catSel = document.getElementById("filterCategory");
+  const pubSel = document.getElementById("filterPublisher");
+
+  [...new Set(data.map(i=>i.loaivanban).filter(Boolean))].forEach(t=>{
+    const op = document.createElement("option");
+    op.value = op.textContent = t;
+    catSel.appendChild(op);
+  });
+
+  [...new Set(data.map(i=>i.noibanhanh).filter(Boolean))].forEach(p=>{
+    const op = document.createElement("option");
+    op.value = op.textContent = p;
+    pubSel.appendChild(op);
+  });
+}
+
+// Gắn sự kiện lọc
+function attachFilterEvents(){
+  document.getElementById("filterCategory").addEventListener("change", ()=>{ currentPage=1; applyFilter(); });
+  document.getElementById("filterPublisher").addEventListener("change", ()=>{ currentPage=1; applyFilter(); });
+
+  document.getElementById("btnAll").addEventListener("click", ()=>{
+    document.getElementById("filterCategory").value = "";
+    document.getElementById("filterPublisher").value = "";
+    currentPage=1;
+    renderList(FILTERED);
+  });
+}
+
+// Áp dụng lọc
+function applyFilter(){
+  const cat = document.getElementById("filterCategory").value.trim();
+  const pub = document.getElementById("filterPublisher").value.trim();
+  let result = FILTERED;
+  if(cat) result = result.filter(i=>i.loaivanban===cat);
+  if(pub) result = result.filter(i=>i.noibanhanh===pub);
+  renderList(result);
+}
+
+// Render danh sách có phân trang
+function renderList(data){
+  const list = document.getElementById("list");
+  const pagination = document.getElementById("pagination");
+  list.innerHTML = "";
+  pagination.innerHTML = "";
+
+  if(!data.length){
+    list.textContent = "Không có văn bản phù hợp.";
+    return;
+  }
+
+  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+  if(currentPage > totalPages) currentPage = totalPages;
+
+  const start = (currentPage-1)*ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+  const pageData = data.slice(start, end);
+
+  const frag = document.createDocumentFragment();
+  pageData.forEach(i=>{
+    const div = document.createElement("div");
+    div.className = "item_list";
+    div.innerHTML = `
+      <div class="arrow"></div>
+      <div class="item" data-title="${i.title}">
+        <p>${escapeHtml(i.title)}</p>
+        <button class="btn-new">Có hiệu lực</button>
+      </div>
+    `;
+    frag.appendChild(div);
+  });
+  list.appendChild(frag);
+
+  // Click vào item
+  list.onclick = e=>{
+    const item = e.target.closest(".item");
+    if(item){
+      const slug = toSlug(item.dataset.title);
+      window.location.href = `detail.html?slug=${slug}`;
+    }
+  };
+
+  // Phân trang
+  for(let p=1;p<=totalPages;p++){
+    const btn = document.createElement("button");
+    btn.textContent = p;
+    if(p===currentPage) btn.classList.add("active");
+    btn.addEventListener("click", ()=>{ currentPage=p; renderList(data); });
+    pagination.appendChild(btn);
+  }
+}
+
+loadPage();
+</script>
+
+</body>
+</html>

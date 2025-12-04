@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Thư viện số Sư đoàn 10</title>
+<style>
+  :root{
+    --primary: #003d82;
+    --accent:  #ccae6e;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --muted:#6b7280;
+    --radius:12px;
+    --shadow: 0 10px 30px rgba(16,24,40,0.06);
+  }
+  html.dark { --bg:#0b1220; --card:#071122; --muted:#9aa6b2; --primary:#1e90ff; --accent:#c7992d; --shadow:0 8px 30px rgba(0,0,0,0.6); color: #e6eef8; }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg,var(--bg), #fff 220px);
+    color: #0f1724; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    padding:18px; display:flex; justify-content:center;
+  }
+  .wrap{width:100%;max-width:1200px;display:grid;grid-template-columns:260px 1fr;gap:18px}
+  /* SIDEBAR */
+  .sidebar{background:linear-gradient(180deg,var(--primary), #00305a); color:#fff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:52px;height:52px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#042022;font-weight:800;font-size:18px}
+  .brand h1{font-size:16px;margin:0}
+  .nav{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+  .nav a{padding:10px;border-radius:8px;color:inherit;text-decoration:none;font-weight:700;display:flex;gap:8px;align-items:center}
+  .nav a:hover, .nav a.active{background:rgba(255,255,255,0.08); transform:translateX(6px)}
+  .sidebar .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,0.9)}
+  /* HEADER / TOPBAR */
+  .main{display:flex;flex-direction:column;gap:12px}
+  #header{height:64px;background:var(--card);border-radius:12px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+  .top-left{display:flex;gap:12px;align-items:center}
+  .search{display:flex;align-items:center;gap:8px;background:var(--card);padding:8px;border-radius:10px;box-shadow:var(--shadow);min-width:260px}
+  .search input{border:0;outline:0;background:transparent}
+  .controls{display:flex;align-items:center;gap:8px}
+  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+  .btn.warn{background:#ef4444;color:#fff}
+  /* STATS + PANEL */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:var(--shadow)}
+  .k{color:var(--muted);font-size:13px}
+  .v{font-size:22px;font-weight:800;margin-top:6px}
+  .panel{background:var(--card);padding:16px;border-radius:12px;box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:10px;border-bottom:1px solid rgba(0,0,0,0.06);text-align:left}
+  th{font-weight:800;color:var(--muted);background:transparent}
+  .muted{color:var(--muted)}
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tabBtn{padding:8px 12px;border-radius:8px;background:transparent;border:1px solid rgba(0,0,0,0.04);cursor:pointer;font-weight:700}
+  .tabBtn.active{background:var(--primary);color:#fff}
+  /* modal & overlay */
+  #overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;z-index:60}
+  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--card);padding:18px;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,0.4);width:92%;max-width:820px;z-index:70;display:none}
+  .modal h3{margin-bottom:8px}
+  .row{display:flex;gap:10px}
+  .col{flex:1}
+  input[type="text"], input[type="date"], select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd}
+  textarea{min-height:100px}
+  .small{font-size:13px;color:var(--muted)}
+  /* PDF viewer styling */
+  .pdfWrap{position:relative;background:#fcf8e8;border-radius:8px;overflow:hidden}
+  .pdfWrap iframe{width:100%;height:70vh;border:0;display:block}
+  .watermarkView{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);font-size:48px;color:rgba(200,0,0,0.12);pointer-events:none;user-select:none}
+  /* chart */
+  #chart{width:100%;height:200px;background:transparent}
+  /* responsive */
+  @media(max-width:980px){
+    .wrap{grid-template-columns:1fr;padding:12px}
+    .sidebar{position:fixed;left:-320px;top:12px;height:calc(100vh - 24px);z-index:70}
+    .sidebar.open{left:12px}
+    #openSidebar{display:inline-block}
+  }
+  @media(max-width:640px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:420px){
+    .stats{grid-template-columns:1fr}
+    .row{flex-direction:column}
+  }
+  /* small utilities */
+  .muted{color:var(--muted)}
+  .empty{padding:20px;text-align:center;color:var(--muted)}
+  .actions button{margin-right:6px}
+  .card.small { padding:10px }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <div class="logo"><img style="width: 60px;" src="./img/logo.png" alt=""></div>
+      <div>
+        <h1>Thư viện số Sư đoàn 10</h1>
+        <div class="small">Tri thức đồng hành</div>
+      </div>
+    </div>
+
+    <nav class="nav" role="navigation">
+      <a href="#" class="active" data-tab="van-ban">📄 Văn bản</a>
+      <a href="#" data-tab="danh-muc">📚 Danh mục</a>
+      <a href="#" data-tab="cai-dat">⚙ Cài đặt</a>
+    </nav>
+
+    <div class="foot">
+      <div>
+        <div style="font-weight:800">Admin</div>
+        <div class="small">Quản trị viên</div>
+      </div>
+      <div class="small">5.0</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div id="header">
+      <div class="top-left">
+        <button id="openSidebar" class="btn ghost" style="display:none">☰</button>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#9aa6b2" stroke-width="1.6" stroke-linecap="round"/></svg><input id="globalSearch" placeholder="Tìm văn bản, số hiệu, danh mục..." /></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <select id="themeColor" title="Chọn màu chủ đạo" class="small" style="padding:8px;border-radius:8px;border:1px solid #ddd">
+          <option value="#003d82">Xanh Quân Đội</option>
+          <option value="#00695c">Xanh Lá</option>
+          <option value="#4b2e83">Tím</option>
+          <option value="#b45309">Nâu Vàng</option>
+        </select>
+        <button id="toggleDark" class="btn ghost" title="Dark mode">🌙</button>
+        <button id="btnAdd" class="btn primary">+ Thêm văn bản</button>
+        <button id="btnExport" class="btn">Export</button>
+      </div>
+    </div>
+
+    <div class="stats" style="margin-top:8px">
+      <div class="card">
+        <div class="k">Tổng văn bản</div>
+        <div class="v" id="statDocs">0</div>
+        <div class="small">Tài liệu trong hệ thống</div>
+      </div>
+      <div class="card">
+        <div class="k">Danh mục</div>
+        <div class="v" id="statCats">0</div>
+        <div class="small">Số nhóm</div>
+      </div>
+      <div class="card">
+        <div class="k">Hoạt động</div>
+        <div class="v">Admin</div>
+        <div class="small">Quyền đầy đủ</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800;font-size:18px">Quản lý</div>
+          <div class="small" id="breadcrumb">Văn bản</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="tabBtn active" data-tab="van-ban">Văn bản</button>
+          <button class="tabBtn" data-tab="danh-muc">Danh mục</button>
+          <button class="tabBtn" data-tab="cai-dat">Cài đặt</button>
+        </div>
+      </div>
+
+      <!-- TAB PANELS -->
+      <div id="tabContent" style="margin-top:12px">
+
+        <!-- VĂN BẢN -->
+        <section id="van-ban" class="tabPanel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <div style="font-weight:800">Văn bản</div>
+              <div class="small">Danh sách văn bản</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input id="filterInput" placeholder="Lọc nhanh..." class="small" style="padding:8px;border-radius:8px;border:1px solid #ddd" />
+              <button id="openAdd2" class="btn primary">+ Thêm</button>
+            </div>
+          </div>
+
+          <div style="overflow:auto">
+            <table id="docsTable" aria-label="Danh sách văn bản">
+              <thead>
+                <tr><th style="width:40px">#</th><th>Số hiệu</th><th>Tiêu đề</th><th>Danh mục</th><th style="width:140px">Ngày</th><th style="width:260px">Hành động</th></tr>
+              </thead>
+              <tbody id="docsTbody"></tbody>
+            </table>
+            <div id="emptyDocs" class="empty" style="display:none">Chưa có văn bản. Nhấn "+ Thêm" để tạo.</div>
+          </div>
+        </section>
+
+        <!-- DANH MỤC -->
+        <section id="danh-muc" class="tabPanel" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div><div style="font-weight:800">Danh mục</div><div class="small">Quản lý nhóm tài liệu</div></div>
+            <div style="display:flex;gap:8px"><button id="addCatBtn" class="btn primary">+ Thêm danh mục</button><button id="exportCats" class="btn">Export JSON</button></div>
+          </div>
+
+          <div id="catsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px"></div>
+        </section>
+
+        <!-- CÀI ĐẶT -->
+        <section id="cai-dat" class="tabPanel" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:12px">
+            <div>
+              <div style="font-weight:800">Cài đặt hệ thống</div>
+              <div style="margin-top:12px">
+                <div style="margin-bottom:8px"><strong>Theme:</strong></div>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <label class="small">Chủ đạo:</label>
+                  <select id="colorSelect"><option value="#003d82">Xanh Quân đội</option><option value="#00695c">Xanh lá</option><option value="#4b2e83">Tím</option><option value="#b45309">Nâu vàng</option></select>
+                </div>
+
+                <div style="margin-top:12px">
+                  <div style="font-weight:700">Backup / Restore</div>
+                  <div class="small" style="margin-top:8px">Bạn có thể xuất (backup) toàn bộ dữ liệu hoặc phục hồi từ file JSON.</div>
+                  <div style="display:flex;gap:8px;margin-top:8px">
+                    <button id="backupBtn" class="btn">Backup JSON</button>
+                    <input type="file" id="restoreInput" accept="application/json" />
+                  </div>
+                </div>
+
+                <div style="margin-top:12px">
+                  <div style="font-weight:700">Import / Export</div>
+                  <div style="margin-top:8px"><button id="exportCsvBtn" class="btn">Export CSV</button></div>
+                </div>
+
+                <div style="margin-top:12px">
+                  <div style="font-weight:700">Lưu ý PDF</div>
+                  <div class="small" style="margin-top:6px">PDF upload sẽ được chuyển thành data URL và lưu trong trình duyệt (localStorage). Không lưu file quá lớn (dễ đầy bộ nhớ localStorage).</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-weight:800">Biểu đồ</div>
+              <canvas id="chart" width="320" height="200" style="margin-top:10px"></canvas>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Overlay + Modals -->
+<div id="overlay"></div>
+
+<!-- Add / Edit Document Modal -->
+<div id="docModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+  <h3 id="docModalTitle">Thêm / Sửa văn bản</h3>
+  <div class="row">
+    <div class="col">
+      <label class="small">Số hiệu</label>
+      <input id="inpSohieu" type="text" placeholder="Số hiệu..." />
+    </div>
+    <div class="col">
+      <label class="small">Ngày ban hành</label>
+      <input id="inpDate" type="date" />
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    <label class="small">Tiêu đề</label>
+    <input id="inpTitle" type="text" placeholder="Tiêu đề..." />
+  </div>
+  <div style="margin-top:8px">
+    <label class="small">Danh mục</label>
+    <select id="inpCategory"></select>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="newCatInput" type="text" placeholder="Nếu muốn thêm danh mục mới..." class="small" />
+      <button id="addCatQuick" class="btn">Thêm</button>
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    <label class="small">Upload PDF (tùy chọn; chú ý kích thước)</label>
+    <input id="inpPdf" type="file" accept="application/pdf" />
+    <div class="small" id="pdfSizeWarn" style="color:#b45309;display:none;margin-top:6px">⚠ File lớn có thể làm đầy bộ nhớ trình duyệt.</div>
+    <div class="small" id="pdfPreview" style="margin-top:8px"></div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+    <button id="btnCancel" class="btn ghost">Hủy</button>
+    <button id="btnSaveDoc" class="btn primary">Lưu</button>
+  </div>
+</div>
+
+<!-- View Document Modal -->
+<div id="viewModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+  <h3 id="viewModalTitle">Xem văn bản</h3>
+  <div id="viewMeta" class="small muted" style="margin-bottom:8px"></div>
+  <div class="pdfWrap">
+    <iframe id="pdfFrame" src=""></iframe>
+    <div class="watermarkView">Thư viện số</div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+    <button id="btnCloseView" class="btn ghost">Đóng</button>
+    <a id="downloadPdf" class="btn" download style="display:none">📥 Tải PDF</a>
+  </div>
+</div>
+
+<script>
+/* ====================== CẤU HÌNH ====================== */
+/*
+ - Thay API_URL bằng URL Google Apps Script Web App (doGet trả JSON {status:"ok", data:[{...}]})
+ - Nếu không có API_URL hoặc fetch lỗi sẽ dùng dữ liệu mẫu (sampleData).
+*/
+const API_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_WEB_APP_URL/exec"; // <-- THAY ĐI
+const LOCAL_KEY = "thuvien_docs_v1";
+
+let docs = [];
+let categories = [];
+let editingIndex = -1; // nếu >=0 là sửa
+
+// Dữ liệu mẫu (fallback)
+const sampleData = [
+  {
+    "ID":"7",
+    "Nhóm":"Văn bản pháp luật",
+    "STT":"1",
+    "Số hiệu":"286/2025/NĐ-CP",
+    "Cơ quan BH":"Chính phủ",
+    "Ngày BH":"2025-11-03",
+    "Loại":"Nghị định",
+    "Người ký":"Hồ Đức Phớc",
+    "Tiêu đề":"Nghị định 286/2025/NĐ-CP sửa đổi các Nghị định trong quản lý sử dụng tài sản công",
+    "PDF":"https://example.com/a.pdf",
+    "Ảnh":"https://example.com/image1.jpg",
+    "Trạng thái":"1"
+  }
+];
+
+/* ====================== HỖ TRỢ ĐỊNH DẠNG NGÀY ====================== */
+function toInputDate(v){
+  if(!v) return "";
+  // chấp nhận định dạng dd/mm/yyyy hoặc yyyy-mm-dd
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(v)){
+    const [d,m,y]=v.split("/");
+    return `${y}-${m}-${d}`;
+  }
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  // try Date parse
+  const dt = new Date(v);
+  if(!isNaN(dt)) {
+    const y=dt.getFullYear(), m=("0"+(dt.getMonth()+1)).slice(-2), d=("0"+dt.getDate()).slice(-2);
+    return `${y}-${m}-${d}`;
+  }
+  return "";
+}
+
+function formatDateDisplay(v){
+  if(!v) return "";
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)){
+    const [y,m,d]=v.split("-");
+    return `${d}/${m}/${y}`;
+  }
+  return v;
+}
+
+/* ====================== LOAD DỮ LIỆU ====================== */
+async function loadSheetData(){
+  try {
+    // nếu trong localStorage đã có dữ liệu do user chỉnh sửa -> ưu tiên
+    const local = localStorage.getItem(LOCAL_KEY);
+    if(local){
+      docs = JSON.parse(local);
+      normalizeAndRender();
+      return;
+    }
+
+    // fetch từ Web App
+    const resp = await fetch(API_URL, {cache: "no-store"});
+    if(!resp.ok) throw new Error("fetch error");
+    const json = await resp.json();
+    if(!json || json.status!=="ok" || !Array.isArray(json.data)) throw new Error("invalid format");
+
+    // chuyển dữ liệu theo định dạng nội bộ
+    docs = json.data.map((r, idx) => ({
+      id: r["ID"] || (idx+1),
+      group: r["Nhóm"] || r["Nhóm"] || r.group || "",
+      stt: r["STT"] || "",
+      sohieu: r["Số hiệu"] || r.sohieu || "",
+      coquan: r["Cơ quan BH"] || r.coquan || "",
+      date: toInputDate(r["Ngày BH"] || r.date || ""),
+      loai: r["Loại"] || "",
+      nguoiky: r["Người ký"] || "",
+      tieude: r["Tiêu đề"] || r.title || "",
+      pdf: r["PDF"] || r.pdf || "",
+      img: r["Ảnh"] || r.img || "",
+      trangthai: r["Trạng thái"] || ""
+    }));
+
+    normalizeAndRender();
+  } catch (e){
+    console.warn("Không lấy được từ API, dùng dữ liệu mẫu.", e);
+    docs = sampleData.map((r, idx) => ({
+      id: r["ID"] || (idx+1),
+      group: r["Nhóm"] || "",
+      stt: r["STT"] || "",
+      sohieu: r["Số hiệu"] || "",
+      coquan: r["Cơ quan BH"] || "",
+      date: toInputDate(r["Ngày BH"] || ""),
+      loai: r["Loại"] || "",
+      nguoiky: r["Người ký"] || "",
+      tieude: r["Tiêu đề"] || "",
+      pdf: r["PDF"] || "",
+      img: r["Ảnh"] || "",
+      trangthai: r["Trạng thái"] || ""
+    }));
+    normalizeAndRender();
+  }
+}
+
+function normalizeAndRender(){
+  // đảm bảo có mảng
+  docs = docs || [];
+  // categories là tập hợp các group
+  categories = [...new Set(docs.map(d => d.group).filter(Boolean))];
+  renderCategories();
+  renderDocs();
+  updateStats();
+  saveLocal(); // lưu lần đầu
+  drawChart();
+}
+
+/* ====================== LƯU / LOAD LOCAL ====================== */
+function saveLocal(){
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(docs));
+}
+function clearLocal(){
+  localStorage.removeItem(LOCAL_KEY);
+}
+
+/* ====================== RENDER DANH SÁCH ====================== */
+function renderDocs(filterText){
+  const tbody = document.getElementById("docsTbody");
+  tbody.innerHTML = "";
+
+  const f = (filterText || "").trim().toLowerCase();
+
+  const list = docs.filter(d => {
+    if(!f) return true;
+    return (d.sohieu || "").toLowerCase().includes(f)
+      || (d.tieude || "").toLowerCase().includes(f)
+      || (d.group || "").toLowerCase().includes(f)
+      || (d.nguoiky || "").toLowerCase().includes(f);
+  });
+
+  if(list.length === 0){
+    document.getElementById("emptyDocs").style.display = "block";
+  } else {
+    document.getElementById("emptyDocs").style.display = "none";
+  }
+
+  list.forEach((d, i) => {
+    const tr = document.createElement("tr");
+    const idx = docs.indexOf(d);
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td>${escapeHtml(d.sohieu)}</td>
+      <td>${escapeHtml(d.tieude)}</td>
+      <td>${escapeHtml(d.group)}</td>
+      <td>${formatDateDisplay(d.date)}</td>
+      <td class="actions">
+        <button class="btn ghost" data-act="view" data-id="${idx}">Xem</button>
+        <button class="btn" data-act="edit" data-id="${idx}">Sửa</button>
+        <button class="btn warn" data-act="del" data-id="${idx}">Xóa</button>
+        ${d.pdf ? `<a class="btn" href="${d.pdf}" download target="_blank">Tải</a>` : ""}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // delegation cho các nút hành động
+  tbody.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.onclick = (e) => {
+      const act = btn.getAttribute("data-act");
+      const id = Number(btn.getAttribute("data-id"));
+      if(act === "view") openView(id);
+      else if(act === "edit") openEdit(id);
+      else if(act === "del") deleteDoc(id);
+    };
+  });
+}
+
+/* ====================== ESCAPE HTML SAFE ====================== */
+function escapeHtml(s){ return (s||"").toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ====================== VIEW ====================== */
+function openView(index){
+  const d = docs[index];
+  if(!d) return;
+  document.getElementById("viewMeta").textContent = `${d.sohieu || ""} • ${formatDateDisplay(d.date) || ""} • ${d.group || ""}`;
+  const pdfFrame = document.getElementById("pdfFrame");
+  pdfFrame.src = d.pdf || "";
+
+  const dl = document.getElementById("downloadPdf");
+  if(d.pdf){
+    dl.href = d.pdf;
+    dl.style.display = "inline-block";
+  } else {
+    dl.style.display = "none";
+  }
+
+  openModal("viewModal");
+}
+
+/* ====================== THÊM / SỬA ====================== */
+function openAdd(){
+  editingIndex = -1;
+  document.getElementById("docModalTitle").textContent = "Thêm văn bản";
+  document.getElementById("inpSohieu").value = "";
+  document.getElementById("inpDate").value = "";
+  document.getElementById("inpTitle").value = "";
+  document.getElementById("inpCategory").value = "";
+  document.getElementById("pdfPreview").innerHTML = "";
+  document.getElementById("pdfSizeWarn").style.display = "none";
+  document.getElementById("inpPdf").value = "";
+  populateCategorySelect();
+  openModal("docModal");
+}
+
+function openEdit(index){
+  const d = docs[index];
+  if(!d) return;
+  editingIndex = index;
+  document.getElementById("docModalTitle").textContent = "Sửa văn bản";
+  document.getElementById("inpSohieu").value = d.sohieu || "";
+  document.getElementById("inpDate").value = d.date || "";
+  document.getElementById("inpTitle").value = d.tieude || "";
+  populateCategorySelect();
+  document.getElementById("inpCategory").value = d.group || "";
+  document.getElementById("pdfPreview").innerHTML = d.pdf ? `<small>PDF hiện có: <a href="${d.pdf}" target="_blank">Mở</a></small>` : "";
+  document.getElementById("pdfSizeWarn").style.display = "none";
+  document.getElementById("inpPdf").value = "";
+  openModal("docModal");
+}
+
+function deleteDoc(index){
+  if(!confirm("Bạn có chắc muốn xóa văn bản này?")) return;
+  docs.splice(index,1);
+  categories = [...new Set(docs.map(d => d.group).filter(Boolean))];
+  saveLocal();
+  renderCategories();
+  renderDocs(document.getElementById("filterInput").value);
+  updateStats();
+  drawChart();
+}
+
+/* ====================== MODAL ====================== */
+function openModal(id){
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById(id).style.display = "block";
+}
+function closeModal(id){
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById(id).style.display = "none";
+}
+
+/* ====================== SAVE DOCUMENT (ADD / EDIT) ====================== */
+async function handleSaveDoc(){
+  const sohieu = document.getElementById("inpSohieu").value.trim();
+  const date = document.getElementById("inpDate").value;
+  const title = document.getElementById("inpTitle").value.trim();
+  let category = document.getElementById("inpCategory").value.trim();
+  const newCat = document.getElementById("newCatInput").value.trim();
+
+  if(newCat){
+    category = newCat;
+    if(!categories.includes(category)) categories.push(category);
+  }
+
+  // lấy file pdf (nếu có mới upload)
+  const fileInput = document.getElementById("inpPdf");
+  let pdfData = null;
+  if(fileInput.files && fileInput.files.length){
+    const f = fileInput.files[0];
+    // cảnh báo lớn > 2MB
+    if(f.size > 2 * 1024 * 1024){
+      document.getElementById("pdfSizeWarn").style.display = "block";
+    } else document.getElementById("pdfSizeWarn").style.display = "none";
+
+    pdfData = await fileToDataUrl(f);
+  }
+
+  if(editingIndex >= 0){
+    // sửa
+    const d = docs[editingIndex];
+    d.sohieu = sohieu;
+    d.date = date;
+    d.tieude = title;
+    d.group = category;
+    if(pdfData) d.pdf = pdfData;
+  } else {
+    // thêm mới
+    const newDoc = {
+      id: Date.now().toString(),
+      group: category,
+      stt: (docs.length + 1).toString(),
+      sohieu,
+      coquan: "",
+      date,
+      loai: "",
+      nguoiky: "",
+      tieude: title,
+      pdf: pdfData || "",
+      img: "",
+      trangthai: "1"
+    };
+    docs.push(newDoc);
+  }
+
+  // cập nhật danh mục, lưu local rồi đóng modal
+  categories = [...new Set(docs.map(d => d.group).filter(Boolean))];
+  saveLocal();
+  renderCategories();
+  renderDocs(document.getElementById("filterInput").value);
+  updateStats();
+  drawChart();
+  closeModal("docModal");
+}
+
+/* ====================== FILE -> DATA URL ====================== */
+function fileToDataUrl(file){
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = (e) => rej(e);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ====================== CATEGORIES ====================== */
+function renderCategories(){
+  const grid = document.getElementById("catsGrid");
+  grid.innerHTML = "";
+
+  categories.forEach(cat => {
+    const count = docs.filter(d => d.group === cat).length;
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<div style="font-weight:700">${escapeHtml(cat)}</div><div class="small">${count} văn bản</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function populateCategorySelect(){
+  const sel = document.getElementById("inpCategory");
+  sel.innerHTML = "";
+  categories.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+/* ====================== BACKUP / RESTORE / EXPORT CSV ====================== */
+function backupJson(){
+  const dataStr = JSON.stringify(docs, null, 2);
+  const blob = new Blob([dataStr], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `thuvien_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function restoreJson(file){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try{
+      const arr = JSON.parse(e.target.result);
+      if(!Array.isArray(arr)) throw new Error("Không phải JSON hợp lệ");
+      docs = arr;
+      categories = [...new Set(docs.map(d => d.group).filter(Boolean))];
+      saveLocal();
+      renderCategories();
+      renderDocs();
+      updateStats();
+      drawChart();
+      alert("Phục hồi thành công.");
+    } catch(err){
+      alert("File không hợp lệ: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportCsv(){
+  if(docs.length === 0) { alert("Không có dữ liệu"); return; }
+  const keys = ["id","group","stt","sohieu","coquan","date","loai","nguoiky","tieude","pdf","img","trangthai"];
+  const lines = [keys.join(",")];
+  docs.forEach(d => {
+    const row = keys.map(k => {
+      let v = d[k] || "";
+      v = v.toString().replace(/"/g,'""');
+      return `"${v}"`;
+    }).join(",");
+    lines.push(row);
+  });
+  const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8;"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `thuvien_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+/* ====================== CHART (đơn giản) ====================== */
+function drawChart(){
+  const canvas = document.getElementById("chart");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const counts = categories.map(c => docs.filter(d => d.group === c).length);
+  // clear
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  if(categories.length === 0) {
+    ctx.fillStyle = "#999";
+    ctx.fillText("Chưa có dữ liệu biểu đồ", 10, 20);
+    return;
+  }
+  const max = Math.max(...counts,1);
+  const padding = 30;
+  const w = canvas.width - padding*2;
+  const h = canvas.height - padding*2;
+  const barW = Math.max(12, w / counts.length * 0.6);
+
+  categories.forEach((c,i) => {
+    const x = padding + i * (w / counts.length) + ( (w / counts.length) - barW)/2;
+    const barH = (counts[i]/max) * (h - 20);
+    const y = canvas.height - padding - barH;
+    // draw bar
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary') || "#003d82";
+    ctx.fillRect(x, y, barW, barH);
+    // label
+    ctx.fillStyle = "#333";
+    ctx.font = "11px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(counts[i], x + barW/2, y - 6);
+    ctx.fillText(c, x + barW/2, canvas.height - padding + 14);
+  });
+}
+
+/* ====================== THEME / DARK MODE ====================== */
+function applyTheme(color){
+  document.documentElement.style.setProperty("--primary", color);
+}
+function toggleDark(){
+  document.documentElement.classList.toggle("dark");
+  localStorage.setItem("theme_dark", document.documentElement.classList.contains("dark") ? "1" : "0");
+}
+function initTheme(){
+  const savedColor = localStorage.getItem("theme_color");
+  if(savedColor) {
+    document.getElementById("themeColor").value = savedColor;
+    applyTheme(savedColor);
+  }
+  const dark = localStorage.getItem("theme_dark");
+  if(dark === "1") document.documentElement.classList.add("dark");
+}
+
+/* ====================== HELPER: DOWNLOAD UTILITY ====================== */
+function downloadUrl(url, filename){
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || "";
+  a.target = "_blank";
+  a.click();
+}
+
+/* ====================== UI BINDINGS ====================== */
+function bindUI(){
+  // tabs
+  document.querySelectorAll(".nav a").forEach(a => {
+    a.onclick = (e) => {
+      e.preventDefault();
+      document.querySelectorAll(".nav a").forEach(x => x.classList.remove("active"));
+      a.classList.add("active");
+      const tab = a.getAttribute("data-tab");
+      showTab(tab);
+    };
+  });
+  document.querySelectorAll(".tabBtn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      showTab(btn.getAttribute("data-tab"));
+    };
+  });
+
+  document.getElementById("openAdd2").onclick = openAdd;
+  document.getElementById("btnAdd").onclick = openAdd;
+  document.getElementById("btnCancel").onclick = () => closeModal("docModal");
+  document.getElementById("btnSaveDoc").onclick = handleSaveDoc;
+
+  document.getElementById("addCatQuick").onclick = () => {
+    const v = document.getElementById("newCatInput").value.trim();
+    if(!v) return alert("Nhập tên danh mục");
+    if(!categories.includes(v)) categories.push(v);
+    populateCategorySelect();
+    document.getElementById("newCatInput").value = "";
+    renderCategories();
+  };
+
+  // search & filter
+  const filterInput = document.getElementById("filterInput");
+  const globalSearch = document.getElementById("globalSearch");
+  function doFilter(){
+    const f = (filterInput.value || "") + " " + (globalSearch.value || "");
+    renderDocs(f);
+  }
+  let debounceTimer;
+  [filterInput, globalSearch].forEach(el => {
+    el.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(doFilter, 220);
+    });
+  });
+
+  // pdf input preview
+  document.getElementById("inpPdf").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if(!f) { document.getElementById("pdfPreview").innerHTML = ""; return; }
+    if(f.size > 2*1024*1024) document.getElementById("pdfSizeWarn").style.display = "block";
+    else document.getElementById("pdfSizeWarn").style.display = "none";
+    document.getElementById("pdfPreview").innerHTML = `<small>Chọn file: ${f.name} (${Math.round(f.size/1024)} KB)</small>`;
+  });
+
+  // backup / restore / export csv
+  document.getElementById("backupBtn").onclick = backupJson;
+  document.getElementById("restoreInput").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if(f) restoreJson(f);
+  });
+  document.getElementById("exportCsvBtn").onclick = exportCsv;
+  document.getElementById("exportCats").onclick = () => {
+    const blob = new Blob([JSON.stringify(categories,null,2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `categories_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  };
+
+  // chart refresh on resize
+  window.addEventListener("resize", () => { drawChart(); });
+
+  // theme handlers
+  document.getElementById("themeColor").addEventListener("change", (e) => {
+    const c = e.target.value;
+    localStorage.setItem("theme_color", c);
+    applyTheme(c);
+  });
+  document.getElementById("toggleDark").addEventListener("click", () => {
+    toggleDark();
+    drawChart();
+  });
+
+  // close view modal
+  document.getElementById("btnCloseView").onclick = () => closeModal("viewModal");
+  document.getElementById("overlay").onclick = () => {
+    closeModal("docModal");
+    closeModal("viewModal");
+  };
+
+  // docs table delegation (works after render)
+}
+
+/* ====================== HELPER: SHOW TAB ====================== */
+function showTab(tab){
+  document.querySelectorAll(".tabPanel").forEach(p => p.style.display = "none");
+  const panel = document.getElementById(tab);
+  if(panel) panel.style.display = "block";
+  document.getElementById("breadcrumb").textContent = tab === "van-ban" ? "Văn bản" : (tab === "danh-muc" ? "Danh mục" : "Cài đặt");
+}
+
+/* ====================== STATS ====================== */
+function updateStats(){
+  document.getElementById("statDocs").textContent = docs.length;
+  document.getElementById("statCats").textContent = categories.length;
+}
+
+/* ====================== INIT ====================== */
+(function init(){
+  bindUI();
+  initTheme();
+  loadSheetData();
+  // expose some functions for inline buttons created after render
+  window.openView = openView;
+  window.openEdit = openEdit;
+  window.deleteDoc = deleteDoc;
+  // save on unload
+  window.addEventListener("beforeunload", () => saveLocal());
+})();
+</script>
+</body>
+</html>

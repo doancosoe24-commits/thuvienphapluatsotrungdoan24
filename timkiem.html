@@ -3,186 +3,233 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
 <title>Kết quả tìm kiếm</title>
+
 <style>
-html, body { height: 100%; margin: 0; font-family: Arial,sans-serif; background:#f7f9fb; }
-body { display: flex; flex-direction: column; width: 70%; margin: 0 auto; }
-main { flex: 1; padding: 20px 0; }
-h2 { color: #004aad; }
-.keyword { color: #ff3131; font-weight: bold; }
-main h2{ width: 100%; background: #004aad; color: #fff; font-size: 20px; padding:5px; }
-.item_list { display: flex; align-items: center; width: 100%; margin: 10px 0;}
-.arrow {
-    width: 120px; height: 45px;
-    background: #ccae6e;
-    clip-path: polygon(0% 0%, 78% 0%, 100% 50%, 78% 100%, 0% 100%, 18% 50%);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; color: #8c6d2a; font-size: 13px;
-    margin-right: 12px;
-}
-.items {
-    background: #004aad;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 10px 5px;
-    color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    cursor: pointer;
-}
-.items p { margin: 0 0 6px 0; font-size: 16px; font-weight: 700; }
-.btn-new {
-    background: #ff3131; color: #ffde59; font-weight: 700;
-    border: none; padding: 8px 16px; border-radius: 10px;
-    cursor: pointer; font-size: 12px; align-self: flex-end;
-    transition: 0.2s;
+:root{
+  --primary:#004aad;
+  --gold:#ccae6e;
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --radius:16px;
+  --shadow:0 10px 25px rgba(0,0,0,0.08);
 }
 
-/* LOADING BOX */
-#loadingBox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #ccae6e;
-}
-.loader {
-  width: 45px;
-  height: 45px;
-  border: 4px solid #ccae6e;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.5s linear infinite;
-  margin-bottom: 12px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+*{box-sizing:border-box}
 
-@media (max-width:768px) {
-    body{ width: 100%; }
-    .arrow { width: 80px; height: 35px; }
-    .items p{ font-size: 14px; }
+html,body{
+  margin:0;
+  height:100%;
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+body{
+  display:flex;
+  flex-direction:column;
+  width:75%;
+  margin:0 auto;
+}
+
+main{
+  flex:1;
+
+}
+
+/* TITLE */
+#pageTitle{
+  text-align:center;
+  color:#fff;
+  background:var(--primary);
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:1px;
+  margin:0 0 30px;
+  padding:10px;
+  border-radius:10px;
+}
+.keyword{color:#ffde59}
+
+/* RESULTS */
+#results{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:22px;
+}
+
+.item{
+  background:linear-gradient(135deg,var(--primary),#003a8c);
+  border-radius:var(--radius);
+  padding:22px 18px;
+  color:var(--gold);
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  transition:.3s;
+}
+.item:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 18px 35px rgba(0,0,0,.18);
+  color:#fff;
+}
+
+.item p{
+  margin:0 0 12px;
+  font-size:16px;
+  font-weight:700;
+}
+
+.status{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+}
+
+/* LOADING */
+#loadingBox{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:60px 0;
+  color:var(--primary);
+  font-weight:600;
+}
+
+.loader{
+  width:52px;
+  height:52px;
+  border:4px solid rgba(0,0,0,.1);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  margin-bottom:14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSIVE */
+@media(max-width:1024px){ body{width:90%} }
+@media(max-width:768px){
+  body{width:100%}
+  #results{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 <div id="header"></div>
 <main>
-<h2>Từ khóa: <span id="searchKey"></span></h2>
+  <h2 id="pageTitle">
+    TỪ KHÓA: <span class="keyword" id="searchKey"></span>
+  </h2>
 
-<!-- Loading -->
-<div id="loadingBox">
-  <div class="loader"></div>
-  Đang tra dữ liệu...
-</div>
+  <!-- LOADING -->
+  <div id="loadingBox">
+    <div class="loader"></div>
+    Đang tra dữ liệu...
+  </div>
 
-<div id="results" style="display:none;"></div>
+  <!-- RESULTS -->
+  <div id="results" style="display:none"></div>
 </main>
 <div id="footer"></div>
-
+<script src="main.js"></script>
 <script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec"; 
-const params = new URLSearchParams(window.location.search);
-const key = params.get("key")?.trim() || "";
+/* ========== CONFIG ========== */
+const webAppUrl = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
+
+/* ========== DOM ========== */
+const loadingBox = document.getElementById("loadingBox");
+const results = document.getElementById("results");
+const searchKeyEl = document.getElementById("searchKey");
+
+/* ========== PARAM ========== */
+const params = new URLSearchParams(location.search);
+const key = (params.get("key") || "").trim();
 const keyLower = key.toLowerCase();
-document.getElementById("searchKey").textContent = key || "không có";
+searchKeyEl.textContent = key || "KHÔNG CÓ";
 
-const ref = window.location.origin;
-
-function createSlug(title){
-  if(!title) return "";
-  title = title.replace(/Đ/g,"D").replace(/đ/g,"d");
-  let str = title.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  return str.split(/\s+/).map(w =>
-    w.replace(/[^a-zA-Z0-9]/g,"").replace(/^./, c=>c.toUpperCase())
-  ).join("");
+/* ========== UTIL ========== */
+function escapeHtml(str){
+  return String(str||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
 }
 
+function toSlug(text){
+  return String(text||"")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9\s]/g,"")
+    .trim()
+    .replace(/\s+/g,"-")
+    .toLowerCase();
+}
+
+function showLoading(){
+  loadingBox.style.display="flex";
+  results.style.display="none";
+}
+
+function hideLoading(){
+  loadingBox.style.display="none";
+  results.style.display="grid";
+}
+
+/* ========== LOAD & FILTER ========== */
 async function loadAndFilter(){
-    const resultsDiv = document.getElementById("results");
-    const loadingDiv = document.getElementById("loadingBox");
+  showLoading();
 
-    resultsDiv.style.display = "none";
-    loadingDiv.style.display = "flex";
+  if(!key){
+    hideLoading();
+    results.innerHTML="<p style='text-align:center'>Không có từ khóa.</p>";
+    return;
+  }
 
-    if(!key){
-        loadingDiv.style.display = "none";
-        resultsDiv.style.display = "block";
-        resultsDiv.innerHTML = "<p>Không có từ khóa.</p>";
-        return;
+  try{
+    const res = await fetch(webAppUrl).then(r=>r.json());
+    const items = res?.ThuVienPhapLuatSo || res?.data?.ThuVienPhapLuatSo || [];
+
+    const filtered = items.filter(i =>
+      i.title && i.title.toLowerCase().includes(keyLower)
+    );
+
+    hideLoading();
+
+    if(!filtered.length){
+      results.innerHTML="<p style='text-align:center'>Không tìm thấy kết quả.</p>";
+      return;
     }
 
-    try{
-        const res = await fetch(`${webAppUrl}?ref=${encodeURIComponent(ref)}`);
-        const allData = await res.json();
+    filtered.forEach(i=>{
+      const div=document.createElement("div");
+      div.className="item";
+      div.dataset.slug=toSlug(i.title);
+      div.innerHTML=`
+        <p>${escapeHtml(i.title)}</p>
+        <span class="status">Có hiệu lực</span>
+      `;
+      div.onclick=()=>location.href=`detail.html?slug=${div.dataset.slug}`;
+      results.appendChild(div);
+    });
 
-        const items = allData.ThuVienPhapLuatSo || [];
-        const filtered = items.filter(item => item.title && item.title.toLowerCase().includes(keyLower));
-
-        loadingDiv.style.display = "none";
-        resultsDiv.style.display = "block";
-
-        if(filtered.length===0){
-            resultsDiv.innerHTML = "<p>Không tìm thấy kết quả.</p>";
-            return;
-        }
-
-        filtered.forEach(item=>{
-            const slug = createSlug(item.title);
-            const div = document.createElement("div");
-            div.className = "item_list";
-            div.innerHTML = `
-                <div class="arrow"></div>
-                <div class="items">
-                    <p>${item.title}</p>
-                    <button class="btn-new">Có hiệu lực</button>
-                </div>
-            `;
-            div.querySelector(".items").addEventListener("click", ()=>{
-                window.location.href = `detail.html?slug=${encodeURIComponent(slug)}`;
-            });
-            resultsDiv.appendChild(div);
-        });
-    }catch(err){
-        console.error("Lỗi load API", err);
-        loadingDiv.style.display = "none";
-        resultsDiv.style.display = "block";
-        resultsDiv.innerHTML = "<p>Không thể tải dữ liệu.</p>";
-    }
+  }catch(err){
+    console.error("Lỗi API:", err);
+    hideLoading();
+    results.innerHTML="<p>Không thể tải dữ liệu.</p>";
+  }
 }
 
 loadAndFilter();
-
-// Load header + footer
-function loadHTML(id, url) {
-  fetch(url)
-    .then(res => res.ok ? res.text() : Promise.reject('Network error'))
-    .then(html => {
-      document.getElementById(id).innerHTML = html;
-
-      if(id==='header'){
-        const searchBtn = document.getElementById("searchBtn");
-        const searchInput = document.getElementById("searchInput");
-        if(searchBtn && searchInput){
-          searchBtn.addEventListener("click", ()=>{
-            const key = searchInput.value.trim();
-            if(!key) return;
-            window.location.href = `timkiem.html?key=${encodeURIComponent(key)}`;
-          });
-          searchInput.addEventListener("keyup", e=>{
-            if(e.key==="Enter") searchBtn.click();
-          });
-        }
-      }
-    })
-    .catch(err => console.error(`Error loading ${url}:`, err));
-}
-
-loadHTML('header','header.html');
-loadHTML('footer','footer.html');
 </script>
+
 </body>
 </html>

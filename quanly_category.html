@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+<title>Admin - Tài liệu tham khảo</title>
+
+<style>
+:root {
+    --bg:#f6f8fb;
+    --card:#fff;
+    --text:#0f172a;
+    --accent:#0b6cff;
+    --muted:#6b7280;
+    --radius:12px;
+    --shadow:0 8px 24px rgba(15,23,42,0.08);
+    font-family:Inter,system-ui,sans-serif;
+}
+
+body{
+  background:var(--bg);
+  margin:0;
+  padding:20px;
+  color:var(--text);
+}
+
+.container{max-width:1100px;margin:0 auto}
+
+.card{
+  background:var(--card);
+  padding:18px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+h1{text-align:center;margin-bottom:20px}
+
+/* Search */
+.search{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.search input{
+  flex:1;
+  padding:9px 12px;
+  font-size:15px;
+  border-radius:8px;
+  border:1px solid #d0d7e2;
+  outline:none;
+  transition:0.25s;
+}
+.search input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 6px rgba(11,108,255,0.35);
+}
+
+/* Buttons */
+.btn{
+  padding:9px 14px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+}
+.btn-add{
+  background:var(--accent);
+  color:#fff;
+  font-weight:600;
+}
+
+.action-btn{
+  padding:6px 12px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  font-size:13px;
+  color:#fff;
+}
+.edit{ background:#f59e0b; }
+.del{ background:#ef4444; }
+
+/* Table */
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+th,td{
+  padding:10px 12px;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  text-align:left;
+  font-size:15px;
+}
+thead th{
+  background:linear-gradient(90deg, rgba(11,108,255,0.08), rgba(0,0,0,0));
+  font-weight:700;
+  color:var(--muted);
+  text-transform:uppercase;
+  font-size:13px;
+}
+tbody tr:hover{
+  background:rgba(11,108,255,0.05);
+  transition:0.2s;
+}
+
+/* Popup */
+.popup{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.form{
+  background:#fff;
+  padding:20px;
+  width:380px;
+  border-radius:14px;
+  box-shadow:var(--shadow);
+}
+.form input{
+  width:100%;
+  padding:10px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid #d0d7e2;
+}
+
+/* Toast */
+.toast{
+  position:fixed;
+  top:22px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:12px 18px;
+  background:#333;
+  color:#fff;
+  border-radius:8px;
+  font-size:14px;
+  display:none;
+  z-index:99999;
+}
+.toast.show{ display:block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <h1>Admin - Danh mục</h1>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <button id="btnAdd" class="btn btn-add">+ Thêm</button>
+      <div class="search">
+        <input id="q" placeholder="Tìm kiếm..." />
+      </div>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tiêu đề</th>
+          <th>Tên slug</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="popup">
+  <div class="form">
+    <h3 id="ftitle">Thêm tài liệu</h3>
+
+    <input id="fid" type="hidden" />
+    <input id="ftitle_inp" placeholder="Tiêu đề" />
+    <input id="fname_inp" placeholder="Tên file" />
+    <input id="furl_inp" placeholder="URL" />
+
+    <div style="text-align:right;margin-top:10px;">
+      <button id="saveBtn" class="btn btn-add">Lưu</button>
+      <button id="cancelBtn" class="btn" style="background:#ccc">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="auth.js"></script>
+
+<script>
+/* ====================== CONFIG ====================== */
+const API = "https://script.google.com/macros/s/AKfycbwuTB_4rOY_mX9S90793Qu55pVLLOdzwsiR7jEYNlRVVMbZDj2G0MU0b2F3OAg0KUuK/exec"; 
+
+/* Lấy token từ loggedInUser */
+const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+const token = user.token || "";
+
+/* Nếu chưa login → đá về login */
+if (!token) {
+  alert("Bạn cần đăng nhập trước!");
+  window.location.href = "/login.html";
+}
+
+const tb = document.getElementById('tb');
+const popup = document.getElementById('popup');
+const toast = document.getElementById('toast');
+const btnAdd = document.getElementById('btnAdd');
+
+/* Toast */
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'), 2000);
+}
+
+/* Load */
+async function load(){
+  tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">Đang tải...</td></tr>';
+
+  const res = await fetch(API + '?route=get-all&token=' + token);
+  const json = await res.json();
+  
+  if (json.error) {
+     showToast(json.error);
+     return;
+  }
+
+  const items = json.Category || [];
+
+  if (items.length === 0) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center">Không có dữ liệu</td></tr>';
+    return;
+  }
+
+  tb.innerHTML = items.map(it => `
+    <tr>
+      <td>${it.id}</td>
+      <td>${it.title}</td>
+      <td>${it.slug}</td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('.edit').forEach(btn=>{
+    btn.onclick = () => {
+      const row = items.find(x=>x.id==btn.dataset.id);
+      openEdit(row);
+    };
+  });
+
+  document.querySelectorAll('.del').forEach(btn=>{
+    btn.onclick = () => deleteItem(btn.dataset.id);
+  });
+}
+
+/* Add */
+btnAdd.onclick = () => {
+  document.getElementById('ftitle').textContent = "Thêm tài liệu";
+  fid.value = "";
+  ftitle_inp.value = "";
+  fname_inp.value = "";
+  furl_inp.value = "";
+  popup.style.display = "flex";
+};
+
+/* Edit */
+function openEdit(row){
+  document.getElementById('ftitle').textContent = "Sửa tài liệu";
+  fid.value = row.id;
+  ftitle_inp.value = row.title;
+  fname_inp.value = row.name;
+  furl_inp.value = row.url;
+  popup.style.display = "flex";
+}
+
+cancelBtn.onclick = ()=> popup.style.display="none";
+
+/* Save */
+saveBtn.onclick = async () => {
+  const id = fid.value;
+  const route = id ? "thamkhao-update" : "thamkhao-add";
+
+  const payload = {
+    token,
+    id,
+    title: ftitle_inp.value,
+    name: fname_inp.value,
+    url: furl_inp.value
+  };
+
+  const res = await fetch(API + "?route=" + route, {
+    method:"POST",
+    body: new URLSearchParams(payload)
+  });
+
+  const json = await res.json();
+  showToast(json.message || "Lưu thành công");
+  popup.style.display = "none";
+  load();
+};
+
+/* Delete */
+async function deleteItem(id){
+  if(!confirm("Bạn chắc muốn xóa?")) return;
+
+  const res = await fetch(API + "?route=thamkhao-delete", {
+    method:"POST",
+    body: new URLSearchParams({ id, token })
+  });
+
+  const json = await res.json();
+  showToast(json.message || "Đã xóa");
+  load();
+}
+
+/* Search */
+q.oninput = () => {
+  const val = q.value.toLowerCase();
+  document.querySelectorAll("#tb tr").forEach(tr=>{
+    tr.style.display = tr.innerText.toLowerCase().includes(val) ? "" : "none";
+  });
+};
+
+load();
+</script>
+
+</body>
+</html>

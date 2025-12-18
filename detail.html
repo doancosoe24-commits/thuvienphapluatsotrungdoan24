@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
 <title>Chi tiết văn bản</title>
 
 <style>
@@ -16,25 +17,75 @@ body {
   color: #333;
   background: #f7f9fb;
 }
-
 main { flex: 1; box-sizing: border-box; }
 
 /* Title */
-h2 { text-align: center; color: #004aad; font-weight: 700; padding: 0 5px;}
+h2 {
+  text-align: center;
+  color: #004aad;
+  font-weight: 700;
+  padding: 0 5px;
+}
 
 /* Tabs */
-.tabs-container { position: relative; display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #d0d6e0; padding-bottom: 8px; margin:0 5px;}
-.tab-btn { font-size: 14px; font-weight: 600; background: #004aad; cursor: pointer; padding: 10px 10px; border-radius: 5px; color: white; transition: 0.25s; }
+.tabs-container {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #d0d6e0;
+  padding-bottom: 8px;
+  margin: 0 5px;
+}
+.tab-btn {
+  font-size: 14px;
+  font-weight: 600;
+  background: #004aad;
+  cursor: pointer;
+  padding: 10px 10px;
+  border-radius: 5px;
+  color: white;
+  transition: 0.25s;
+}
 .tab-btn.active { background: #ccae6e; }
-.tab-underline { position: absolute; bottom: -2px; height: 4px; background: #ccae6e; width: 100%; border-radius: 10px; transition: 0.3s; }
+.tab-underline {
+  position: absolute;
+  bottom: -2px;
+  height: 4px;
+  background: #ccae6e;
+  width: 100%;
+  border-radius: 10px;
+  transition: 0.3s;
+}
 
 /* Tab content */
-.tab-detail { padding: 20px; background: #fff9e8; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); min-height: 500px; position: relative; }
+.tab-detail {
+  padding: 20px;
+  background: #fff9e8;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  min-height: 500px;
+  position: relative;
+}
 
 /* Table */
-.info-table { width: 100%; border-collapse: collapse; font-size: 16px; border: 1px solid #000; }
-.info-table th, .info-table td { text-align: left; padding: 12px 15px; border: 1px solid #000; }
-.info-table th { background-color: #f0f4f8; color: #004aad; width: 200px; }
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+  border: 1px solid #000;
+}
+.info-table th,
+.info-table td {
+  text-align: left;
+  padding: 12px 15px;
+  border: 1px solid #000;
+}
+.info-table th {
+  background-color: #f0f4f8;
+  color: #004aad;
+  width: 200px;
+}
 
 /* Watermark */
 .watermark {
@@ -46,45 +97,62 @@ h2 { text-align: center; color: #004aad; font-weight: 700; padding: 0 5px;}
   transform: translate(-50%, -50%) rotate(-15deg);
   pointer-events: none;
 }
-@media (max-width:768px){
-  body{
-    width:100%;
-  }
-}
-</style>
 
+@media (max-width:768px){
+  body { width: 100%; }
+}
+ .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:0 10px 25px rgba(0,0,0,0.08);
+      color:#004aad;
+      font-weight:600;
+      cursor:pointer;
+      transition:.25s;
+      margin-bottom:20px;
+    }
+    .back-link:hover{
+      background:#004aad;
+      color:#fff;
+    }
+</style>
 </head>
+
 <body>
 
 <main>
 
-    <div id="header"></div>
+  <div id="header"></div>
+ <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-    <span onclick="history.back()" 
-        style="color:#ccae6e;padding:10px;font-weight:600;text-decoration:underline;cursor:pointer;">
-        Quay lại
-    </span>
+  <h2 id="docTitle"></h2>
 
-    <h2 id="docTitle"></h2>
+  <div class="tabs-container">
+    <div class="tab-btn active" data-tab="info">Thuộc tính</div>
+    <div class="tab-btn" data-tab="source">Văn bản PDF</div>
+    <div class="tab-underline"></div>
+  </div>
 
-    <div class="tabs-container">
-        <div class="tab-btn active" data-tab="info">Thuộc tính</div>
-        <div class="tab-btn" data-tab="source">Văn bản PDF</div>
-        <div class="tab-underline"></div>
-    </div>
-
-    <div class="tab-detail" id="tabContent"></div>
+  <div class="tab-detail" id="tabContent"></div>
 
 </main>
 
 <div id="footer"></div>
+
 <script src="main.js"></script>
 <script>
 /* =======================================
-   CẤU HÌNH
+   CONFIG
 ======================================= */
-const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
-const slugFromURL = new URLSearchParams(window.location.search).get("slug");
+const webAppUrl =
+  "https://script.google.com/macros/s/AKfycbxrj25sWeIPBbhw7HzhC8CEdol5bW1nV1ZtppCbs3lLCn9CEgl__mWSw6WHbZDQjXM-/exec";
+
+const slugFromURL =
+  new URLSearchParams(window.location.search).get("slug") || "";
 
 const tabContent = document.getElementById("tabContent");
 const docTitle   = document.getElementById("docTitle");
@@ -94,147 +162,149 @@ const underline  = document.querySelector(".tab-underline");
 let currentData = null;
 
 /* =======================================
-   CHUẨN HOÁ TITLE THÀNH SLUG SO SÁNH
+   NORMALIZE TITLE -> SLUG (tai-lieu-nganh)
 ======================================= */
 function normalizeNameForComparison(text){
-    return String(text || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g,"")
-        .replace(/Đ/g,"D").replace(/đ/g,"d")
-        .replace(/[^a-zA-Z0-9]/g,"")
-        .toUpperCase();
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 /* =======================================
-   LẤY GOOGLE DRIVE ID
+   DRIVE ID
 ======================================= */
 function getDriveID(link){
-    if (!link) return "";
-    const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    return match ? match[1] : link;
+  if (!link) return "";
+  const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : link;
 }
 
 /* =======================================
-   UNDERLINE TAB
+   TAB UNDERLINE
 ======================================= */
 function updateUnderline(activeTab){
-    if(!activeTab) return;
-    underline.style.width = activeTab.offsetWidth + "px";
-    underline.style.transform = `translateX(${activeTab.offsetLeft}px)`;
+  if(!activeTab) return;
+  underline.style.width = activeTab.offsetWidth + "px";
+  underline.style.transform =
+    `translateX(${activeTab.offsetLeft}px)`;
 }
 updateUnderline(document.querySelector(".tab-btn.active"));
 
 /* =======================================
-   HIỂN THỊ TAB PDF
+   FORMAT DATE
 ======================================= */
 function formatDateVN(dateString){
-    if(!dateString) return "";
-    const d = new Date(dateString);
-    if (isNaN(d)) return dateString;
-
-    const day   = String(d.getDate()).padStart(2,"0");
-    const month = String(d.getMonth()+1).padStart(2,"0");
-    const year  = d.getFullYear();
-
-    return `${day}/${month}/${year}`;
-}
-
-function showTab(data){
-    if(!data) return;
-
-    const active = document.querySelector(".tab-btn.active").dataset.tab;
-
-    if(active === "info"){
-        tabContent.innerHTML = `
-            <table class="info-table">
-               <tr><th>Số hiệu</th><td>${data.sohieu || ""}</td></tr>
-                <tr><th>Ngày ban hành</th><td>${formatDateVN(data.ngaybanhanh) || ""}</td></tr>
-                <tr><th>Cơ quan</th><td>${data.noibanhanh || ""}</td></tr>
-                <tr><th>Người ký</th><td>${data.nguoiky || ""}</td></tr>
-                <tr><th>Loại văn bản</th><td>${data.loaivanban || ""}</td></tr>
-                <tr><th>Ngày hiệu lực</th><td>${formatDateVN(data.ngayhieuluc) || ""}</td></tr>
-            </table>
-        `;
-    }
-
-    if(active === "source"){
-
-        if(!data.url || data.url.trim() === ""){
-            tabContent.innerHTML = `
-            <div style="position:relative; width:100%; height:700px; 
-                border-radius:10px; overflow:hidden; background:#fcf8e8; 
-                box-shadow:0 4px 12px rgba(0,0,0,0.1); 
-                display:flex; justify-content:center; align-items:center; 
-                font-size:18px; color:#ff3131;">
-                Dữ liệu PDF chưa có
-            </div>`;
-        } else {
-            const pdfID = getDriveID(data.url);
-
-            tabContent.innerHTML = `
-            <div style="position:relative; width:100%; height:700px; border-radius:10px;
-                overflow:hidden; background:#fcf8e8; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-                <iframe src="https://drive.google.com/file/d/${pdfID}/preview"
-                        style="width:100%; height:100%; border:none;"></iframe>
-                <div class="watermark">Thư viện số Sư đoàn 10</div>
-            </div>`;
-        }
-    }
-
-    docTitle.innerText = data.title || "Không có tiêu đề";
+  if(!dateString) return "";
+  const d = new Date(dateString);
+  if (isNaN(d)) return dateString;
+  return `${String(d.getDate()).padStart(2,"0")}/${
+    String(d.getMonth()+1).padStart(2,"0")
+  }/${d.getFullYear()}`;
 }
 
 /* =======================================
-   SỰ KIỆN CLICK TAB
+   RENDER TAB
+======================================= */
+function showTab(data){
+  if(!data) return;
+  const active = document.querySelector(".tab-btn.active").dataset.tab;
+
+  if(active === "info"){
+    tabContent.innerHTML = `
+      <table class="info-table">
+        <tr><th>Số hiệu</th><td>${data.sohieu || ""}</td></tr>
+        <tr><th>Ngày ban hành</th><td>${formatDateVN(data.ngaybanhanh)}</td></tr>
+        <tr><th>Cơ quan</th><td>${data.noibanhanh || ""}</td></tr>
+        <tr><th>Người ký</th><td>${data.nguoiky || ""}</td></tr>
+        <tr><th>Loại văn bản</th><td>${data.loaivanban || ""}</td></tr>
+        <tr><th>Ngày hiệu lực</th><td>${formatDateVN(data.ngayhieuluc)}</td></tr>
+      </table>
+    `;
+  }
+
+  if(active === "source"){
+    if(!data.url){
+      tabContent.innerHTML = `
+        <div style="height:700px;display:flex;align-items:center;
+          justify-content:center;color:#ff3131;font-size:18px;">
+          Dữ liệu PDF chưa có
+        </div>`;
+    } else {
+      const pdfID = getDriveID(data.url);
+      tabContent.innerHTML = `
+        <div style="height:700px;position:relative;">
+          <iframe
+            src="https://drive.google.com/file/d/${pdfID}/preview"
+            style="width:100%;height:100%;border:none"></iframe>
+          <div class="watermark">Thư viện số Sư đoàn 10</div>
+        </div>`;
+    }
+  }
+
+  docTitle.innerText = data.title || "Không có tiêu đề";
+}
+
+/* =======================================
+   TAB EVENTS
 ======================================= */
 tabs.forEach(tab=>{
-    tab.addEventListener("click", ()=>{
-        document.querySelector(".tab-btn.active").classList.remove("active");
-        tab.classList.add("active");
-        updateUnderline(tab);
-        showTab(currentData);
-    });
+  tab.onclick = ()=>{
+    document.querySelector(".tab-btn.active").classList.remove("active");
+    tab.classList.add("active");
+    updateUnderline(tab);
+    showTab(currentData);
+  };
 });
+
 /* =======================================
-   TẢI DỮ LIỆU TỪ SHEET ThuVienPhapLuatSo
+   LOAD DATA + COMPARE SLUG
 ======================================= */
 if(slugFromURL){
 
-    fetch(`${webAppUrl}?ref=${encodeURIComponent(window.location.origin)}`)
-        .then(res => res.json())
-        .then(res => {
+  const slugNormalized = normalizeNameForComparison(slugFromURL);
 
-            const list = res.ThuVienPhapLuatSo || [];
+  console.log("🔹 slugFromURL:", slugFromURL);
+  console.log("🔹 slugNormalized:", slugNormalized);
 
-            const slugNormalized = slugFromURL.toUpperCase().trim();
+  fetch(webAppUrl)
+    .then(res => res.json())
+    .then(res => {
 
-            const matched = list.find(row =>
-                normalizeNameForComparison(row.title) === slugNormalized
-            );
+      const list = res?.data?.ThuVienPhapLuatSo || [];
 
-            if(matched){
-                currentData = matched;
-                showTab(currentData);
-            } else {
-                docTitle.innerText = "Không tìm thấy văn bản";
-                tabContent.innerHTML = "<p>Không tìm thấy dữ liệu.</p>";
-            }
-        })
-        .catch(err=>{
-            console.error("Lỗi tải dữ liệu:", err);
-            docTitle.innerText = "Lỗi tải dữ liệu";
-            tabContent.innerHTML = "<p>Không thể tải dữ liệu.</p>";
-        });
+      console.log("📦 Tổng số bản ghi:", list.length);
+
+      const matched = list.find(row=>{
+        const titleSlug = normalizeNameForComparison(row.title);
+        console.log("🔸 compare:", titleSlug, "==", slugNormalized);
+        return titleSlug === slugNormalized;
+      });
+
+      if(matched){
+        currentData = matched;
+        showTab(currentData);
+      } else {
+        docTitle.innerText = "Không tìm thấy văn bản";
+        tabContent.innerHTML = "<p>Không có dữ liệu phù hợp.</p>";
+      }
+    })
+    .catch(err=>{
+      console.error("❌ Lỗi tải dữ liệu:", err);
+      docTitle.innerText = "Lỗi tải dữ liệu";
+      tabContent.innerHTML = "<p>Không thể tải dữ liệu.</p>";
+    });
 
 } else {
-    docTitle.innerText = "Không xác định văn bản";
-    tabContent.innerHTML = "<p>Không có slug.</p>";
+  docTitle.innerText = "Không có slug";
+  tabContent.innerHTML = "<p>Thiếu tham số slug.</p>";
 }
-/* =======================================
-   LOAD HEADER - FOOTER
-======================================= */
-
-
 </script>
+
 </body>
 </html>

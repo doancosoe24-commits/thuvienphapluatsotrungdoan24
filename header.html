@@ -1,28 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+<link rel="stylesheet" 
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
 <title>Search Example</title>
+
 <style>
-    header{
-        width: 100%;
-        padding:0;
+    header{ width: 100%; padding:0; }
+    .logo{ display: flex; justify-content: space-between; }
+    .logo img{ width: 100px; height: 100px; }
+
+    /* USER BOX */
+    #userBox{
+        text-align: right;
+        padding: 5px 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #004aad;
     }
-    .logo{
-        display: flex;
-        justify-content: space-between;
-    }
-    .logo img{
-        width: 120px;
-        height: 120px;
-    }
+
+    #userBox span{ cursor: pointer; }
+
     .search{
         margin-top: 10px;
         text-align: right;
         position: relative;
     }
+
     .search input{
         padding: 10px;
         background: #004aad;
@@ -34,11 +40,24 @@
         padding: 10px;
         background:none;
         border: none;
-        color: rgb(6, 6, 6);
+        color: black;
     }
-    .search button i{
-        font-size: 16px;
+    .search button i{ font-size: 16px; }
+
+    /* NÚT CLEAR */
+    #clearBtn {
+        position: absolute;
+        right: 40px; /* canh bên trong input */
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: white;
+        font-size: 18px;
+        display: none;
+        font-weight: bold;
+        user-select: none;
     }
+
     .results{
         position: absolute;
         right: 0;
@@ -57,81 +76,37 @@
         padding: 5px 10px;
         cursor: pointer;
     }
-    hr{
-        height: 4px;
-        background: #004aad;
-    }
-    .search_item { display: flex; align-items: center; margin-bottom: 0px; }
 
-    .btn-new-search {
-        width: 100px; height: 35px;
-        background: #ff3131;
-        clip-path: polygon(0% 0%, 78% 0%, 100% 50%, 78% 100%, 0% 100%, 18% 50%);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; color: #8c6d2a; font-size: 13px;
-        margin-right: 12px;
+    hr{ height: 4px; background: #004aad; }
+    #clearBtn{
+        margin-right: 10px;
     }
-
-    .item_con {
-        background: #004aad;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 10px 5px;
-        color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    }
-
-    .item_con p { margin: 0 0 6px 0; font-size: 14px; font-weight: 700; }
-
-    .btn-new-search {
-        background: #ff3131; color: #ffde59; font-weight: 700;
-        border: none; padding: 8px 16px; border-radius: 10px;
-        cursor: pointer; font-size: 12px; align-self: flex-end;
-        transition: 0.2s;
-    }
-#chay{
-    color: black;
-}
 </style>
 </head>
+
 <body>
-<!-- header.html -->
+
 <header>
+
+    <!-- LOGO -->
     <div class="logo">
-        <a href="./index.html"><img src="./img/logo.png" alt=""></a>
-        <a href="./index.html"><img src="./img/z7265685068761_8f537423848b7220300016fed448a3d9.jpg" alt=""></a>
+        <a href="./main.html"><img src="./img/logo.png" alt=""></a>
+        <a href="./main.html"><img src="./img/logo2.png" alt=""></a>
     </div>
+
+    <!-- USER LOGIN BOX -->
+    <div id="userBox"></div>
+
+    <!-- SEARCH -->
     <div class="search">
         <input type="text" id="searchInput" placeholder="Tìm kiếm">
+        <span id="clearBtn">&times;</span>
         <button id="searchBtn" type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
         <div class="results" id="results"></div>
     </div>
 </header>
+
 <hr>
-
-<script>
-    // Đảm bảo nút search redirect sang timkiem.html
-    const searchBtn = document.getElementById("searchBtn");
-    const searchInput = document.getElementById("searchInput");
-
-    if(searchBtn && searchInput){
-        searchBtn.addEventListener("click", ()=>{
-            const key = searchInput.value.trim();
-            if(!key) return;
-            // Redirect sang timkiem.html với query param
-            window.location.href = `timkiem.html?key=${encodeURIComponent(key)}`;
-        });
-
-        // Nếu muốn Enter cũng search được
-        searchInput.addEventListener("keyup", (e)=>{
-            if(e.key === "Enter"){
-                searchBtn.click();
-            }
-        });
-    }
-</script>
-
+<script src="main.js"></script>
 </body>
 </html>

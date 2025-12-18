@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>403 - Không có quyền truy cập</title>
+<style>
+  /* Reset cơ bản */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body, html {
+    height: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f6f8fb;
+    color: #0f172a;
+  }
+
+  /* Container chính */
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 6rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: #6b7280;
+  }
+
+  a {
+    display: inline-block;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #0b6cff, #2dd4bf);
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15,23,42,0.2);
+  }
+
+  /* Biểu tượng cảnh báo */
+  .icon {
+    font-size: 5rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+  }
+
+  @media(max-width:600px){
+    h1 { font-size: 4rem; }
+    h2 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="icon">🚫</div>
+  <h1>403</h1>
+  <h2>Không có quyền truy cập</h2>
+  <p>Bạn không được phép truy cập trang này hoặc trang đã hết hạn đăng nhập.</p>
+  <a href="index.html">Quay về Trang chủ</a>
+</div>
+</body>
+</html>

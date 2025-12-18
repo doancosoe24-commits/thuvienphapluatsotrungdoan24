@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+<title>Admin — Thư viện pháp luật</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#f6f8fb;
+  --card:#fff;
+  --text:#0f172a;
+  --accent:#0b6cff;
+  --muted:#6b7280;
+  --radius:12px;
+  --shadow:0 10px 30px rgba(15,23,42,0.08);
+  --danger:#ef4444;
+  --success:#10b981;
+  font-family:Inter,system-ui,Arial;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);padding:20px}
+
+.container{max-width:1200px;margin:0 auto}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+
+h1{margin:0;color:var(--accent);text-align:center}
+.small{font-size:13px;color:var(--muted)}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.search{flex:1;min-width:200px}
+.search input{width:100%;padding:10px;border-radius:10px;border:1px solid #e6e9ef}
+
+.btn{padding:9px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+.btn-add{background:var(--accent);color:#fff}
+.btn-edit{background:#f59e0b;color:#fff}
+.btn-del{background:var(--danger);color:#fff}
+.btn-ghost{background:transparent;border:1px solid #e6e9ef}
+
+.table-wrap{overflow:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:1100px}
+thead th{padding:12px 14px;font-size:12px;color:var(--muted);text-transform:uppercase;text-align:left}
+tbody td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.05)}
+tbody tr:hover{background:rgba(11,108,255,.04)}
+
+.actions{display:flex;gap:8px}
+
+.badge{padding:6px 8px;border-radius:8px;font-size:12px;font-weight:700}
+.badge.role{background:#e6f0ff;color:var(--accent)}
+
+.popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:999}
+.form{background:#fff;padding:20px;border-radius:14px;width:560px;max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
+.form h3{margin:0 0 12px;color:var(--accent)}
+.form input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;margin-bottom:8px}
+
+.toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:10000}
+.toast.show{display:block}
+
+.loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.65);z-index:9999}
+.loader.show{display:flex}
+
+/* responsive: table -> cards (small screens) */
+@media (max-width:900px){
+  table{min-width:0}
+  thead{display:none}
+  tbody tr{display:block;margin-bottom:12px;background:#fff;border-radius:10px;box-shadow:var(--shadow);padding:0}
+  tbody td{display:block;border-bottom:none;padding:10px 14px}
+  tbody td:before{display:inline-block;width:120px;font-weight:700;color:var(--muted)}
+  tbody td:nth-child(1):before{content:"ID"}
+  tbody td:nth-child(2):before{content:"Tiêu đề"}
+  tbody td:nth-child(3):before{content:"Số hiệu"}
+  tbody td:nth-child(4):before{content:"Nơi ban hành"}
+  tbody td:nth-child(5):before{content:"Người ký"}
+  tbody td:nth-child(6):before{content:"Ngày ban hành"}
+  tbody td:nth-child(7):before{content:"Ngày hiệu lực"}
+  tbody td:nth-child(8):before{content:"Loại"}
+  tbody td:nth-child(9):before{content:"Slug"}
+  tbody td:nth-child(10):before{content:"URL"}
+  tbody td:nth-child(11):before{content:"Hành động"}
+}
+</style>
+</head>
+
+<body>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="loader" class="loader"><div class="card">Đang tải dữ liệu…</div></div>
+
+<div class="container">
+  <div class="card">
+
+    <div class="toolbar">
+      <div>
+        <h1 style="text-align: center;">Admin — Thư viện pháp luật</h1>
+        <div class="small">Quản lý văn bản pháp luật</div>
+      </div>
+      <div id="meta"></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <input id="q" placeholder="Tìm theo tiêu đề, số hiệu, người ký…">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" id="reloadBtn">⟳ Tải lại</button>
+        <button class="btn btn-add" id="addBtn">+ Thêm văn bản</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tiêu đề</th>
+            <th>Số hiệu</th>
+            <th>Nơi ban hành</th>
+            <th>Người ký</th>
+            <th>Ngày ban hành</th>
+            <th>Ngày hiệu lực</th>
+            <th>Loại</th>
+            <th>Slug</th>
+            <th>URL</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="tb">
+          <tr><td colspan="11" style="text-align:center">Đang tải…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="popup" aria-hidden="true">
+  <div class="form" role="dialog" aria-modal="true" aria-labelledby="ftitle">
+    <h3 id="ftitle">Thêm văn bản</h3>
+    <input type="hidden" id="fid">
+    <input id="title" placeholder="Tiêu đề">
+    <input id="sohieu" placeholder="Số hiệu">
+    <input id="noibanhanh" placeholder="Nơi ban hành">
+    <input id="nguoiky" placeholder="Người ký">
+    <input id="ngaybanhanh" placeholder="Ngày ban hành">
+    <input id="ngayhieuluc" placeholder="Ngày hiệu lực">
+    <input id="loaivanban" placeholder="Loại văn bản">
+    <input id="slug" placeholder="Slug">
+    <input id="url" placeholder="URL">
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+      <button class="btn btn-add" id="saveBtn">Lưu</button>
+      <button class="btn btn-ghost" id="cancelBtn">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const API = "https://script.google.com/macros/s/AKfycbxrj25sWeIPBbhw7HzhC8CEdol5bW1nV1ZtppCbs3lLCn9CEgl__mWSw6WHbZDQjXM-/exec";
+
+/* ================= UTIL ================= */
+const tb=document.getElementById('tb');
+const popup=document.getElementById('popup');
+const loader=document.getElementById('loader');
+const toast=document.getElementById('toast');
+const q=document.getElementById('q');
+const addBtn = document.getElementById('addBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+
+function showToast(m){ toast.textContent=m; toast.classList.add('show'); toast.style.display='block'; setTimeout(()=>{ toast.classList.remove('show'); toast.style.display='none'; },2200); }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function getSession(){ try{ return JSON.parse(localStorage.getItem('loggedInUser')) }catch(e){ return null } }
+
+/* ================= AUTH & ROLE ================= */
+let ROLE=''; // raw role string from backend
+let roleLower = '';
+let USER = null;
+let LAST_LOADED = []; // cache loaded ThuVienPhapLuatSo for view redirect
+
+(async()=>{
+  const s = getSession();
+  if(!s || !s.token){ location.href='login.html'; return; }
+  loader.classList.add('show');
+
+  try{
+    // check-manager returns { status:"success", isManager: bool, role: "...", user: {...} }
+    const r = await fetch(`${API}?route=check-manager&token=${encodeURIComponent(s.token)}`);
+    const j = await r.json();
+    if(!j || !j.isManager){ alert('Không có quyền truy cập trang này'); location.href='index.html'; return; }
+    ROLE = j.role || '';
+    roleLower = String(ROLE).toLowerCase();
+    USER = j.user || {};
+
+    // update meta & hide/show add button
+    document.getElementById('meta').innerHTML = `<div><strong>${esc(USER.username||USER.email||'')}</strong><div class="small">Quyền: <span class="badge role">${esc(ROLE)}</span></div></div>`;
+    if(roleLower !== 'admin'){
+      // editor -> hide Add button
+      addBtn.style.display = 'none';
+    } else {
+      addBtn.style.display = '';
+    }
+
+    await loadData();
+  }catch(err){
+    console.error(err);
+    showToast('Lỗi xác thực');
+    localStorage.removeItem('loggedInUser');
+    setTimeout(()=> location.href='login.html', 900);
+  }finally{
+    loader.classList.remove('show');
+  }
+})();
+
+/* ================= LOAD ================= */
+async function loadData(){
+  tb.innerHTML='<tr><td colspan="11" style="text-align:center">Đang tải…</td></tr>';
+  try{
+    // fetch all data (apiGetAllData)
+    const r = await fetch(`${API}`); // server returns apiGetAllData when no route
+    const j = await r.json();
+    const data = j?.data?.ThuVienPhapLuatSo || [];
+    LAST_LOADED = data.slice();
+
+    if(!data.length){ tb.innerHTML='<tr><td colspan="11" style="text-align:center">Không có dữ liệu</td></tr>'; return; }
+
+    tb.innerHTML = data.map(x => {
+      // build action cell depending on role
+      let actions = '';
+      // admin gets edit & delete & view
+      if(roleLower === 'admin'){
+        actions = `
+          <div class="actions">
+            <button class="btn btn-edit" onclick="editLaw('${esc(x.id)}')">Sửa</button>
+            <button class="btn btn-del" onclick="deleteLaw('${esc(x.id)}')">Xóa</button>
+          </div>`;
+      } else {
+        // editor: xem only
+        actions = `<div class="actions"><button class="btn btn-ghost" onclick="viewLaw('${esc(x.id)}')">Xem</button></div>`;
+      }
+
+      const urlCell = x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">Link</a>` : '';
+      return `<tr>
+        <td>${esc(x.id)}</td>
+        <td>${esc(x.title)}</td>
+        <td>${esc(x.sohieu)}</td>
+        <td>${esc(x.noibanhanh)}</td>
+        <td>${esc(x.nguoiky)}</td>
+        <td>${esc(x.ngaybanhanh)}</td>
+        <td>${esc(x.ngayhieuluc)}</td>
+        <td>${esc(x.loaivanban)}</td>
+        <td>${esc(x.slug)}</td>
+        <td>${urlCell}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }).join('');
+  }catch(err){
+    console.error('loadData err', err);
+    tb.innerHTML='<tr><td colspan="11" style="text-align:center">Lỗi tải dữ liệu</td></tr>';
+    showToast('Lỗi khi tải dữ liệu');
+  }
+}
+
+/* ================= FORM ================= */
+addBtn.onclick = ()=> openForm({});
+function openForm(o = {}){
+  if(roleLower !== 'admin'){ showToast('Chỉ admin mới được thêm/sửa'); return; }
+  popup.style.display = 'flex';
+  popup.setAttribute('aria-hidden','false');
+  document.getElementById('fid').value = o.id || '';
+  ['title','sohieu','noibanhanh','nguoiky','ngaybanhanh','ngayhieuluc','loaivanban','slug','url']
+    .forEach(k => document.getElementById(k).value = o[k] || '');
+}
+cancelBtn.onclick = ()=> closeForm();
+function closeForm(){
+  popup.style.display='none';
+  popup.setAttribute('aria-hidden','true');
+}
+
+/* edit -> open with data (admin only) */
+async function editLaw(id){
+  if(roleLower !== 'admin'){ showToast('Bạn không có quyền sửa'); return; }
+  // try find in LAST_LOADED
+  let it = LAST_LOADED.find(x => String(x.id) === String(id));
+  if(!it){
+    try{
+      const r = await fetch(`${API}`);
+      const j = await r.json();
+      it = (j?.data?.ThuVienPhapLuatSo || []).find(x => String(x.id) === String(id));
+    }catch(e){ console.error(e); }
+  }
+  if(it) openForm(it);
+  else showToast('Không tìm thấy mục');
+}
+
+/* save (add/update) */
+document.getElementById('saveBtn').onclick = async () => {
+  if(roleLower !== 'admin'){ showToast('Bạn không có quyền lưu'); return; }
+  const s = getSession();
+  if(!s || !s.token){ showToast('Token mất, xin đăng nhập lại'); localStorage.removeItem('loggedInUser'); setTimeout(()=>location.href='login.html',800); return; }
+
+  const id = document.getElementById('fid').value;
+  const route = id ? 'law-update' : 'law-add';
+  const body = new URLSearchParams();
+  body.append('token', s.token);
+  if(id) body.append('id', id);
+  ['title','sohieu','noibanhanh','nguoiky','ngaybanhanh','ngayhieuluc','loaivanban','slug','url']
+    .forEach(k => body.append(k, document.getElementById(k).value || ''));
+
+  try{
+    const r = await fetch(`${API}?route=${route}`, { method:'POST', body });
+    const j = await r.json();
+    showToast(j?.message || 'Đã lưu');
+    closeForm();
+    await loadData();
+  }catch(e){
+    console.error(e);
+    showToast('Lỗi lưu dữ liệu');
+  }
+};
+
+/* delete (admin only) */
+async function deleteLaw(id){
+  if(roleLower !== 'admin'){ showToast('Bạn không có quyền xóa'); return; }
+  if(!confirm('Bạn chắc chắn muốn xóa văn bản này?')) return;
+  const s = getSession();
+  if(!s || !s.token){ showToast('Token mất'); return; }
+  try{
+    const r = await fetch(`${API}?route=law-delete`, { method:'POST', body: new URLSearchParams({ token: s.token, id }) });
+    const j = await r.json();
+    showToast(j?.message || 'Đã xóa');
+    await loadData();
+  }catch(e){
+    console.error(e);
+    showToast('Lỗi xóa');
+  }
+}
+
+/* view for both admin and editor: redirect to detail page */
+function toSlug(title){
+  if(!title) return '';
+  let t = String(title).replace(/Đ/g,'D').replace(/đ/g,'d');
+  t = t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9\s]/g,'').trim().replace(/\s+/g,'-').toLowerCase();
+  return encodeURIComponent(t);
+}
+function viewLaw(id){
+  // find in LAST_LOADED
+  const it = LAST_LOADED.find(x=>String(x.id) === String(id));
+  if(it){
+    const slug = it.slug || toSlug(it.title || '');
+    if(slug) window.location.href = `detail.html?slug=${encodeURIComponent(slug)}`;
+    else window.location.href = `detail.html?id=${encodeURIComponent(id)}`;
+  } else {
+    // fallback: open detail by id param
+    window.location.href = `detail.html?id=${encodeURIComponent(id)}`;
+  }
+}
+
+/* ================= SEARCH ================= */
+q.oninput = ()=> {
+  const t = q.value.trim().toLowerCase();
+  Array.from(tb.rows).forEach(r => {
+    r.style.display = r.innerText.toLowerCase().includes(t) ? '' : 'none';
+  });
+};
+document.getElementById('reloadBtn').onclick = loadData;
+
+</script>
+</body>
+</html>

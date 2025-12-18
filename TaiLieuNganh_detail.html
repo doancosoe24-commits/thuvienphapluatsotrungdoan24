@@ -2,68 +2,173 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư Viện Pháp Luật Số - Chi Tiết</title>
 
   <style>
-    html, body { margin:0; height:100%; font-family: Arial, sans-serif; background:#f7f9fb; color:#333; }
-    body { display:flex; flex-direction:column; width:70%; margin:0 auto; }
-    main { flex:1; padding:20px 0; }
+    :root{
+      --primary:#004aad;
+      --gold:#ccae6e;
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --radius:16px;
+      --shadow:0 10px 25px rgba(0,0,0,0.08);
+    }
 
-    .item_list { display:flex; align-items:center; margin-bottom:18px; }
-    .arrow { width:120px;height:45px;background:#ccae6e;
+    *{ box-sizing:border-box; }
+
+    html, body{
+      margin:0;
+      height:100%;
+      font-family:"Segoe UI", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    body{
+      display:flex;
+      flex-direction:column;
+      width:75%;
+      margin:0 auto;
+    }
+
+    main{
+      flex:1;
+      padding:28px 0 40px;
+    }
+
+    /* ---------- BACK ---------- */
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      color:var(--primary);
+      font-weight:600;
+      cursor:pointer;
+      transition:.25s;
+      margin-bottom:18px;
+    }
+    .back-link:hover{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    /* ---------- TITLE ---------- */
+    #pageTitle{
+      text-align:center;
+      color:var(--primary);
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:1px;
+      margin:10px 0 30px;
+      text-transform:uppercase;
+    }
+
+    /* ---------- LIST ---------- */
+    #list{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .item_list{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin: 10px 0;
+    }
+
+    /* ---------- ARROW ---------- */
+    .arrow{
+      min-width:64px;
+      height:44px;
+      background:linear-gradient(135deg,var(--gold),#bda15d);
       clip-path: polygon(0% 0%,78% 0%,100% 50%,78% 100%,0% 100%,18% 50%);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:700;color:#8c6d2a;margin-right:12px;
-    }
-    .item {
-      background:#004aad; flex:1; display:flex; flex-direction:column;
-      padding:15px 5px; color:#ccae6e; border-radius:5px;
-      box-shadow:0 3px 6px rgba(0,0,0,0.15); cursor:pointer;
-      transition:0.3s; text-align:start;
-    }
-    .item p { margin:0 0 6px 0; font-weight:700; font-size:16px; }
-    .item:hover{ background:#ccae6e; color:#fff; }
-    .btn-new {
-      background:#ff3131; color:#ffde59; font-weight:700; border:none;
-      padding:8px 16px; border-radius:10px; margin-top:6px;
-      cursor:pointer; font-size:12px; transition:0.2s;
-    }
-    .back-link {
-      color:#ccae6e; padding:10px; font-weight:600;
-      text-decoration:underline; cursor:pointer; display:inline-block;
+      box-shadow:var(--shadow);
     }
 
-    @media(max-width:768px){
-      body { width:100%; }
-      .arrow { width:50px;height:35px;font-size:11px; }
-      .item p { font-size:14px; }
-      .btn-new { padding:6px 12px;font-size:11px; }
+    /* ---------- ITEM ---------- */
+    .item{
+      flex:1;
+      background:linear-gradient(135deg,var(--primary),#003a8c);
+      border-radius:var(--radius);
+      padding:18px 22px;
+      color:var(--gold);
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      transition:.3s;
+      position:relative;
+      overflow:hidden;
     }
 
-    #loadingBox {
+    .item::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg,transparent,rgba(255,255,255,.12));
+      opacity:0;
+      transition:.3s;
+    }
+
+    .item:hover{
+      transform:translateY(-4px);
+      box-shadow:0 16px 30px rgba(0,0,0,0.18);
+      color:#fff;
+    }
+
+    .item:hover::after{ opacity:1; }
+
+    .item p{
+      margin:0;
+      font-size:16px;
+      font-weight:700;
+      line-height:1.4;
+    }
+
+    /* ---------- LOADING ---------- */
+    #loadingBox{
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
-      padding:40px 0;
-      color:#ccae6e;
-      font-size:17px;
+      padding:60px 0;
+      color:var(--primary);
+      font-size:16px;
       font-weight:600;
     }
 
-    .loader {
-      width:45px;
-      height:45px;
-      border:4px solid #ccae6e;
-      border-top-color:transparent;
+    .loader{
+      width:54px;
+      height:54px;
+      border:4px solid rgba(0,0,0,0.1);
+      border-top-color:var(--gold);
       border-radius:50%;
-      animation:spin 0.7s linear infinite;
-      margin-bottom:12px;
+      animation:spin .7s linear infinite;
+      margin-bottom:16px;
     }
 
-    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes spin{
+      to{ transform:rotate(360deg); }
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media(max-width:1024px){
+      body{ width:90%; }
+    }
+
+    @media(max-width:768px){
+      body{ width:100%; padding:0; }
+      #pageTitle{ font-size:18px; }
+      .arrow{ min-width:48px;height:36px; }
+      .item p{ font-size:14px; }
+    }
   </style>
 </head>
 
@@ -72,21 +177,23 @@
 <div id="header"></div>
 
 <main>
-  <span class="back-link" onclick="history.back()">Quay lại</span>
-  <h2 id="pageTitle" style="text-align:center;color:#ccae6e;text-transform:uppercase;"></h2>
+  <span class="back-link" onclick="history.back()">← Quay lại</span>
+
+  <h2 id="pageTitle"></h2>
 
   <div id="loadingBox">
-      <div class="loader"></div>
-      Đang tải dữ liệu...
+    <div class="loader"></div>
+    Đang tải dữ liệu...
   </div>
 
   <div id="list" style="display:none;"></div>
 </main>
 
 <div id="footer"></div>
+
 <script src="main.js"></script>
 <script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
 
 // Chuyển text thành slug chuẩn hóa
 function normalizeTitle(text){
@@ -124,8 +231,8 @@ async function loadPage(){
       fetch(webAppUrl).then(r=>r.json())
     ]);
 
-    const rawList = res.TaiLieuNganh || [];
-
+    const rawList = res.data.TaiLieuNganh || [];
+console.log(res.data);
     // Filter items matching slug
     const matched = rawList.filter(d => normalizeTitle(d.title) === pageSlug.toUpperCase());
 
@@ -152,13 +259,28 @@ async function loadPage(){
 // Render list
 function renderList(data){
   const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  const frag = document.createDocumentFragment();
   const loading = document.getElementById("loadingBox");
 
-  data.forEach(i=>{
-    if(!i.name || !i.name.trim()) return;
+  list.innerHTML = "";
+
+  // Không có dữ liệu
+  if(!Array.isArray(data) || data.length === 0){
+    loading.style.display = "none";
+    list.style.display = "block";
+    list.innerHTML = `<p style="text-align:center;color:#6b7280">
+      Chưa có tài liệu
+    </p>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  let hasItem = false;
+
+  data.forEach(i => {
+    // Nếu name null / rỗng
+    if(!i || !i.name || !i.name.trim()) return;
+
+    hasItem = true;
 
     const div = document.createElement("div");
     div.className = "item_list";
@@ -171,19 +293,29 @@ function renderList(data){
     frag.appendChild(div);
   });
 
-  list.appendChild(frag);
-
   loading.style.display = "none";
   list.style.display = "block";
 
-  // Click -> detail page (slug = name của item click)
-  list.onclick = e=>{
+  // Tất cả item đều không có name
+  if(!hasItem){
+    list.innerHTML = `<p style="text-align:center;color:#6b7280">
+      Chưa có tài liệu
+    </p>`;
+    return;
+  }
+
+  list.appendChild(frag);
+
+  // Click -> detail page
+  list.onclick = e => {
     const item = e.target.closest(".item");
-    if(item){
-      const nameClicked = item.dataset.name; // lấy name item click
-      const nSlug = normalizeTitle(nameClicked); // convert thành slug
-      window.location.href = `detail_nganh.html?slug=${nSlug}`;
-    }
+    if(!item) return;
+
+    const nameClicked = item.dataset.name;
+    if(!nameClicked) return;
+
+    const nSlug = normalizeTitle(nameClicked);
+    window.location.href = `detail_nganh.html?slug=${nSlug}`;
   };
 }
 

@@ -2,68 +2,142 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư Viện Pháp Luật Số - Chi Tiết</title>
 
   <style>
-    html, body { margin:0; height:100%; font-family: Arial, sans-serif; background:#f7f9fb; color:#333; }
-    body { display:flex; flex-direction:column; width:70%; margin:0 auto; }
-    main { flex:1; padding:20px 0; }
+    :root{
+      --primary:#004aad;
+      --gold:#ccae6e;
+      --bg:#f6f8fb;
+      --text:#1f2937;
+      --radius:16px;
+      --shadow:0 10px 25px rgba(0,0,0,0.08);
+    }
 
-    .item_list { display:flex; align-items:center; margin-bottom:18px; }
-    .arrow { width:120px;height:45px;background:#ccae6e;
+    html, body{
+      margin:0;
+      height:100%;
+      font-family:Arial, sans-serif;
+      background:#f7f9fb;
+      color:#333;
+    }
+
+    body{
+      display:flex;
+      flex-direction:column;
+      width:70%;
+      margin:0 auto;
+    }
+
+    main{ flex:1; padding:28px 0 40px; }
+
+    /* ---------- BACK (ĐỒNG BỘ) ---------- */
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      color:var(--primary);
+      font-weight:600;
+      cursor:pointer;
+      transition:.25s;
+      margin-bottom:18px;
+    }
+    .back-link:hover{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    /* ---------- TITLE ---------- */
+    #pageTitle{
+      text-align:center;
+      color:var(--gold);
+      text-transform:uppercase;
+      font-weight:800;
+      margin-bottom:26px;
+    }
+
+    /* ---------- LIST ---------- */
+    .item_list{
+      display:flex;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .arrow{
+      width:120px;
+      height:45px;
+      background:#ccae6e;
       clip-path: polygon(0% 0%,78% 0%,100% 50%,78% 100%,0% 100%,18% 50%);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:700;color:#8c6d2a;margin-right:12px;
-    }
-    .item {
-      background:#004aad; flex:1; display:flex; flex-direction:column;
-      padding:15px 5px; color:#ccae6e; border-radius:5px;
-      box-shadow:0 3px 6px rgba(0,0,0,0.15); cursor:pointer;
-      transition:0.3s; text-align:start;
-    }
-    .item p { margin:0 0 6px 0; font-weight:700; font-size:16px; }
-    .item:hover{ background:#ccae6e; color:#fff; }
-    .btn-new {
-      background:#ff3131; color:#ffde59; font-weight:700; border:none;
-      padding:8px 16px; border-radius:10px; margin-top:6px;
-      cursor:pointer; font-size:12px; transition:0.2s;
-    }
-    .back-link {
-      color:#ccae6e; padding:10px; font-weight:600;
-      text-decoration:underline; cursor:pointer; display:inline-block;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      color:#8c6d2a;
+      margin-right:12px;
     }
 
-    @media(max-width:768px){
-      body { width:100%; }
-      .arrow { width:50px;height:35px;font-size:11px; }
-      .item p { font-size:14px; }
-      .btn-new { padding:6px 12px;font-size:11px; }
+    .item{
+      background:#004aad;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      padding:15px 5px;
+      color:#ccae6e;
+      border-radius:5px;
+      box-shadow:0 3px 6px rgba(0,0,0,0.15);
+      cursor:pointer;
+      transition:.3s;
+      text-align:start;
     }
 
-    #loadingBox {
+    .item p{
+      margin:0 0 6px 0;
+      font-weight:700;
+      font-size:16px;
+    }
+
+    .item:hover{
+      background:#ccae6e;
+      color:#fff;
+    }
+
+    /* ---------- LOADING (ĐỒNG BỘ) ---------- */
+    #loadingBox{
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
-      padding:40px 0;
-      color:#ccae6e;
-      font-size:17px;
+      padding:60px 0;
+      color:var(--primary);
+      font-size:16px;
       font-weight:600;
     }
 
-    .loader {
-      width:45px;
-      height:45px;
-      border:4px solid #ccae6e;
-      border-top-color:transparent;
+    .loader{
+      width:54px;
+      height:54px;
+      border:4px solid rgba(0,0,0,0.1);
+      border-top-color:var(--gold);
       border-radius:50%;
-      animation:spin 0.7s linear infinite;
-      margin-bottom:12px;
+      animation:spin .7s linear infinite;
+      margin-bottom:16px;
     }
 
-    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes spin{
+      to{ transform:rotate(360deg); }
+    }
+
+    @media(max-width:768px){
+      body{ width:100%; }
+      .arrow{ width:50px; height:35px; font-size:11px; }
+      .item p{ font-size:14px; }
+    }
   </style>
 </head>
 
@@ -72,32 +146,32 @@
 <div id="header"></div>
 
 <main>
-  <span class="back-link" onclick="history.back()">Quay lại</span>
-  <h2 id="pageTitle" style="text-align:center;color:#ccae6e;text-transform:uppercase;"></h2>
+  <span class="back-link" onclick="history.back()">← Quay lại</span>
+
+  <h2 id="pageTitle"></h2>
 
   <div id="loadingBox">
-      <div class="loader"></div>
-      Đang tải dữ liệu...
+    <div class="loader"></div>
+    Đang tải dữ liệu...
   </div>
 
   <div id="list" style="display:none;"></div>
 </main>
 
 <div id="footer"></div>
+
 <script src="main.js"></script>
 <script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbwuTB_4rOY_mX9S90793Qu55pVLLOdzwsiR7jEYNlRVVMbZDj2G0MU0b2F3OAg0KUuK/exec";
 
-// Chuyển text thành slug chuẩn hóa (giữ D/Đ, bỏ dấu các ký tự khác)
 function normalizeTitle(text){
   return String(text || "")
-    .normalize("NFD") // tách dấu
-    .replace(/[\u0300-\u036f]/g,"") // bỏ dấu
-    .replace(/[^a-zA-Z0-9Đđ]/g,"") // giữ a-z, A-Z, 0-9, Đ, đ
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9Đđ]/g,"")
     .toUpperCase();
 }
 
-// Escape HTML
 function escapeHtml(str){
   if(!str) return "";
   return String(str)
@@ -108,81 +182,65 @@ function escapeHtml(str){
     .replace(/'/g,"&#39;");
 }
 
-// Lấy slug từ URL
 function getSlugFromURL(){
-  const url = new URL(window.location.href);
-  return url.searchParams.get("slug") || "";
+  return new URL(window.location.href).searchParams.get("slug") || "";
 }
 
-// Load page
 async function loadPage(){
   try{
     const pageSlug = getSlugFromURL();
+    const res = await fetch(webAppUrl).then(r=>r.json());
+    const rawList = res.data.TaiLieuThamKhao || [];
 
-    const [res] = await Promise.all([
-      fetch(webAppUrl).then(r=>r.json())
-    ]);
+    const matched = rawList.filter(d =>
+      normalizeTitle(d.title) === pageSlug.toUpperCase()
+    );
 
-
-    const rawList = res.TaiLieuThamKhao || [];
-
-    // Filter items matching slug
-    const matched = rawList.filter(d => normalizeTitle(d.title) === pageSlug.toUpperCase());
-
-    if(matched.length === 0){
-      document.getElementById("pageTitle").textContent = "KHÔNG TÌM THẤY TÀI LIỆU";
-      document.getElementById("list").textContent = "Không có tài liệu trùng khớp.";
-      document.getElementById("loadingBox").style.display = "none";
+    if(!matched.length){
+      document.getElementById("pageTitle").textContent="KHÔNG TÌM THẤY TÀI LIỆU";
+      document.getElementById("loadingBox").style.display="none";
       return;
     }
 
-    // Hiển thị title đầu tiên
-    const doc = matched[0];
-    document.getElementById("pageTitle").textContent = doc.title.toUpperCase();
+    document.getElementById("pageTitle").textContent =
+      matched[0].title.toUpperCase();
 
     renderList(matched);
 
-  } catch(err){
-    console.error("❌ Lỗi loadPage:", err);
-    document.getElementById("list").textContent = "Không thể tải dữ liệu.";
-    document.getElementById("loadingBox").style.display = "none";
+  }catch(err){
+    console.error(err);
+    document.getElementById("loadingBox").style.display="none";
   }
 }
 
-// Render list chỉ khi name tồn tại
 function renderList(data){
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+  const list=document.getElementById("list");
+  const loading=document.getElementById("loadingBox");
+  list.innerHTML="";
 
-  const frag = document.createDocumentFragment();
-  const loading = document.getElementById("loadingBox");
+  const frag=document.createDocumentFragment();
 
   data.forEach(i=>{
     if(!i.name || !i.name.trim()) return;
-
-    const div = document.createElement("div");
-    div.className = "item_list";
-    div.innerHTML = `
+    const div=document.createElement("div");
+    div.className="item_list";
+    div.innerHTML=`
       <div class="arrow"></div>
       <div class="item" data-name="${escapeHtml(i.name)}">
         <p>${escapeHtml(i.name)}</p>
-      </div>
-    `;
+      </div>`;
     frag.appendChild(div);
   });
 
   list.appendChild(frag);
+  loading.style.display="none";
+  list.style.display="block";
 
-  loading.style.display = "none";
-  list.style.display = "block";
-
-  // Click -> detail page (slug = name của item click)
-  list.onclick = e=>{
-    const item = e.target.closest(".item");
+  list.onclick=e=>{
+    const item=e.target.closest(".item");
     if(item){
-      const nameClicked = item.dataset.name;
-      const nSlug = normalizeTitle(nameClicked); // slug = normalize name
-      window.location.href = `detail_tailieuthamkhao.html?slug=${nSlug}`;
+      const slug=normalizeTitle(item.dataset.name);
+      window.location.href=`detail_tailieuthamkhao.html?slug=${slug}`;
     }
   };
 }

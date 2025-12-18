@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư Viện Số Sư Đoàn 10</title>
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      width: 70%;
+      margin: 0 auto;
+      font-family: Arial, sans-serif;
+      background: #f7f9fb;
+    }
+    main { flex: 1; box-sizing: border-box; }
+
+    .skeleton {
+      background: #e0e0e0;
+      height: 50px;
+      margin: 15px 0;
+      border-radius: 4px;
+      animation: shimmer 1.5s infinite linear;
+    }
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .arrow {
+      display: inline-block;
+      width: 150px;
+      height: 60px;
+      background-color: #f9f2db;
+      margin-left: 10px;
+      clip-path: polygon(0% 0%,80% 0%,100% 50%,80% 100%,0% 100%,20% 50%);
+      flex-shrink: 0;
+      opacity: 0;
+      transform: translateX(-50px);
+      animation: slideIn 0.6s forwards;
+    }
+
+    .item {
+      background: #004aad;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      padding: 10px 0;
+      margin: 15px 0;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(-50px);
+      animation: slideIn 0.6s forwards;
+    }
+
+    .flag-vn {
+      width: 84px;
+      margin-right: 12px;
+      flex-shrink: 0;
+      opacity: 0;
+      transform: translateX(-50px);
+      animation: slideIn 0.6s forwards;
+    }
+
+    .flag-vn svg {
+      width: 100%;
+      animation: flag-wave 4s ease-in-out infinite;
+      transform-origin: 50% 50%;
+    }
+
+    @keyframes flag-wave {
+      0% { transform: rotateY(0deg) skewX(0deg); }
+      25% { transform: rotateY(-1.2deg) skewX(-0.8deg); }
+      50% { transform: rotateY(0deg) skewX(0deg); }
+      75% { transform: rotateY(1.2deg) skewX(0.8deg); }
+      100% { transform: rotateY(0deg) skewX(0deg); }
+    }
+
+    @keyframes slideIn {
+      0% { opacity: 0; transform: translateX(-50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .item p {
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 10px;
+      flex: 1;
+      text-align: center;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    @media (max-width:768px){
+      body { width:100%; }
+      .flag-vn{ width:54px; flex-shrink: 0; }
+      .arrow{ width:60px; height:40px; flex-shrink: 0; }
+      .item p { font-size:10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header"></div>
+
+  <main>
+    <div class="list" id="list">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="main.js"></script>
+<script>
+  
+const webAppUrl = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
+
+// GỌI HEADER + FOOTER
+
+
+// Escape HTML để an toàn
+function escapeHtml(str){
+  if(!str) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function toSlug(text){
+  if(!text) return "";
+  text = text.replace(/Đ/g, "D").replace(/đ/g, "d");
+  let str = text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  str = str.split(/\s+/).map(word => {
+    return word
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .replace(/^./, c => c.toUpperCase());
+  }).join("");
+  return str;
+}
+
+// Tạo item Category với delay animation
+function createItemHTML(item, index){
+  const slug = toSlug(item.title);
+  const page = slug + ".html";
+  const delay = index * 0.15; // delay từng item
+  return `
+    <div class="item" onclick="goToPage('${page}', '${slug}')" style="animation-delay:${delay}s">
+      <div class="arrow" style="animation-delay:${delay + 0.05}s"></div>
+      <p>${escapeHtml(item.title)}</p>
+      <div class="flag-vn" style="animation-delay:${delay + 0.1}s">
+        <svg viewBox="0 0 512 341">
+          <rect width="512" height="341" fill="#DA251D"/>
+          <polygon fill="#FFD200"
+            points="256 80 276 142 341 142 289 181 309 243 
+                    256 204 203 243 223 181 170 142 236 142"/>
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+// Chuyển sang trang tương ứng theo title/slug
+function goToPage(page, slug){
+  window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
+}
+
+// Fetch Category từ Google Sheets
+async function fetchCategory(){
+  try {
+    const res = await fetch(webAppUrl);
+    const data = await res.json();
+    const list = document.getElementById("list");
+    const cat = data.data.Category || [];
+    if(cat.length === 0){
+      list.innerHTML = "<p>Không có dữ liệu Category.</p>";
+      return;
+    }
+    list.innerHTML = cat.map((item, idx) => createItemHTML(item, idx)).join("");
+  } catch(err){
+    console.error("Lỗi tải Category:", err);
+    document.getElementById("list").innerHTML = "<p>Không thể tải dữ liệu.</p>";
+  }
+}
+
+// Gọi fetch Category
+fetchCategory();
+</script>
+
+</body>
+</html>

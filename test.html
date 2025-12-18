@@ -1,93 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trang chính</title>
 <style>
-     html, body { height: 100%; margin: 0; }
-body {
-  display: flex;
-  flex-direction: column;
-  width: 70%;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-  background: #f7f9fb;
-}
-main h2{
-    text-align: center;
-    color: #ccae6e;
-    font-size: 28px;
-    text-transform: uppercase;
-    margin-bottom: 40px;
-}
-main .list .item{
-    padding: 10px;
-    background: #004aad;
-    margin: 20px 0;
-    transition: 0.3s;
-    color: #ccae6e;
-    cursor: pointer;
-}
-main .list .item:hover{
-    background: #ccae6e;
-    color: #fff;
-}
-main .list .item p{
-    text-align: center;
-    text-transform: uppercase;
-}
-.back-link{
-    color: #ccae6e;
-    text-decoration: underline;
-    padding: 10px;
-    font-weight: 700;
-    cursor: pointer;
-}
-main { flex: 1; box-sizing: border-box; }
-@media (max-width:768px){
-    body{
-        width: 100%;
-    }
-    main .list .item p{
-        font-size: 14px;
-    }
-}
+body { font-family: Arial, sans-serif; margin:20px; background:#f7f9fb; }
+h1 { color:#004aad; }
+iframe { border:1px solid #ccc; border-radius:8px; width:100%; height:600px; }
+.toast {position:fixed; top:-120px; left:50%; transform:translateX(-50%); padding:16px 28px; border-radius:12px; color:#fff; font-weight:700; opacity:0; transition:top 0.45s, opacity 0.45s; z-index:9999; font-size:14px;}
+.toast.show {top:22px; opacity:1;}
+.toast.success {background:#28a745;}
+.toast.error {background:#dc3545;}
 </style>
+</head>
 <body>
-    <div id="header"></div>
-                <span class="back-link" onclick="history.back()">Quay lại</span>
-    <main>
-        <h2>Tủ Sách Pháp Luật</h2>
-       <div class="list">
-           <div class="item">
-                 <p>Quy chế hoạt động</p>
-           </div>
-           <div class="item">
-                 <p>Văn kiện chỉ thị nghị quyết</p>
-           </div>
-           <div class="item">
-                 <p>Văn bản pháp luật liên quan đến chức năng nhiệm vụ</p>
-           </div>
-           <div class="item">
-                 <p>Sách, báo chí, tạp chí, tài liệu pháp luật</p>
-           </div>
-           <div class="item">
-                 <p>Sách, tài liệu phục vụ quản lý, hướng dẫn học tập, tìm hiểu pháp luật</p>
-           </div>
-       </div>
-    </main>
-    <div id="footer"></div>
-</body>
+
+<h1>Trang chính</h1>
+<iframe id="pdfFrame"></iframe>
+<div id="toast" class="toast"></div>
+
 <script>
-    function loadHTML(id, url) {
-  fetch(url)
-    .then(res => res.text())
-    .then(html => { document.getElementById(id).innerHTML = html; })
-    .catch(err => console.error(err));
+const API = "https://script.google.com/macros/s/AKfycbyAOorM4eSNT2CfFDlr4Uwc3_khZCOQR3IK6zADswDBklxZBJUvqVhXRpg0dkxlY5NZ/exec"; // Thay bằng URL Apps Script
+const toastEl = document.getElementById("toast");
+
+function showToast(msg,type="success",duration=4000){
+    toastEl.textContent = msg;
+    toastEl.className = `toast ${type} show`;
+    setTimeout(()=>toastEl.className="toast", duration);
 }
-loadHTML("header", "header.html");
-loadHTML("footer", "footer.html");
+
+async function loadPDF(){
+    const token = localStorage.getItem("jwt_token");
+    if(!token){
+        showToast("Vui lòng đăng nhập để xem nội dung","error");
+        setTimeout(()=>window.location.href="login.html",1000);
+        return;
+    }
+
+    try{
+        const resp = await fetch(`${API}?route=data&token=${token}`);
+        const data = await resp.json();
+        if(data.status==="success"){
+            // Ví dụ: lấy PDF đầu tiên từ sheet matkhauopen
+            const pdfUrl = data.matkhauopen?.[0]?.Link || "";
+            if(pdfUrl){
+                document.getElementById("pdfFrame").src = pdfUrl;
+            } else showToast("Chưa có PDF để hiển thị","error");
+        } else{
+            showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại","error");
+            localStorage.removeItem("jwt_token");
+            setTimeout(()=>window.location.href="login.html",1500);
+        }
+    }catch(err){
+        console.error(err);
+        showToast("Lỗi kết nối server","error");
+        localStorage.removeItem("jwt_token");
+        setTimeout(()=>window.location.href="login.html",1500);
+    }
+}
+
+loadPDF();
 </script>
+
+</body>
 </html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng xuất...</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f8fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .box {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .loading {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Đang đăng xuất...</h2>
+    <p class="loading">Vui lòng chờ trong giây lát.</p>
+</div>
+
+<script>
+    // Xóa user login
+    localStorage.removeItem("loggedInUser");
+
+    // Chuyển hướng về trang chủ sau 1 giây
+    setTimeout(() => {
+        window.location.href = "index.html";
+    }, 1000);
+</script>
+
+</body>
+</html>

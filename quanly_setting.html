@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+<title>Admin — Toggle Registration</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f8fb;
+  --card:#fff;
+  --text:#0f172a;
+  --accent:#0b6cff;
+  --muted:#6b7280;
+  --success:#10b981;
+  --danger:#ef4444;
+  --radius:12px;
+  --shadow:0 10px 30px rgba(15,23,42,0.08);
+  font-family:Inter,system-ui,Arial;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);padding:24px}
+.container{max-width:920px;margin:32px auto}
+.card{background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);padding:22px;border-radius:16px;box-shadow:var(--shadow);display:flex;gap:20px;align-items:center}
+.left{flex:1}
+.title{margin:0;color:var(--accent);font-size:20px;font-weight:700}
+.subtitle{margin:6px 0 0;color:var(--muted);font-size:13px}
+.meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.meta .user{font-weight:700}
+.pill{background:#eef6ff;padding:6px 10px;border-radius:999px;font-size:13px;color:var(--accent);display:inline-flex;align-items:center;gap:8px}
+
+/* big toggle */
+.switch-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.switch{
+  --w:140px; --h:56px;
+  width:var(--w); height:var(--h);
+  background:linear-gradient(180deg,#eef6ff,#e4f0ff);
+  border-radius:999px;display:flex;align-items:center;padding:6px;
+  cursor:pointer;transition:all .22s ease;box-shadow:0 6px 18px rgba(11,108,255,0.06)
+}
+.knob{
+  width:44px;height:44px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px rgba(2,6,23,0.08);transition:transform .22s cubic-bezier(.2,.9,.2,1),background .18s;
+}
+.switch.off{background:linear-gradient(180deg,#fff6f6,#fff0f0)}
+.switch.off .knob{transform:translateX(0)}
+.switch.on{background:linear-gradient(90deg,var(--accent),#3ea1ff)}
+.switch.on .knob{transform:translateX(calc(var(--w) - var(--h))); background:linear-gradient(180deg,#fff,#f6fcff);}
+
+/* status text */
+.status{font-weight:700;font-size:16px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.status .dot{width:10px;height:10px;border-radius:50%}
+.status.on .dot{background:var(--success)}
+.status.off .dot{background:var(--danger)}
+
+/* small info row */
+.info-row{display:flex;gap:12px;margin-top:12px;color:var(--muted);font-size:13px}
+
+/* spinner overlay */
+.loader{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.6);z-index:9999
+}
+.loader.show{display:flex}
+.loader .box{background:#fff;padding:14px;border-radius:12px;box-shadow:0 8px 26px rgba(2,6,23,0.08);font-weight:700}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:10000;
+  display:flex;gap:12px;align-items:center;font-size:14px;
+}
+.toast.show{display:flex}
+.toast .btn-undo{background:transparent;border:1px solid rgba(255,255,255,0.18);padding:6px 10px;border-radius:8px;color:#fff;cursor:pointer;font-weight:600}
+
+/* responsive */
+@media(max-width:720px){
+  .card{flex-direction:column;align-items:stretch}
+  .meta{align-items:flex-start}
+  .switch{--w:120px;--h:48px}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card" role="region" aria-label="Bật tắt đăng ký">
+    <div class="left">
+      <h1 class="title">Bật/Tắt đăng ký</h1>
+      <div class="subtitle">Bật hoặc tắt chức năng đăng ký người dùng. Thay đổi sẽ được ghi vào hệ thống.</div>
+
+      <div class="info-row" style="margin-top:18px">
+        <div class="status off" id="statusText" aria-live="polite">
+          <span class="dot"></span><span id="statusLabel">Đang tải...</span>
+        </div>
+        <div class="pill" id="lastUpdated" style="display:none">Cập nhật: —</div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div class="pill" id="userMeta">—</div>
+
+      <div class="switch-wrap" style="margin-top:12px">
+        <div id="toggle" class="switch" role="switch" aria-checked="false" tabindex="0" aria-label="Chuyển trạng thái đăng ký">
+          <div class="knob" id="knob">
+            <!-- icon -->
+            <svg id="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14" stroke="#0b6cff" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted)">Nhấn vào biểu tượng hoặc dùng Space/Enter</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loader" id="loader"><div class="box">Đang xử lý…</div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/************ Cấu hình API ************/
+const API = "https://script.google.com/macros/s/AKfycbxzWMJ5FSuka8J50wPcNI6nIxt_Rn5TvO6s0TEG87Ek31Z0h2U6n8F5wTKuvwg05OPo/exec";
+const rawUser = localStorage.getItem("loggedInUser") || "{}";
+let session;
+try{ session = JSON.parse(rawUser); }catch(e){ session = {}; }
+const token = session.token || "";
+if(!token){ alert("Bạn cần đăng nhập trước!"); window.location.href="/login.html"; }
+
+/************ DOM ************/
+const toggle = document.getElementById('toggle');
+const knob = document.getElementById('knob');
+const icon = document.getElementById('icon');
+const statusText = document.getElementById('statusText');
+const statusLabel = document.getElementById('statusLabel');
+const lastUpdated = document.getElementById('lastUpdated');
+const userMeta = document.getElementById('userMeta');
+const loader = document.getElementById('loader');
+const toast = document.getElementById('toast');
+
+/************ State ************/
+let registrationStatus = false;
+let registrationId = null;
+let lastUpdatedAt = null;
+let prevStatus = null; // for undo
+
+/************ UI HELPERS ************/
+function showLoader(show=true){ loader.classList.toggle('show', !!show); }
+function setStatusUI(on){
+  registrationStatus = !!on;
+  toggle.classList.toggle('on', on);
+  toggle.classList.toggle('off', !on);
+  toggle.setAttribute('aria-checked', on ? "true":"false");
+  statusText.classList.toggle('on', on);
+  statusText.classList.toggle('off', !on);
+  statusLabel.textContent = on ? "Đăng ký: Đã bật" : "Đăng ký: Đã tắt";
+  // icon swap
+  icon.innerHTML = on
+    ? '<path d="M5 12h3l2 4 9-8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    : '<path d="M5 12h14" stroke="#0b6cff" stroke-width="2" stroke-linecap="round"></path>';
+}
+function setLastUpdated(text){
+  if(!text){ lastUpdated.style.display='none'; lastUpdated.textContent=''; return; }
+  lastUpdated.style.display='inline-flex';
+  lastUpdated.textContent = 'Cập nhật: ' + text;
+}
+
+/************ Toast with optional undo ************/
+let undoTimeout = null;
+function showToast(message, withUndo=false, undoHandler=null){
+  toast.innerHTML = '';
+  const txt = document.createElement('div');
+  txt.textContent = message;
+  toast.appendChild(txt);
+  if(withUndo && typeof undoHandler === 'function'){
+    const btn = document.createElement('button');
+    btn.className = 'btn-undo';
+    btn.textContent = 'Hoàn tác';
+    btn.onclick = ()=>{
+      undoHandler();
+      clearTimeout(undoTimeout);
+      toast.classList.remove('show');
+    };
+    toast.appendChild(btn);
+    // auto hide and clear undo after 6s
+    undoTimeout = setTimeout(()=> toast.classList.remove('show'), 6000);
+  } else {
+    setTimeout(()=> toast.classList.remove('show'), 2200);
+  }
+  toast.classList.add('show');
+}
+
+/************ Load trạng thái hiện tại ************/
+async function loadStatus(){
+  showLoader(true);
+  try{
+    const res = await fetch(API + "?route=get-all&token=" + encodeURIComponent(token));
+    const json = await res.json();
+    // Try to find matkhauopen array — be defensive
+    const arr = (json?.data?.matkhauopen && Array.isArray(json.data.matkhauopen)) ? json.data.matkhauopen : (json?.data?.matkhau_open || []);
+    // find key registration_open
+    const item = Array.isArray(arr) ? arr.find(x => (x.key || '').toString().toLowerCase() === 'registration_open') : null;
+    if(!item){
+      showToast('Không tìm thấy key registration_open');
+      setStatusUI(false);
+      registrationId = null;
+      return;
+    }
+    registrationId = item.id || null;
+    // accept "true"/"TRUE"/true etc
+    registrationStatus = String(item.value).toLowerCase() === 'true' || item.value === true;
+    setStatusUI(registrationStatus);
+    // get update time if exists
+    lastUpdatedAt = item.updatedAt || item.updated_at || item.modified || item.modifiedAt || null;
+    setLastUpdated(lastUpdatedAt ? formatDate(lastUpdatedAt) : null);
+
+    // set meta user display
+    const userLabel = (session?.user?.username || session?.user?.email || session?.username || session?.email || 'Người dùng');
+    const roleLabel = String(session?.role || session?.roleName || '').toLowerCase() || (json?.isAdmin ? 'Admin' : '');
+    userMeta.innerHTML = `<strong style="font-weight:700">${userLabel}</strong><div style="font-size:12px;color:var(--muted)">${roleLabel?('Quyền: '+roleLabel):''}</div>`;
+  }catch(err){
+    console.error('loadStatus error', err);
+    showToast('Lỗi tải trạng thái');
+    setStatusUI(false);
+  }finally{
+    showLoader(false);
+  }
+}
+
+/************ Format date helper ************/
+function formatDate(d){
+  try{
+    const dd = new Date(d);
+    if(isNaN(dd)) return d;
+    return dd.toLocaleString('vi-VN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }catch(e){ return d; }
+}
+
+/************ Update backend ************/
+async function updateStatus(newValue){
+  if(!registrationId) { showToast('ID chưa xác định'); return false; }
+  showLoader(true);
+  try{
+    const payload = {
+      token,
+      id: registrationId,
+      key: "registration_open",
+      value: newValue ? "TRUE" : "FALSE"
+    };
+    const res = await fetch(API + "?route=matkhauopen-update", {
+      method: "POST",
+      body: new URLSearchParams(payload)
+    });
+    const json = await res.json();
+    if(json?.status==="success" || !json?.error){
+      // set last updated time (either from response or now)
+      lastUpdatedAt = json?.updatedAt || json?.updated_at || new Date().toISOString();
+      setLastUpdated(formatDate(lastUpdatedAt));
+      showToast(json?.message || 'Cập nhật thành công', true, async ()=>{ // undo handler placeholder (set below)
+        // this undo handler will be replaced by outer scope when calling showToastWithUndo
+      });
+      showLoader(false);
+      return {ok:true, resp: json};
+    } else {
+      throw new Error(json?.error || json?.message || 'Update thất bại');
+    }
+  }catch(err){
+    console.error('updateStatus error', err);
+    showLoader(false);
+    showToast('Lỗi khi cập nhật');
+    return {ok:false, error: err};
+  }
+}
+
+/************ UX: optimistic toggle w/ undo ************/
+async function toggleHandler(){
+  if(!registrationId){ showToast('ID chưa xác định'); return; }
+  // store prev state for undo
+  prevStatus = registrationStatus;
+  const target = !registrationStatus;
+  // optimistic UI update
+  setStatusUI(target);
+
+  // call backend
+  const result = await updateStatus(target);
+  if(result.ok){
+    // replace toast's undo handler to revert to prevStatus
+    // remove existing toast and show with actual undo that calls updateStatus(prevStatus)
+    showToast(target ? 'Đã bật đăng ký' : 'Đã tắt đăng ký', true, async ()=>{
+      // user clicked undo -> revert
+      showLoader(true);
+      const r2 = await fetch(API, { method: "POST", body: new URLSearchParams({
+        token, id: registrationId, key: "registration_open", value: prevStatus ? "TRUE":"FALSE"
+      })});
+      const j2 = await r2.json();
+      if(j2?.status==="success" || !j2?.error){
+        setStatusUI(prevStatus);
+        lastUpdatedAt = j2?.updatedAt || new Date().toISOString();
+        setLastUpdated(formatDate(lastUpdatedAt));
+        showToast('Đã hoàn tác');
+      } else {
+        showToast('Hoàn tác thất bại');
+      }
+      showLoader(false);
+    });
+  }else{
+    // rollback UI
+    setStatusUI(prevStatus);
+  }
+}
+
+/************ Keyboard accessibility ************/
+toggle.addEventListener('keydown', (e)=>{
+  if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggleHandler(); }
+});
+
+/************ Click handler ************/
+toggle.addEventListener('click', async ()=> toggleHandler());
+
+/************ Init ************/
+loadStatus();
+</script>
+
+</body>
+</html>

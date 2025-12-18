@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Lịch sử đăng nhập (Mobile)</title>
+<style>
+  :root{
+    --bg:#f1f6fb;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --accent:#0b6cff;
+    --accent-2:#38bdf8;
+    --danger:#ef4444;
+    --success:#10b981;
+    --glass: rgba(255,255,255,0.85);
+    --radius:14px;
+    --shadow: 0 8px 22px rgba(12,34,63,0.08);
+    --gap:12px;
+    --touch:48px;
+    --max-width:720px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  /* Page */
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#eef7ff 0%, #f8fbff 100%);-webkit-font-smoothing:antialiased}
+  .page{max-width:var(--max-width);margin:0 auto;padding:12px 14px 84px;min-height:100vh;box-sizing:border-box}
+
+  /* Header */
+  header{
+    position:sticky;top:0;z-index:30;
+    display:flex;align-items:center;gap:10px;justify-content:space-between;
+    padding:12px;border-radius:12px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:#fff;box-shadow:0 8px 20px rgba(11,108,255,0.12);
+    margin-bottom:10px;
+  }
+  header .title{font-weight:800;font-size:16px;letter-spacing:0.1px}
+  header .right{display:flex;gap:8px;align-items:center}
+
+  /* Search row */
+  .search-row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:12px;padding:6px 10px;box-shadow:var(--shadow);height:44px}
+  .search-box input{border:0;outline:none;font-size:15px;width:100%;background:transparent}
+  .btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,108,255,0.12)}
+  .icon{width:20px;height:20px;opacity:0.95}
+
+  /* List (mobile cards) */
+  .list{display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border-radius:14px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+  .row-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .user{font-weight:800;color:var(--accent);font-size:15px}
+  .time{font-size:13px;color:var(--muted)}
+  .device{font-size:13px;color:#24323a;font-family:monospace;word-break:break-word}
+  .ip{font-size:13px;color:var(--muted)}
+  .status{font-weight:800;padding:6px 10px;border-radius:999px;color:#fff;font-size:12px}
+  .ok{background:var(--success)} .fail{background:var(--danger)}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+  .btn-delete{background:#fff;border:1px solid #ffdede;color:var(--danger);padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+
+  /* Footer load more */
+  .load-more{display:flex;justify-content:center;margin-top:8px}
+  .muted{color:var(--muted)}
+
+  /* Modal (filter & confirm) */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:flex-end;z-index:60}
+  .modal{background:linear-gradient(180deg,#fff,#f8fbff);width:100%;border-top-left-radius:16px;border-top-right-radius:16px;padding:14px;box-shadow:0 -8px 24px rgba(12,34,63,0.12);max-height:80vh;overflow:auto}
+  .modal h3{margin:0 0 8px;font-size:16px}
+  .field{display:flex;flex-direction:column;margin-bottom:10px}
+  .field label{font-size:13px;color:var(--muted);margin-bottom:6px}
+  .field input, .field select{padding:12px;border-radius:10px;border:1px solid #e6eef7;font-size:15px}
+
+  /* Toast */
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:12px;font-weight:700;z-index:100;display:none}
+
+  /* empty */
+  .empty{padding:22px;border-radius:12px;background:linear-gradient(90deg,#fff,#fbfdff);text-align:center;color:var(--muted);font-weight:700}
+
+  /* responsive tweaks */
+  @media(min-width:720px){
+    .page{padding:20px}
+    header{border-radius:18px}
+    .card{padding:16px}
+  }
+</style>
+</head>
+<body>
+<div class="page" id="app">
+  <header>
+    <div class="title">Lịch sử đăng nhập</div>
+    <div class="right">
+      <button id="btnFilterOpen" class="btn ghost" title="Lọc">Bộ lọc</button>
+      <button id="btnClearAll" class="btn ghost" title="Xóa toàn bộ" style="display:none">Xóa tất cả</button>
+    </div>
+  </header>
+
+  <div class="search-row">
+    <div class="search-box" role="search" aria-label="Tìm kiếm username">
+      <svg class="icon" viewBox="0 0 24 24"><path fill="#0b6cff" d="M9.5 3a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13m0-2a8.5 8.5 0 1 0 0 17a8.5 8.5 0 0 0 0-17z"/><path fill="#0b6cff" d="M20.7 20.3l-4.9-4.9"/></svg>
+      <input id="q" type="search" placeholder="Tìm tài khoản..." aria-label="Tìm tài khoản">
+      <button id="btnSearch" class="btn" style="padding:8px 10px;font-weight:700">Tìm</button>
+    </div>
+  </div>
+
+  <div id="list" class="list">
+    <div class="empty">Đang tải dữ liệu...</div>
+  </div>
+
+  <div class="load-more" style="margin-top:14px">
+    <button id="btnLoadMore" class="btn ghost" style="padding:10px 16px">Tải thêm</button>
+  </div>
+
+</div>
+
+<!-- Modal backdrop (filter + confirm) -->
+<div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Bộ lọc</h3>
+    <div class="field">
+      <label>Username</label>
+      <input id="filterUsername" type="text" placeholder="Tên tài khoản (partial)">
+    </div>
+    <div class="field">
+      <label>Từ ngày</label>
+      <input id="filterFrom" type="date">
+    </div>
+    <div class="field">
+      <label>Đến ngày</label>
+      <input id="filterTo" type="date">
+    </div>
+    <div class="field">
+      <label>Số bản ghi mỗi lần</label>
+      <select id="filterLimit">
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button id="applyFilter" class="btn" style="flex:1">Áp dụng</button>
+      <button id="closeFilter" class="btn ghost" style="flex:1">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal (simple) -->
+<div id="confirmBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h3 id="confirmTitle">Xác nhận</h3>
+    <div id="confirmMessage" style="margin-bottom:12px;font-weight:700"></div>
+    <div style="display:flex;gap:10px">
+      <button id="confirmYes" class="btn" style="flex:1">Xóa</button>
+      <button id="confirmNo" class="btn ghost" style="flex:1">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== CẤU HÌNH: đổi API sang WebApp URL của bạn ===== */
+const API = 'https://script.google.com/macros/s/AKfycbz4yMlZF6IHhTL_vVeD3eHeZ8aZPpq9-qMBsRDRCHirbamqgdmJnu8dIS7uj9H-fBg_/exec';
+const ASSUME_INPUT_IS_VN = true; // giữ mặc định nếu server lưu giờ VN
+
+/* ===== Helpers ===== */
+function showToast(msg, ms=2400){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display = 'none'; }, ms);
+}
+function $(id){return document.getElementById(id);}
+
+function fetchJson(url, options={}, timeout=20000){
+  return new Promise((resolve,reject)=>{
+    const t = setTimeout(()=> reject(new Error('Timeout')), timeout);
+    fetch(url, options).then(r=>{ clearTimeout(t); return r.text(); }).then(txt=>{
+      try{ resolve(JSON.parse(txt)); }catch(e){ reject(new Error('Invalid JSON')); }
+    }).catch(err=>{ clearTimeout(t); reject(err); });
+  });
+}
+
+function getToken(){
+  try{ const raw = localStorage.getItem('loggedInUser'); if(!raw) return null; const obj = JSON.parse(raw); return obj && obj.token ? obj.token : null;}catch(e){return null}
+}
+
+/* chuyển các dạng ngày -> hiển thị giờ VN */
+function formatToVN(dateStr){
+  if(!dateStr) return '';
+  dateStr = String(dateStr).trim();
+  const fmt = new Intl.DateTimeFormat('vi-VN',{ timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false });
+  if(/[T].*(Z|[+\-]\d{2}:?\d{2})$/.test(dateStr) || /\+\d{2}:?\d{2}$/.test(dateStr) ){
+    const d = new Date(dateStr); if(isNaN(d)) return dateStr; return fmt.format(d).replace(',','');
+  }
+  const isoSpaceMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+  if(isoSpaceMatch){
+    const Y=+isoSpaceMatch[1],M=+isoSpaceMatch[2],D=+isoSpaceMatch[3],h=+isoSpaceMatch[4],m=+isoSpaceMatch[5],s=+isoSpaceMatch[6];
+    const utcMillis = Date.UTC(Y,M-1,D,h,m,s);
+    const adjusted = ASSUME_INPUT_IS_VN ? utcMillis - (7*3600*1000) : utcMillis;
+    const d = new Date(adjusted); if(isNaN(d)) return dateStr; return fmt.format(d).replace(',','');
+  }
+  const parsed = Date.parse(dateStr);
+  if(!isNaN(parsed)) return fmt.format(new Date(parsed)).replace(',','');
+  return dateStr;
+}
+
+/* parse date for sorting (returns Date or null) */
+function parseDateForSort(dateStr){
+  if(!dateStr) return null;
+  dateStr = String(dateStr).trim();
+  if(/[T].*(Z|[+\-]\d{2}:?\d{2})$/.test(dateStr) || /\+\d{2}:?\d{2}$/.test(dateStr) ){
+    const d = new Date(dateStr); return isNaN(d)?null:d;
+  }
+  const isoSpaceMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+  if(isoSpaceMatch){
+    const Y=+isoSpaceMatch[1],M=+isoSpaceMatch[2],D=+isoSpaceMatch[3],h=+isoSpaceMatch[4],m=+isoSpaceMatch[5],s=+isoSpaceMatch[6];
+    const utcMillis = Date.UTC(Y,M-1,D,h,m,s);
+    const adjusted = ASSUME_INPUT_IS_VN ? utcMillis - (7*3600*1000) : utcMillis;
+    return new Date(adjusted);
+  }
+  const parsed = Date.parse(dateStr);
+  if(!isNaN(parsed)) return new Date(parsed);
+  return null;
+}
+
+/* ===== UI elements ===== */
+const listEl = $('list');
+const qEl = $('q');
+const btnSearch = $('btnSearch');
+const btnFilterOpen = $('btnFilterOpen');
+const modalBackdrop = $('modalBackdrop');
+const closeFilter = $('closeFilter');
+const applyFilter = $('applyFilter');
+const btnLoadMore = $('btnLoadMore');
+const btnClearAll = $('btnClearAll');
+const filterUsername = $('filterUsername');
+const filterFrom = $('filterFrom');
+const filterTo = $('filterTo');
+const filterLimit = $('filterLimit');
+
+const confirmBackdrop = $('confirmBackdrop');
+const confirmMessage = $('confirmMessage');
+const confirmYes = $('confirmYes');
+const confirmNo = $('confirmNo');
+
+let offset = 0;
+let limit = 25;
+let total = 0;
+let isAdmin = false;
+let lastLoadedItems = []; // store current items
+let pendingDeleteId = null;
+
+/* ===== Logic: admin check ===== */
+async function checkAdmin(){
+  const token = getToken();
+  if(!token){ showToast('Bạn chưa đăng nhập'); return; }
+  const body = new URLSearchParams();
+  body.append('route','check-admin');
+  body.append('token', token);
+  try{
+    const res = await fetchJson(API, { method:'POST', body });
+    if(res && res.status === 'success'){
+      isAdmin = !!res.isAdmin;
+      if(isAdmin) btnClearAll.style.display = 'inline-block';
+    }
+  }catch(e){ console.warn('checkAdmin',e); }
+}
+
+/* ===== Render list items (mobile cards), items must be sorted before call ===== */
+function renderCards(items, append=false){
+  if(!append) listEl.innerHTML = '';
+  if(!items || items.length === 0){
+    if(!append) listEl.innerHTML = '<div class="empty">Không có bản ghi</div>';
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  items.forEach(r=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const timeVN = formatToVN(r.ngaygio || '');
+    const statusText = (r.active||'').toString();
+    const statusClass = (statusText.toLowerCase().includes('thành')||statusText.toLowerCase().includes('thanh')) ? 'ok' : 'fail';
+    card.innerHTML = `
+      <div class="row-top">
+        <div>
+          <div class="user">${escapeHtml(r.username || '(unknown)')}</div>
+          <div class="time">${escapeHtml(timeVN)}</div>
+        </div>
+        <div class="meta">
+          <div class="status ${statusClass}">${escapeHtml(statusText||'—')}</div>
+        </div>
+      </div>
+      <div class="device">📱 ${escapeHtml(r.loaithietbi || '—')}</div>
+      <div class="ip">🌐 ${escapeHtml(r.ip || '—')}</div>
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+        <div class="muted" style="font-size:13px">${escapeHtml(r.reason || '') || '—'}</div>
+        <div class="actions">
+          ${isAdmin ? `<button class="btn-delete" data-id="${escapeHtml(r.id||'')}" data-username="${escapeHtml(r.username||'')}" onclick="onDeleteClick(event)">Xóa</button>` : ''}
+        </div>
+      </div>
+    `;
+    frag.appendChild(card);
+  });
+  listEl.appendChild(frag);
+}
+
+/* escape */
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ===== Load logs (with filters) ===== */
+async function loadLogs({reset=true} = {}){
+  if(reset){
+    offset = 0;
+    listEl.innerHTML = '<div class="empty">Đang tải dữ liệu...</div>';
+    btnLoadMore.style.display = 'none';
+  } else {
+    btnLoadMore.textContent = 'Đang tải...';
+  }
+
+  const token = getToken();
+  if(!token){ listEl.innerHTML = '<div class="empty">Vui lòng đăng nhập</div>'; return; }
+
+  const body = new URLSearchParams();
+  body.append('route','lichsu-list');
+  body.append('token', token);
+  if(qEl.value && qEl.value.trim()) body.append('username', qEl.value.trim());
+  if(filterUsername.value && filterUsername.value.trim()) body.append('username', filterUsername.value.trim());
+  if(filterFrom.value) body.append('from', filterFrom.value);
+  if(filterTo.value) body.append('to', filterTo.value);
+  body.append('limit', String(limit || filterLimit.value || 25));
+  body.append('offset', String(offset));
+
+  try{
+    const res = await fetchJson(API, { method:'POST', body });
+    if(!res || res.status !== 'success'){ listEl.innerHTML = `<div class="empty">Lỗi: ${escapeHtml(res && res.message||'Không tải được')}</div>`; return; }
+    let items = Array.isArray(res.data) ? res.data : [];
+    total = Number(res.total || items.length || 0);
+
+    // sort by ngaygio desc
+    items.sort((a,b)=>{
+      const da = parseDateForSort(a && a.ngaygio);
+      const db = parseDateForSort(b && b.ngaygio);
+      if(da===null && db===null) return 0;
+      if(da===null) return 1;
+      if(db===null) return -1;
+      return db.getTime() - da.getTime();
+    });
+
+    // store and render
+    if(reset){
+      lastLoadedItems = items;
+      renderCards(items, false);
+    } else {
+      lastLoadedItems = lastLoadedItems.concat(items);
+      renderCards(items, true);
+    }
+
+    // show load more if server returned full page (assume more)
+    if(items.length >= (limit || filterLimit.value || 25)){
+      btnLoadMore.style.display = 'inline-block';
+      btnLoadMore.textContent = 'Tải thêm';
+      offset += (limit || Number(filterLimit.value) || 25);
+    } else {
+      btnLoadMore.style.display = 'none';
+    }
+
+    // update admin button visibility (server may return isAdmin)
+    if(res.isAdmin) { isAdmin = true; btnClearAll.style.display = 'inline-block'; } 
+
+  }catch(err){
+    console.error(err);
+    listEl.innerHTML = '<div class="empty">Lỗi kết nối server</div>';
+    btnLoadMore.style.display = 'none';
+  }
+}
+
+/* ===== Events ===== */
+btnSearch.addEventListener('click', ()=> loadLogs({reset:true}));
+
+// open filter modal
+btnFilterOpen.addEventListener('click', ()=>{
+  modalBackdrop.style.display = 'flex';
+  modalBackdrop.setAttribute('aria-hidden','false');
+});
+closeFilter.addEventListener('click', ()=>{ modalBackdrop.style.display='none'; modalBackdrop.setAttribute('aria-hidden','true'); });
+applyFilter.addEventListener('click', ()=>{
+  limit = Number(filterLimit.value) || 25;
+  offset = 0;
+  modalBackdrop.style.display='none';
+  loadLogs({reset:true});
+});
+
+btnLoadMore.addEventListener('click', ()=> loadLogs({reset:false}));
+
+// Clear all (admin)
+btnClearAll.addEventListener('click', async ()=>{
+  if(!confirm('Xác nhận xóa toàn bộ lịch sử đăng nhập?')) return;
+  const token = getToken(); if(!token){ showToast('Bạn chưa đăng nhập'); return; }
+  const body = new URLSearchParams(); body.append('route','lichsu-clear'); body.append('token', token);
+  try{
+    const res = await fetchJson(API, { method:'POST', body });
+    if(res && res.status === 'success'){ showToast('Đã xóa toàn bộ'); loadLogs({reset:true}); }
+    else showToast('Không xóa được: '+(res && res.message||''), 2500);
+  }catch(e){ showToast('Lỗi kết nối'); }
+});
+
+/* delete single item flow */
+window.onDeleteClick = function(e){
+  const btn = e.currentTarget || e.target;
+  const id = btn.getAttribute('data-id');
+  const uname = btn.getAttribute('data-username');
+  pendingDeleteId = id;
+  confirmMessage.textContent = `Xóa bản ghi của "${uname}"? (ID: ${id})`;
+  confirmBackdrop.style.display = 'flex';
+  confirmBackdrop.setAttribute('aria-hidden','false');
+};
+
+confirmNo.addEventListener('click', ()=>{ confirmBackdrop.style.display='none'; confirmBackdrop.setAttribute('aria-hidden','true'); pendingDeleteId = null; });
+confirmYes.addEventListener('click', async ()=>{
+  if(!pendingDeleteId){ confirmBackdrop.style.display='none'; return; }
+  const token = getToken(); if(!token){ showToast('Bạn chưa đăng nhập'); return; }
+  const body = new URLSearchParams(); body.append('route','lichsu-delete'); body.append('token', token); body.append('id', pendingDeleteId);
+  try{
+    const res = await fetchJson(API, { method:'POST', body });
+    if(res && res.status === 'success'){ showToast('Đã xóa'); loadLogs({reset:true}); }
+    else showToast('Không xóa được: '+(res && res.message||''), 2500);
+  }catch(e){ showToast('Lỗi kết nối'); }
+  confirmBackdrop.style.display='none';
+  confirmBackdrop.setAttribute('aria-hidden','true');
+  pendingDeleteId = null;
+});
+
+/* keyboard: enter -> search */
+qEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') loadLogs({reset:true}); });
+
+/* initial */
+(async function(){
+  await checkAdmin();
+  limit = Number(filterLimit.value) || 25;
+  loadLogs({reset:true});
+})();
+  
+/* parse helpers copied (same logic as earlier) */
+function parseDateForSort(dateStr){
+  if(!dateStr) return null;
+  dateStr = String(dateStr).trim();
+  if(/[T].*(Z|[+\-]\d{2}:?\d{2})$/.test(dateStr) || /\+\d{2}:?\d{2}$/.test(dateStr) ){
+    const d = new Date(dateStr); return isNaN(d)?null:d;
+  }
+  const isoSpaceMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+  if(isoSpaceMatch){
+    const Y=+isoSpaceMatch[1],M=+isoSpaceMatch[2],D=+isoSpaceMatch[3],h=+isoSpaceMatch[4],m=+isoSpaceMatch[5],s=+isoSpaceMatch[6];
+    const utcMillis = Date.UTC(Y,M-1,D,h,m,s);
+    const adjusted = ASSUME_INPUT_IS_VN ? utcMillis - (7*3600*1000) : utcMillis;
+    return new Date(adjusted);
+  }
+  const parsed = Date.parse(dateStr);
+  if(!isNaN(parsed)) return new Date(parsed);
+  return null;
+}
+</script>
+</body>
+</html>

@@ -2,90 +2,161 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư Viện Pháp Luật Số - Tài Liệu Ngành</title>
 
   <style>
-    html, body {
-      margin:0;
-      height:100%;
-      font-family: Arial, sans-serif;
-      background:#f7f9fb;
-      color:#333;
+    :root{
+      --primary:#004aad;
+      --gold:#ccae6e;
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --radius:16px;
+      --shadow:0 10px 25px rgba(0,0,0,0.08);
     }
 
-    body {
+    *{ box-sizing:border-box; }
+
+    html, body{
+      margin:0;
+      height:100%;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    body{
       display:flex;
       flex-direction:column;
-      width:70%;
+      width:75%;
       margin:0 auto;
     }
 
-    main { flex:1; padding:20px 0; }
-
-    .item_list { 
-      display:flex;
-      align-items:center;
-      margin-bottom:18px; 
-    }
-
-    .item {
-      background:#004aad;
+    main{
       flex:1;
-      padding:15px 0;
-      color:#ccae6e;
-      box-shadow:0 3px 6px rgba(0,0,0,0.15);
-      cursor:pointer;
-      transition:0.3s;
-      text-align:center;
+      padding:28px 0 40px;
     }
 
-    .item p { margin:0; font-size:16px; }
+    /* ---------- HEADER TITLE ---------- */
+    #pageTitle{
+      text-align:center;
+      color:var(--primary);
+      font-size:24px;
+      font-weight:800;
+      letter-spacing:1px;
+      margin:10px 0 30px;
+      text-transform:uppercase;
+    }
 
-    .item:hover {
-      background:#ccae6e;
+    /* ---------- BACK ---------- */
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      color:var(--primary);
+      font-weight:600;
+      cursor:pointer;
+      transition:.25s;
+      margin-bottom:20px;
+    }
+    .back-link:hover{
+      background:var(--primary);
       color:#fff;
     }
 
-    .back-link {
-      color:#ccae6e;
-      padding:10px;
-      font-weight:600;
-      text-decoration:underline;
-      cursor:pointer;
-      display:inline-block;
+    /* ---------- LIST GRID ---------- */
+    #list{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+      gap:22px;
     }
 
-    /* ---------------------- LOADING --------------------- */
-    #loadingBox {
+    .item_list{ width:100%; margin: 10px 0;}
+
+    .item{
+      background:linear-gradient(135deg,var(--primary),#003a8c);
+      border-radius:var(--radius);
+      padding:26px 18px;
+      color:var(--gold);
+      text-align:center;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      transition:.3s;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .item::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg,transparent,rgba(255,255,255,.12));
+      opacity:0;
+      transition:.3s;
+    }
+
+    .item:hover{
+      transform:translateY(-6px) scale(1.02);
+      box-shadow:0 18px 35px rgba(0,0,0,0.18);
+      color:#fff;
+    }
+
+    .item:hover::after{ opacity:1; }
+
+    .item p{
+      margin:0;
+      font-size:17px;
+      font-weight:700;
+      line-height:1.4;
+    }
+
+    /* ---------- LOADING ---------- */
+    #loadingBox{
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
-      padding:40px 0;
-      color:#ccae6e;
-      font-size:17px;
+      padding:60px 0;
+      color:var(--primary);
+      font-size:16px;
       font-weight:600;
     }
 
-    .loader {
-      width:45px;
-      height:45px;
-      border:4px solid #ccae6e;
-      border-top-color:transparent;
+    .loader{
+      width:54px;
+      height:54px;
+      border:4px solid rgba(0,0,0,0.1);
+      border-top-color:var(--gold);
       border-radius:50%;
-      animation:spin 0.5s linear infinite;
-      margin-bottom:12px;
+      animation:spin .7s linear infinite;
+      margin-bottom:16px;
     }
 
-    @keyframes spin {
-      to { transform:rotate(360deg); }
+    @keyframes spin{
+      to{ transform:rotate(360deg); }
+    }
+
+    /* ---------- EMPTY / ERROR ---------- */
+    #loadingBox.error{
+      color:#dc2626;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media(max-width:1024px){
+      body{ width:90%; }
     }
 
     @media(max-width:768px){
-      body{ width:100%; }
-      .item p{ font-size:14px; }
+      body{ width:100%; padding:0; }
+      #pageTitle{ font-size:20px; }
+      #list{ grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -94,15 +165,13 @@
 <div id="header"></div>
 
 <main>
-  <span class="back-link" onclick="history.back()">Quay lại</span>
+  <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle" style="text-align:center; color:#ccae6e; text-transform:uppercase;">
-  </h2>
+  <h2 id="pageTitle"></h2>
 
-  <!-- Hiệu ứng loading -->
   <div id="loadingBox">
-      <div class="loader"></div>
-      Đang tải dữ liệu...
+    <div class="loader"></div>
+    Đang tải dữ liệu...
   </div>
 
   <div id="list" style="display:none;"></div>
@@ -112,12 +181,16 @@
 
 <script src="main.js"></script>
 <script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
+/* =========================
+   CẤU HÌNH: thay webAppUrl nếu cần
+   ========================= */
+const webAppUrl = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
 
+/* dữ liệu toàn cục */
 let ALL_DOCUMENTS = [];
 let ALL_CATEGORIES = [];
 
-// Escape HTML
+/* ---------- helpers (giữ giao diện nguyên) ---------- */
 function escapeHtml(str){
   if(!str) return "";
   return String(str)
@@ -127,8 +200,6 @@ function escapeHtml(str){
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#39;");
 }
-
-// Convert text → slug PascalCase
 function toSlug(text){
   if(!text) return "";
   text = text.replace(/Đ/g,"D").replace(/đ/g,"d");
@@ -137,70 +208,129 @@ function toSlug(text){
     w.replace(/[^a-zA-Z0-9]/g,"").replace(/^./, c=>c.toUpperCase())
   ).join("");
 }
-
-// Lấy query param
 function getQueryParam(name) {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(name);
 }
 
-// Cập nhật pageTitle từ slug
+/* parse quyen formats (client-side) */
+function parseQuyenToArray(q){
+  if(q === undefined || q === null) return [];
+  if(Array.isArray(q)) return q.map(x=>String(x).trim());
+  let s = String(q || "").trim();
+  if(s === "") return [];
+  if(s.toLowerCase() === "all") return ["all"];
+  try{
+    const p = JSON.parse(s);
+    if(Array.isArray(p)) return p.map(x=>String(x).trim());
+    if(typeof p === "string") return [p];
+  }catch(e){}
+  if(s.indexOf(",") >= 0) return s.split(",").map(x=>x.trim()).filter(x=>x!=="");
+  return [s];
+}
+
+/* set page title from slug (Category lookup) */
 function updatePageTitleFromSlug(slug){
   if(!slug) return;
   const cat = ALL_CATEGORIES.find(c => c.slug === slug);
   if(cat){
     document.getElementById("pageTitle").innerText = cat.title;
   } else {
-    // fallback hiển thị slug
     document.getElementById("pageTitle").innerText = slug;
   }
 }
 
-// Load tất cả dữ liệu
+/* show error */
+function showError(msg){
+  document.getElementById("loadingBox").innerHTML = msg;
+}
+
+/* ---------- CORE: loadPage (sử dụng token nếu có) ---------- */
 async function loadPage(){
   try{
-    const [ res] = await Promise.all([
-      fetch(webAppUrl).then(r=>r.json())
-    ]);
+    // lấy token từ localStorage (nhiều format có thể lưu)
+    let token = null;
+    try{
+      const raw = localStorage.getItem("loggedInUser");
+      if(raw){
+        const parsed = JSON.parse(raw);
+        token = parsed && (parsed.token || (parsed.user && (parsed.user.token || parsed.user.accessToken)) || parsed.accessToken) || null;
+      }
+    }catch(e){ token = null; }
 
-    ALL_DOCUMENTS = res.TaiLieuNganh || [];
-    ALL_CATEGORIES = res.Category || [];
+    // nếu có token -> gọi route=tailieu-list để backend lọc quyền
+    if(token){
+      const resp = await fetch(webAppUrl + '?route=tailieu-list&token=' + encodeURIComponent(token));
+      const js = await resp.json();
+      if(js && js.status === 'success'){
+        ALL_DOCUMENTS = js.data || [];
+      } else {
+        // nếu backend trả lỗi (token hết hạn...), fallback: show lỗi hoặc lấy public
+        console.warn("tailieu-list lỗi:", js);
+        // fallback: lấy toàn bộ và lọc public
+        const all = await (await fetch(webAppUrl)).json();
+        const docs = (all && all.data && all.data.TaiLieuNganh) ? all.data.TaiLieuNganh : [];
+        ALL_DOCUMENTS = docs.filter(d => {
+          const arr = parseQuyenToArray(d.quyen);
+          return arr.length === 0 || arr.indexOf('all') >= 0;
+        });
+      }
 
-    if(!ALL_DOCUMENTS.length){
-      showError("Không tìm thấy tài liệu nào.");
+      // vẫn lấy Category để map tiêu đề (dùng apiGetAllData)
+      try{
+        const catsResp = await fetch(webAppUrl);
+        const catsJson = await catsResp.json();
+        ALL_CATEGORIES = (catsJson && catsJson.data && catsJson.data.Category) ? catsJson.data.Category : [];
+      }catch(e){
+        ALL_CATEGORIES = [];
+      }
+
+    } else {
+      // không có token -> lấy toàn bộ data rồi lọc public (quyen: all hoặc rỗng)
+      const res = await fetch(webAppUrl);
+      const j = await res.json();
+      const docs = (j && j.data && j.data.TaiLieuNganh) ? j.data.TaiLieuNganh : [];
+      ALL_CATEGORIES = (j && j.data && j.data.Category) ? j.data.Category : [];
+      ALL_DOCUMENTS = docs.filter(d => {
+        const arr = parseQuyenToArray(d.quyen);
+        // treat empty quyen as public as well
+        if(arr.length === 0) return true;
+        return arr.indexOf('all') >= 0;
+      });
+    }
+
+    // nếu không có docs sau lọc -> thông báo
+    if(!ALL_DOCUMENTS || ALL_DOCUMENTS.length === 0){
+      showError("Không có tài liệu bạn được phép xem.");
       return;
     }
 
     renderList(ALL_DOCUMENTS);
 
-    // Cập nhật pageTitle ngay khi load nếu có slug trong URL
+    // cập nhật pageTitle nếu có slug trong URL
     const slugFromURL = getQueryParam("slug");
-    if(slugFromURL){
-      updatePageTitleFromSlug(slugFromURL);
-    }
+    if(slugFromURL) updatePageTitleFromSlug(slugFromURL);
 
-  } catch(err){
-    console.log("❌ Lỗi loadPage:", err);
+  }catch(err){
+    console.error("Lỗi loadPage:", err);
     showError("Không thể tải dữ liệu.");
   }
 }
 
-// Show error
-function showError(msg){
-  document.getElementById("loadingBox").innerHTML = msg;
-}
-
-// Render danh sách
+/* ---------- Render danh sách (giữ nguyên UI) ---------- */
 function renderList(data){
   const list = document.getElementById("list");
   const loading = document.getElementById("loadingBox");
 
   const uniqueMap = new Map();
 
-  // Lọc trùng title trong TaiLieuNganh
+  // giữ logic ban đầu: lọc các row có slug === "TaiLieuNganh"
   data.forEach(i=>{
-    if(i.slug !== "TaiLieuNganh") return;
-    const key = i.title.trim().toLowerCase();
+    if(!i) return;
+    // phòng trường hợp trường slug khác kiểu chữ hoa/thường
+    const slugVal = (i.slug || "").toString();
+    if(slugVal !== "TaiLieuNganh") return;
+    const key = (i.title || "").toString().trim().toLowerCase();
     if(!uniqueMap.has(key)) uniqueMap.set(key, i);
   });
 
@@ -211,7 +341,7 @@ function renderList(data){
     const div = document.createElement("div");
     div.className = "item_list";
     div.innerHTML = `
-      <div class="item" data-title="${i.title}">
+      <div class="item" data-title="${escapeHtml(i.title)}">
         <p>${escapeHtml(i.title)}</p>
       </div>
     `;
@@ -223,30 +353,37 @@ function renderList(data){
   loading.style.display = "none";
   list.style.display = "block";
 
-  // Click vào item
+  // Click vào item -> chuyển trang detail (kèm token nếu có)
   list.onclick = e=>{
     const item = e.target.closest(".item");
     if(item){
-      const slug = toSlug(item.dataset.title);
-
-      // Tìm Category trùng slug
+      const slug = toSlug(item.dataset.title || item.getAttribute('data-title') || "");
       const cat = ALL_CATEGORIES.find(c=>c.slug === slug);
       if(cat){
         document.getElementById("pageTitle").innerText = cat.title;
       } else {
-        document.getElementById("pageTitle").innerText = item.dataset.title;
+        document.getElementById("pageTitle").innerText = item.dataset.title || item.getAttribute('data-title') || "";
       }
 
-      // Chuyển trang
-      window.location.href = `TaiLieuNganh_detail.html?slug=${slug}`;
+      // truyền token nếu tồn tại (để detail page có thể gọi tailieu-list & kiểm tra quyền)
+      let token = null;
+      try{
+        const raw = localStorage.getItem("loggedInUser");
+        if(raw){
+          const parsed = JSON.parse(raw);
+          token = parsed && (parsed.token || (parsed.user && (parsed.user.token || parsed.user.accessToken)) || parsed.accessToken) || null;
+        }
+      }catch(e){ token = null; }
+
+      const detailUrl = `TaiLieuNganh_detail.html?slug=${encodeURIComponent(slug)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+      window.location.href = detailUrl;
     }
   };
 }
 
+/* ---------- start ---------- */
 loadPage();
 </script>
-
-
 
 </body>
 </html>

@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard — Thống kê (Optimized)</title>
+
+  <!-- Chart.js (CDN) - dùng defer để không block parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#fff; --text:#0f172a; --accent:#0b6cff; --muted:#6b7280;
+      --radius:12px; --shadow:0 12px 30px rgba(15,23,42,0.08);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);padding:20px;transition:opacity .2s}
+    .container{max-width:1200px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    header h1{margin:0;color:var(--accent);font-size:18px}
+    .controls{display:flex;gap:10px;align-items:center}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-weight:700}
+    .nav-ghost{background:transparent;border:1px solid #e6e9ef;color:var(--text)}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+    @media(max-width:920px){ .grid{grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:520px){ .grid{grid-template-columns:1fr;} }
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+    .card .k{font-size:28px;font-weight:800;color:var(--accent)}
+    .card .label{color:var(--muted);font-size:13px}
+    .charts{display:grid;grid-template-columns:2fr 1fr;gap:16px; margin-bottom:18px}
+    @media(max-width:920px){ .charts{grid-template-columns:1fr;} }
+    .chart-card{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+    .recent{background:var(--card);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.04);font-size:14px}
+    th{font-size:12px;color:var(--muted);text-transform:uppercase}
+    .small{font-size:13px;color:var(--muted)}
+    .badge{display:inline-block;padding:6px 8px;border-radius:8px;background:#10b981;color:#fff;font-weight:700;font-size:12px}
+    .badge.gray{background:#6b7280}
+    .loading{opacity:0.6;pointer-events:none}
+    .helper{font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Trang quản lý — Thống kê (Tối ưu)</h1>
+      <div class="controls">
+        <button id="btnReload" class="btn nav-ghost">⟳ Tải lại</button>
+        <button id="btnCancel" class="btn nav-ghost" title="Hủy tải" style="display:none">✕ Hủy</button>
+        <button id="btnRefreshCharts" class="btn">Làm mới biểu đồ</button>
+      </div>
+    </header>
+
+    <div id="message" class="helper" style="margin-bottom:10px"></div>
+
+    <div class="grid" id="statsGrid">
+      <div class="card">
+        <div class="label">Tổng người dùng</div>
+        <div class="k" id="totalUsers">—</div>
+        <div class="small" id="usersBreakdown">Admin: — · Editor: — · User: —</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Tổng tài liệu ngành</div>
+        <div class="k" id="totalDocs">—</div>
+        <div class="small" id="docsBreakdown">Public (all): — · Không gán: —</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Số editors (được gán ít nhất 1)</div>
+        <div class="k" id="totalEditors">—</div>
+        <div class="small">Editors có thể quản lý tài liệu mà admin đã gán</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Ghi chú</div>
+        <div class="small">Editor chỉ hiển thị các ngành có `quyền` chứa user của họ.</div>
+        <div style="margin-top:8px" class="helper">Nếu thiếu dữ liệu, kiểm tra sheet `Users` và `TaiLieuNganh`.</div>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-card">
+        <canvas id="rolesChart" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <canvas id="docsPerEditorChart" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="recent">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>Tài liệu gần nhất</strong>
+        <span class="small">Hiển thị tối đa 10 mục</span>
+      </div>
+      <div id="recentTableWrap">
+        <table id="recentTable">
+          <thead><tr><th>ID</th><th>Tiêu đề</th></tr></thead>
+          <tbody><tr><td colspan="5" style="text-align:center;padding:12px">Chưa tải dữ liệu...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  Optimized Dashboard JS
+  - Thay API bằng URL Apps Script WebApp của bạn (deploy as web app).
+  - Giữ tương thích với backend cũ (route=check-manager, tailieu-list, default GET -> all data)
+*/
+
+const API = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec"; // <-- THAY bằng URL của bạn
+const USERS_CACHE_TTL = 60 * 1000; // cache Users in sessionStorage for 60s
+
+// state
+let rolesChart = null;
+let docsPerEditorChart = null;
+let currentAbort = null;
+
+// helpers UI
+function showMsg(txt, isError=false){
+  const el = document.getElementById('message');
+  el.textContent = txt || '';
+  el.style.color = isError ? 'crimson' : 'inherit';
+}
+function setLoading(on){
+  document.body.classList.toggle('loading', !!on);
+  document.getElementById('btnCancel').style.display = on ? 'inline-block' : 'none';
+}
+function getTokenFromStorage(){
+  const raw = localStorage.getItem('loggedInUser');
+  if(!raw) return null;
+  try{
+    const parsed = JSON.parse(raw);
+    return parsed.token || (parsed.user && parsed.user.token) || null;
+  }catch(e){ return null; }
+}
+
+/* timeoutable fetch using AbortController */
+function fetchJsonWithTimeout(url, options = {}, timeout = 20000, signalParent = null){
+  const controller = new AbortController();
+  const signal = controller.signal;
+  if(signalParent){
+    // when parent aborts, abort this too
+    signalParent.addEventListener('abort', ()=> controller.abort());
+  }
+  const fetchPromise = fetch(url, { ...options, signal }).then(r => {
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+  const timeoutId = setTimeout(()=> controller.abort(), timeout);
+  return fetchPromise.finally(()=> clearTimeout(timeoutId));
+}
+
+/* get cached users if recent */
+function getCachedUsers(){
+  try{
+    const raw = sessionStorage.getItem('__users_cache');
+    if(!raw) return null;
+    const obj = JSON.parse(raw);
+    if(Date.now() - (obj.t || 0) > USERS_CACHE_TTL) return null;
+    return obj.v || null;
+  }catch(e){ return null; }
+}
+function setCachedUsers(users){
+  try{ sessionStorage.setItem('__users_cache', JSON.stringify({ t: Date.now(), v: users })); }catch(e){}
+}
+
+/* charts helpers: update data (faster than destroy/create) */
+function initOrUpdateDoughnut(chartRef, ctx, labels, values){
+  if(chartRef && chartRef.chartInstance){
+    const c = chartRef.chartInstance;
+    c.data.labels = labels;
+    c.data.datasets[0].data = values;
+    c.update();
+    return chartRef;
+  }
+  const c = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: ['#0b6cff','#f59e0b','#60a5fa','#6b7280'] }] },
+    options: { plugins:{legend:{position:'bottom'}}, maintainAspectRatio: false }
+  });
+  return { chartInstance: c };
+}
+function initOrUpdateBar(chartRef, ctx, labels, values){
+  if(chartRef && chartRef.chartInstance){
+    const c = chartRef.chartInstance;
+    c.data.labels = labels;
+    if(c.data.datasets[0]) c.data.datasets[0].data = values;
+    else c.data.datasets = [{ label: 'Số tài liệu', data: values }];
+    c.update();
+    return chartRef;
+  }
+  const c = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Số tài liệu', data: values }] },
+    options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} , maintainAspectRatio: false }
+  });
+  return { chartInstance: c };
+}
+
+/* batch render recent table (DocumentFragment) */
+function renderRecentTable(docs){
+  const tbody = document.querySelector('#recentTable tbody');
+  // build rows off-DOM
+  if(!docs || docs.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:12px">Không có tài liệu</td></tr>';
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  const max = Math.min(10, docs.length);
+  for(let i=0;i<max;i++){
+    const d = docs[i];
+    // skip empty title
+    if(!d.name) continue;
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td'); td1.textContent = d.id || '';
+    const td2 = document.createElement('td'); td2.textContent = d.name || '';
+    tr.appendChild(td1); tr.appendChild(td2);
+    frag.appendChild(tr);
+  }
+  // replace body in one operation
+  tbody.innerHTML = '';
+  tbody.appendChild(frag);
+}
+
+/* main load: optimized to start fetches early and reuse cache */
+async function initDashboard(){
+  // cancel previous in-flight
+  if(currentAbort){
+    currentAbort.abort();
+    currentAbort = null;
+  }
+  currentAbort = new AbortController();
+  const parentSignal = currentAbort.signal;
+
+  setLoading(true);
+  showMsg('Đang kiểm tra quyền...');
+
+  const token = getTokenFromStorage();
+  if(!token){
+    alert('Bạn chưa đăng nhập. Quay về trang đăng nhập.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  try{
+    // prepare requests (start in-flight early)
+    const urlCheck = `${API}?route=check-manager&token=${encodeURIComponent(token)}`;
+
+    // tailieu-list POST options
+    const postDocs = new URLSearchParams();
+    postDocs.append('route','tailieu-list');
+    postDocs.append('token', token);
+    const docsOptions = { method:'POST', body: postDocs };
+
+    // Try to use cached users if available
+    let users = getCachedUsers();
+    let allDataPromise = null;
+    if(!users){
+      // start fetch for allData (no params -> apiGetAllData)
+      allDataPromise = fetchJsonWithTimeout(API, { method:'GET' }, 20000, parentSignal);
+    } else {
+      allDataPromise = Promise.resolve({ data: { Users: users } });
+    }
+
+    // start docs fetch immediately (in-flight)
+    const docsPromise = fetchJsonWithTimeout(API, docsOptions, 20000, parentSignal);
+
+    // start check-manager as well
+    const chkPromise = fetchJsonWithTimeout(urlCheck, { method:'GET' }, 15000, parentSignal);
+
+    // await check result first (to verify permission) — but fetches are already in-flight
+    const chk = await chkPromise;
+    if(!chk || chk.status !== 'success' || !chk.isManager){
+      alert('Bạn không có quyền (chỉ admin/editor được truy cập).');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    showMsg('Tải dữ liệu thống kê...');
+
+    // await remaining results (likely already resolving)
+    const [docsRes, allDataRes] = await Promise.all([docsPromise, allDataPromise]);
+
+    const docs = (docsRes && docsRes.data) ? docsRes.data : [];
+    users = users || ((allDataRes && allDataRes.data && allDataRes.data.Users) ? allDataRes.data.Users : []);
+    if(!users) users = [];
+    setCachedUsers(users);
+
+    // compute stats efficiently
+    const totalUsers = users.length;
+    const rolesCount = users.reduce((acc,u)=>{
+      const r = (u.role || 'user').toString().toLowerCase();
+      acc[r] = (acc[r] || 0) + 1;
+      return acc;
+    },{});
+    rolesCount.total = totalUsers;
+
+    const totalDocs = docs.length;
+    let docsPublic = 0, docsNoQuyen = 0;
+    const docsByEditorId = Object.create(null);
+
+    for(let i=0;i<docs.length;i++){
+      const d = docs[i];
+      const qraw = (d.quyen||'').toString().trim();
+      if(!qraw){ docsNoQuyen++; continue; }
+      const qlow = qraw.toLowerCase();
+      if(qlow.indexOf('all') >= 0){ docsPublic++; continue; }
+      // parse csv list (cache split)
+      const arr = qlow.split(',').map(x=>x.trim()).filter(x=>x);
+      for(let j=0;j<arr.length;j++){
+        const id = arr[j];
+        if(!id || id === 'all') continue;
+        docsByEditorId[id] = (docsByEditorId[id] || 0) + 1;
+      }
+    }
+
+    const adminCnt = rolesCount.admin || 0;
+    const editorCnt = rolesCount.editor || 0;
+    const userCnt = rolesCount.user || 0;
+
+    // update UI (batch DOM updates via requestAnimationFrame)
+    requestAnimationFrame(()=>{
+      document.getElementById('totalUsers').textContent = totalUsers;
+      document.getElementById('usersBreakdown').textContent = `Admin: ${adminCnt}  ·  Editor: ${editorCnt}  ·  User: ${userCnt}`;
+      document.getElementById('totalDocs').textContent = totalDocs;
+      document.getElementById('docsBreakdown').textContent = `Public (all): ${docsPublic}  ·  Không gán: ${docsNoQuyen}`;
+      let editorsWithAssigned = 0;
+      if(editorCnt > 0){
+        for(let i=0;i<users.length;i++){
+          const u = users[i];
+          if((u.role||'').toString().toLowerCase() === 'editor'){
+            if(docsByEditorId[u.id]) editorsWithAssigned++;
+          }
+        }
+      }
+      document.getElementById('totalEditors').textContent = `${editorsWithAssigned} / ${editorCnt}`;
+    });
+
+    // prepare roles chart data
+    const roleLabels = ['Admin','Editor','User'];
+    const roleValues = [adminCnt, editorCnt, userCnt];
+
+    // prepare docsPerEditor (top 8)
+    const arrEditors = Object.keys(docsByEditorId).map(id => {
+      const user = users.find(u => String(u.id) === String(id));
+      return { id, count: docsByEditorId[id], username: (user && user.username) ? user.username : id };
+    }).sort((a,b)=>b.count-a.count);
+    const top = arrEditors.slice(0,8);
+    const labels = top.map(x=> x.username || x.id);
+    const values = top.map(x=> x.count);
+    // ensure non-empty
+    const barLabels = labels.length ? labels : ['(no editor)'];
+    const barValues = values.length ? values : [0];
+
+    // render charts during idle to avoid blocking UI paint
+    const scheduleCharts = (cb) => {
+      if('requestIdleCallback' in window) requestIdleCallback(cb, {timeout:500});
+      else setTimeout(cb, 0);
+    };
+
+    scheduleCharts(()=>{
+      // roles chart
+      const ctxR = document.getElementById('rolesChart').getContext('2d');
+      rolesChart = initOrUpdateDoughnut(rolesChart, ctxR, roleLabels, roleValues);
+
+      // bar chart
+      const ctxB = document.getElementById('docsPerEditorChart').getContext('2d');
+      docsPerEditorChart = initOrUpdateBar(docsPerEditorChart, ctxB, barLabels, barValues);
+    });
+
+    // render recent table (batch)
+    renderRecentTable(docs);
+
+    showMsg('Đã tải xong', false);
+  }catch(err){
+    if(err.name === 'AbortError'){
+      showMsg('Tác vụ bị hủy', true);
+    }else{
+      console.error(err);
+      showMsg('Lỗi khi tải dữ liệu. Xem console để debug.', true);
+    }
+  } finally {
+    setLoading(false);
+    currentAbort = null;
+  }
+}
+
+/* buttons */
+document.getElementById('btnReload').addEventListener('click', ()=> initDashboard());
+document.getElementById('btnRefreshCharts').addEventListener('click', ()=>{
+  // re-render charts from current DOM values quickly (no network)
+  try{
+    const totalUsers = Number(document.getElementById('totalUsers').textContent || 0);
+    // rebuild small sample: re-run init to be safe
+    initDashboard();
+  }catch(e){}
+});
+document.getElementById('btnCancel').addEventListener('click', ()=>{
+  if(currentAbort) currentAbort.abort();
+  setLoading(false);
+  showMsg('Đã hủy bởi người dùng', true);
+});
+
+// init on load after Chart.js loaded
+window.addEventListener('load', ()=> {
+  // ensure charts are created only after Chart.js ready (defer script above helps)
+  initDashboard();
+});
+</script>
+</body>
+</html>

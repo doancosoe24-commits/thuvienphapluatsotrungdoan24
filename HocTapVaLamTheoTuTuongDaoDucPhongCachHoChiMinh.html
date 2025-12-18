@@ -2,7 +2,11 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+<<<<<<< HEAD
       <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+=======
+  <link rel="shortcut icon" href="./img/logo1.jpg" type="image/x-icon">
+>>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư Viện Pháp Luật Số - Học tập và làm theo tư tưởng Hồ Chí Minh</title>
 
@@ -48,6 +52,7 @@
       color:#fff;
     }
 
+<<<<<<< HEAD
      .back-link{
       display:inline-flex;
       align-items:center;
@@ -68,10 +73,23 @@
     }
 
      #loadingBox{
+=======
+    .back-link {
+      color:#ccae6e;
+      padding:10px;
+      font-weight:600;
+      text-decoration:underline;
+      cursor:pointer;
+      display:inline-block;
+    }
+
+    #loadingBox {
+>>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
+<<<<<<< HEAD
       padding:60px 0;
       color:#004aad;
       font-size:16px;
@@ -86,6 +104,22 @@
       border-radius:50%;
       animation:spin .7s linear infinite;
       margin-bottom:16px;
+=======
+      padding:40px 0;
+      color:#ccae6e;
+      font-size:17px;
+      font-weight:600;
+    }
+
+    .loader {
+      width:45px;
+      height:45px;
+      border:4px solid #ccae6e;
+      border-top-color:transparent;
+      border-radius:50%;
+      animation:spin 0.5s linear infinite;
+      margin-bottom:12px;
+>>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
     }
 
     @keyframes spin { to { transform:rotate(360deg); } }
@@ -103,7 +137,11 @@
 <div id="header"></div>
 
 <main>
+<<<<<<< HEAD
    <span class="back-link" onclick="history.back()">← Quay lại</span>
+=======
+  <span class="back-link" onclick="history.back()">Quay lại</span>
+>>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 
   <h2 id="pageTitle" style="text-align:center; color:#ccae6e; text-transform:uppercase;"></h2>
 
@@ -124,7 +162,11 @@
    CONFIG
 -----------------------------*/
 const webAppUrl =
+<<<<<<< HEAD
   "https://script.google.com/macros/s/AKfycbxU3AQTc_LrF7IRoOrcVMr8IWIMxiMWtVC-J2dEJ01VD1TvAYTeX-EAnzWqXKdnNesK/exec";
+=======
+  "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7dvWw8d7KK7vPw9_RKqH0nCDCrWB9skE7BlUPHNFn-KLdLb/exec";
+>>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 
 let ALL_DOCUMENTS = [];
 let ALL_CATEGORIES = [];
@@ -242,8 +284,13 @@ async function loadPage(){
   try{
     const res = await fetch(webAppUrl).then(r=>r.json());
 
+<<<<<<< HEAD
     ALL_DOCUMENTS = res.data.HocTaVaLamTheoTuTuongDaoDucPhongCachHoChiMinh || [];
     ALL_CATEGORIES = res.data.Category || [];
+=======
+    ALL_DOCUMENTS = res.HocTaVaLamTheoTuTuongDaoDucPhongCachHoChiMinh || [];
+    ALL_CATEGORIES = res.Category || [];
+>>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 
     if(!ALL_DOCUMENTS.length){
       showError("Không tìm thấy tài liệu nào.");

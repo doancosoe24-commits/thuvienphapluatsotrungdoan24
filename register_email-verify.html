@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Xác thực Email — Bước 2</title>
+
+<link rel="shortcut icon" href="./img/logo.png" type="image/png">
+
+<style>
+:root{
+  --primary:#004aad;
+  --accent:#0b6bd6;
+  --bg:#f6fbff;
+  --card:#ffffff;
+  --muted:#6b7a90;
+  --success:#28a745;
+  --danger:#dc3545;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter, 'Segoe UI', Roboto, Arial, sans-serif}
+html,body{height:100%}
+body{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#f6fbff, var(--bg));
+  padding:20px;
+}
+
+/* Card */
+.card{
+  width:100%;
+  max-width:420px;
+  background:var(--card);
+  padding:22px;
+  border-radius:14px;
+  box-shadow: 0 10px 30px rgba(10,30,60,0.06);
+  text-align:center;
+  border: 1px solid rgba(10,30,60,0.03);
+}
+
+/* Logo area */
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  justify-content:center;
+  margin-bottom:8px;
+}
+.brand img{
+  width:78px;
+  height:78px;
+  object-fit:contain;
+  border-radius:12px;
+  box-shadow: 0 6px 18px rgba(6,24,40,0.06);
+  background: #fff;
+  padding:6px;
+}
+.brand .title{
+  text-align:left;
+}
+.brand .title .sitename{font-size:16px;color:var(--primary);font-weight:800}
+.brand .title .tag{font-size:12px;color:var(--muted)}
+
+/* Content */
+h2{color:var(--primary);font-size:20px;margin:6px 0 10px}
+.note{font-size:13px;color:var(--muted);margin-bottom:12px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #e1e8f0;background:#fff;margin:10px 0;font-size:15px}
+.row{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#4aa3ff);color:#fff;cursor:pointer;font-weight:800}
+.btn.secondary{background:#6c757d}
+.small{font-size:13px;color:#8a98ad}
+
+/* Toast */
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:20px;background:var(--success);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+.toast.error{background:var(--danger)}
+
+/* Countdown */
+.countdown{font-size:13px;color:var(--primary);font-weight:700;margin-top:10px}
+
+/* Responsive */
+@media (max-width:420px){
+  .card{padding:18px}
+  .brand img{width:64px;height:64px}
+}
+</style>
+
+<!-- EmailJS (fallback) -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>(function(){ emailjs.init('q9a3FrQ_V8WsnNmaM'); })();</script>
+</head>
+<body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div class="card" role="region" aria-label="Xác thực Email">
+  <div class="brand" aria-hidden="false">
+    <img src="./img/logo.png" alt="Logo — Thư viện số Trung đoàn 24">
+  </div>
+
+  <h2>Xác thực Email</h2>
+  <div class="note">Mã đã gửi tới: <b id="emailDisplay">-</b></div>
+
+  <label for="otp" class="small" style="display:block;text-align:left;margin:6px 0 4px;color:#425b76">Mã OTP</label>
+  <input id="otp" class="input" placeholder="Nhập mã OTP (6 chữ số)" inputmode="numeric" maxlength="6" aria-label="Mã OTP">
+
+  <div class="row" style="margin-top:6px">
+    <button id="btnVerify" class="btn" aria-label="Xác thực mã">Xác thực</button>
+    <button id="btnResend" class="btn secondary" aria-label="Gửi lại mã">Gửi lại</button>
+    <button id="btnCancel" class="btn secondary" aria-label="Hủy đăng ký">Hủy</button>
+  </div>
+
+  <div id="countdown" class="countdown" style="display:none"></div>
+  <div style="margin-top:14px;font-size:13px;color:#8a98ad">Bạn có thể hủy để quay lại <a href="register.html" style="color:var(--accent);font-weight:700;text-decoration:none">form đăng ký</a>.</div>
+</div>
+
+<script>
+/* ========== Cấu hình (giữ trùng với register.html) ========== */
+const API = 'https://script.google.com/macros/s/AKfycbzUuQFf7PNcRJR-MxW03F2aTuDY5_BQXbqJXB0K1PdAJomdFgvHVZkirmIB24CbZnBk/exec';
+const EMAILJS_SERVICE_ID = 'service_fb3dyvt';
+const EMAILJS_TEMPLATE_ID = 'template_wpzqqrw';
+
+/* ========== Helpers UI ========== */
+const toastEl = document.getElementById('toast');
+function showToast(text, type='success', ms=3000){
+  toastEl.textContent = text;
+  toastEl.className = 'toast' + (type==='error' ? ' error' : '');
+  toastEl.style.display = 'block';
+  setTimeout(()=> toastEl.style.display = 'none', ms);
+}
+
+/* ========== Storage helpers ========== */
+function loadPending(){ try{ return JSON.parse(localStorage.getItem('pending_registration')||'null'); }catch(e){return null;} }
+function loadOtp(){ try{ return JSON.parse(localStorage.getItem('pending_otp')||'null'); }catch(e){return null;} }
+function clearAll(){ localStorage.removeItem('pending_registration'); localStorage.removeItem('pending_otp'); localStorage.removeItem('otp_last_sent'); }
+
+/* ========== Countdown UI ========== */
+const emailDisplay = document.getElementById('emailDisplay');
+const otpInput = document.getElementById('otp');
+const btnVerify = document.getElementById('btnVerify');
+const btnResend = document.getElementById('btnResend');
+const btnCancel = document.getElementById('btnCancel');
+const countdownEl = document.getElementById('countdown');
+let cdTimer = null;
+
+function startCountdown(msLeft){
+  clearInterval(cdTimer);
+  if(msLeft <= 0){ countdownEl.style.display = 'none'; btnResend.disabled = false; return; }
+  btnResend.disabled = true;
+  countdownEl.style.display = 'block';
+  const end = Date.now() + msLeft;
+  function tick(){
+    const left = Math.max(0, Math.ceil((end - Date.now())/1000));
+    countdownEl.textContent = `OTP còn ${left}s`;
+    if(left <= 0){ clearInterval(cdTimer); countdownEl.style.display = 'none'; btnResend.disabled = false; }
+  }
+  tick();
+  cdTimer = setInterval(tick, 900);
+}
+
+/* ========== Init: restore pending info ========== */
+(function init(){
+  const p = loadPending();
+  const o = loadOtp();
+  if(!p){ showToast('Không tìm thấy thông tin đăng ký — vui lòng đăng ký lại', 'error', 1200); setTimeout(()=> location.href='register.html', 1200); return; }
+  emailDisplay.textContent = p.email || '-';
+  if(o && o.exp) startCountdown(o.exp - Date.now());
+})();
+
+/* ========== Server sendOtp (preferred) ========== */
+async function sendOtpViaServer(email, name, otp){
+  try{
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ route:'sendOtp', email, name, otp })
+    });
+    if(!res.ok) throw new Error('Server trả lỗi ' + res.status);
+    const j = await res.json();
+    if(j && j.success) return { ok:true };
+    return { ok:false, msg: j && j.message ? j.message : 'Server không trả success' };
+  }catch(err){
+    console.warn('sendOtpViaServer error', err);
+    return { ok:false, msg: String(err) };
+  }
+}
+
+/* ========== EmailJS fallback ========== */
+async function sendOtpViaEmailJS(email, name, otp){
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: email,
+      otp_code: otp,
+      passcode: otp,
+      name: name,
+      time: new Date(Date.now()+5*60*1000).toLocaleString('vi-VN')
+    });
+    return { ok:true };
+  }catch(err){
+    console.error('EmailJS send error', err);
+    return { ok:false, msg: String(err) };
+  }
+}
+
+/* ========== Verify handler ========== */
+btnVerify.addEventListener('click', async ()=>{
+  const code = otpInput.value.trim();
+  const p = loadPending();
+  const o = loadOtp();
+  if(!p){ showToast('Không có đăng ký đang chờ', 'error'); return; }
+  if(!code){ showToast('Nhập mã OTP', 'error'); return; }
+  if(!o){ showToast('Mã OTP đã hết hạn hoặc không tồn tại', 'error'); return; }
+  if(o.email !== p.email){ showToast('Email không khớp với mã', 'error'); return; }
+  if(o.otp !== code){ showToast('OTP không đúng', 'error'); return; }
+
+  // Gọi API register (passwordHash đã lưu trong pending_registration)
+  try{
+    const url = `${API}?route=register&username=${encodeURIComponent(p.username)}&password=${encodeURIComponent(p.passwordHash)}&email=${encodeURIComponent(p.email)}`;
+    const res = await fetch(url);
+    const j = await res.json();
+    if(j && (j.success === true || j.status === 'success')){
+      showToast(j.message || 'Đăng ký thành công', 'success', 1600);
+      clearAll();
+      setTimeout(()=> location.href = 'index.html', 1200);
+    } else {
+      showToast(j.message || 'Đăng ký thất bại', 'error');
+    }
+  }catch(err){
+    console.error('register api error', err);
+    showToast('Lỗi server khi đăng ký', 'error');
+  }
+});
+
+/* ========== Resend handler ========== */
+btnResend.addEventListener('click', async ()=>{
+  const p = loadPending();
+  if(!p){ showToast('Không tìm thấy đăng ký', 'error'); location.href='register.html'; return; }
+
+  try{
+    // tạo OTP mới
+    const otp = String(Math.floor(100000 + Math.random()*900000));
+    localStorage.setItem('pending_otp', JSON.stringify({ email: p.email, otp, exp: Date.now() + 5*60*1000 }));
+    localStorage.setItem('otp_last_sent', String(Date.now()));
+
+    // Try server first
+    const srv = await sendOtpViaServer(p.email, p.username, otp);
+    if(srv.ok){
+      startCountdown(60*1000);
+      showToast('Đã gửi lại mã OTP (server).', 'success');
+      return;
+    }
+
+    // Fallback EmailJS
+    const js = await sendOtpViaEmailJS(p.email, p.username, otp);
+    if(js.ok){
+      startCountdown(60*1000);
+      showToast('Đã gửi lại mã OTP (EmailJS).', 'success');
+      return;
+    }
+
+    showToast('Gửi lại thất bại: ' + (srv.msg || js.msg || 'Không rõ'), 'error');
+  }catch(e){
+    console.error('resend error', e);
+    showToast('Gửi lại thất bại', 'error');
+  }
+});
+
+/* ========== Cancel handler ========== */
+btnCancel.addEventListener('click', ()=>{
+  clearAll();
+  showToast('Đã hủy đăng ký', 'success', 900);
+  setTimeout(()=> location.href = 'register.html', 900);
+});
+</script>
+</body>
+</html>

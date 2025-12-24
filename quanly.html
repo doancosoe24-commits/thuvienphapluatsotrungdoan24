@@ -1,116 +1,167 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Quản lý - Thư Viện Pháp Luật Số Sư Đoàn 10</title>
-    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+<link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f8fb; --card:#fff; --text:#0f172a;
-  --accent:#004aad; --accent-2:#2dd4bf; --muted:#6b7280;
-  --radius:12px; --gap:1rem; --shadow:0 8px 30px rgba(15,23,42,0.08);
+  --bg:#f6f8fb; --card:#ffffff; --text:#0f172a;
+  --accent:#0b63d1; --accent-2:#06b6d4; --muted:#6b7280;
+  --radius:14px; --gap:14px; --shadow:0 10px 30px rgba(15,23,42,0.06);
+  --glass: rgba(255,255,255,0.6);
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --transition:0.28s ease;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#eef4fb);color:var(--text);-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto}
 a{color:inherit;text-decoration:none}
-.app{display:flex;min-height:100vh;transition:margin-left var(--transition)}
-/* SIDEBAR */
+:focus{outline:2px solid rgba(11,99,209,0.18);outline-offset:2px}
+.container{max-width:1150px;margin:0 auto;padding:16px}
+/* Top bar (mobile-first) */
+.topbar{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--card),#fbfdff);box-shadow:var(--shadow);backdrop-filter:blur(6px);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{width:48px;height:48px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.brand .title{font-weight:700;font-size:16px}
+.hamburger{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;border:0;background:transparent;color:var(--accent);cursor:pointer}
+.hamburger:hover{transform:translateY(-2px)}
+.searchBar{flex:1;display:flex;align-items:center;background:rgba(15,23,42,0.03);padding:8px;border-radius:12px;gap:8px}
+.searchBar input{border:0;background:transparent;outline:none;flex:1;padding:6px 4px;font-size:15px}
+.header-actions{display:flex;align-items:center;gap:10px}
+.avatar{width:44px;height:44px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:white;font-weight:700;font-size:16px}
+.fab-menu{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#0ea5a3);box-shadow:0 8px 22px rgba(11,99,209,0.18);display:grid;place-items:center;color:#fff;font-size:22px;z-index:60}
+/* Sidebar as slide-over */
 .sidebar{
-  width:260px; max-width:260px; background:var(--card); padding:18px;
-  position:fixed; top:0; left:-300px; height:100%; overflow:auto;
-  box-shadow:var(--shadow); border-radius:0 12px 12px 0; transition:all var(--transition); z-index:60;
-}
-.sidebar.open{left:0}
-.sidebar.collapsed{width:72px}
-.brand{display:flex;gap:12px;align-items:center;margin-bottom:1rem}
-.brand .logo img{width:54px;height:54px;border-radius:8px;object-fit:cover}
-.brand .brand-text{font-weight:700;font-size:22px;color:var(--accent)}
-.nav{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-.nav a{padding:10px 12px;border-radius:10px;font-weight:600;transition:all .18s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-.sidebar .nav a:hover{background:linear-gradient(90deg, rgba(0,74,173,0.07), rgba(45,212,191,0.03)); transform:translateY(-2px)}
-.nav a[aria-current="true"]{background:linear-gradient(90deg, rgba(0,74,173,0.12), rgba(45,212,191,0.04));box-shadow:0 6px 18px rgba(0,74,173,0.04)}
-.main{flex:1;margin-left:0;padding:18px;transition:margin-left var(--transition)}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.search{flex:1;display:flex;align-items:center;background:var(--card);padding:8px;border-radius:12px;box-shadow:var(--shadow);min-width:220px}
-.search input{border:0;outline:none;background:transparent;padding:6px 8px;flex:1;color:var(--text);font-size:15px}
-.controls{display:flex;align-items:center;gap:8px}
-.btn{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;background:var(--card);box-shadow:var(--shadow);display:inline-flex;align-items:center;gap:8px}
-.btn:hover{transform:translateY(-2px)}
-.avatar{width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:white;font-weight:700;font-size:0.95rem}
-.app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.22);display:none;z-index:50;opacity:0;transition:opacity var(--transition)}
-.app-overlay.active{display:block;opacity:1}
-#protectLoader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);z-index:9999;font-size:16px;color:var(--muted)}
-.accessNotice{margin:0.75rem 0;padding:0.75rem;border-radius:10px;background:#fff7ed;color:#7a4b00;border:1px solid rgba(250,180,50,0.12);box-shadow:0 6px 18px rgba(15,23,42,0.06);font-weight:600}
-iframe#contentFrame{width:100%;height:calc(100vh - 120px);border:0;border-radius:10px;background:#fff;box-shadow:var(--shadow);margin-top: 10px;}
-
-/* responsive */
-@media(min-width:1024px){
-  .main{margin-left:260px}
-  .sidebar{left:0}
-}
-@media(max-width:900px){
-  .sidebar{left:-100%;position:fixed}
-  .main{margin-left:0;padding:12px}
+  position:fixed;inset:0 auto 0 0;width:320px;max-width:92vw;background:var(--card);box-shadow:var(--shadow);padding:18px;transform:translateX(-120%);transition:transform .32s cubic-bezier(.2,.9,.25,1);z-index:70;border-top-right-radius:12px;border-bottom-right-radius:12px}
+.sidebar.open{transform:translateX(0)}
+.sidebar .brand-mini{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sidebar .brand-mini .logo{width:56px;height:56px}
+.menu{display:flex;flex-direction:column;gap:6px}
+.menu a{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;font-weight:600;color:var(--text);transition:background .18s}
+.menu a svg{flex-shrink:0;width:20px;height:20px;opacity:.85}
+.menu a:hover{background:linear-gradient(90deg, rgba(11,99,209,0.06), rgba(6,182,212,0.04));transform:translateY(-2px)}
+.menu a[aria-current="true"]{background:linear-gradient(90deg, rgba(11,99,209,0.12), rgba(6,182,212,0.03));box-shadow:0 6px 18px rgba(11,99,209,0.04)}
+.logout{margin-top:8px;padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff, #fff);border:1px solid rgba(11,99,209,0.06)}
+/* Content area */
+.content-wrap{margin-top:14px}
+.panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:var(--shadow)}
+.iframe-wrap{margin-top:12px;border-radius:12px;overflow:hidden}
+iframe#contentFrame{width:100%;height:70vh;border:0;display:block;background:#fff}
+/* Desktop tweaks */
+@media(min-width:900px){
+  .sidebar{transform:none;position:fixed;left:24px;top:24px;bottom:24px;width:260px;max-width:none;border-radius:12px}
+  .container{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+  .topbar{grid-column:2/span 1}
+  .content-wrap{grid-column:2/span 1}
   iframe#contentFrame{height:calc(100vh - 140px)}
+  .fab-menu{display:none}
 }
+/* small devices */
+@media(max-width:420px){
+  .brand .title{font-size:14px}
+  .searchBar{
+    overflow: hidden;
+  }
+  .searchBar input{font-size:14px}
+  .hamburger{width:44px;height:44px}
+}
+/* utilities */
+.kv{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 12px;border-radius:10px;border:0;cursor:pointer;background:var(--accent);color:#fff;font-weight:600}
+.small{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
 
-<div id="protectLoader">Đang kiểm tra quyền truy cập — vui lòng chờ...</div>
+<!-- Loader / protect notice -->
+<div id="protectLoader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);z-index:9999;font-size:15px;color:var(--muted)">Đang kiểm tra quyền truy cập — vui lòng chờ...</div>
 
-<div class="app-overlay" id="overlay"></div>
+<!-- sidebar (offcanvas on mobile) -->
+<aside class="sidebar" id="sidebar" aria-hidden="true" aria-label="Menu quản trị">
+  <div class="brand-mini">
+    <div class="logo"><img src="./img/logo1.jpg" alt="logo" onerror="this.src='./img/logo.png'" style="width:100%;height:100%;object-fit:cover"></div>
+    <div>
+      <div style="font-weight:800;color:var(--accent)">Thư Viện Pháp Luật</div>
+      <div class="small">Trung đoàn 24 — Khu vực quản trị</div>
+    </div>
+  </div>
 
-<div class="app" aria-hidden="true">
-  <aside class="sidebar" id="sidebar" aria-label="Chức năng quản trị">
+  <nav class="menu" role="navigation" aria-label="Menu chính">
+    <a href="dashboard.html" aria-current="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z" fill="currentColor"/></svg>Trang chủ</a>
+    <a href="quanly_users.html"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-3.3 4.7-5 8-5s8 1.7 8 5v1H4v-1z" fill="currentColor"/></svg>Tài khoản</a>
+    <a href="quanly_thuvienphapluatso.html"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h18v2H3V3zm0 4h12v12H3V7zm14 0h2v12h-2V7z" fill="currentColor"/></svg>Thư viện pháp luật số</a>
+    <a href="quanly_tailieunganh.html"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v2H4zM6 8h12v12H6z" fill="currentColor"/></svg>Tài liệu ngành</a>
+    <a href="quanly_tailieutaphuan.html"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zm0 7v13" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Tập huấn</a>
+    <a href="quanly_tailieuthamkhao.html"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="currentColor"/></svg>Tài liệu tham khảo</a>
+    <a href="quanly_history.html"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 3" fill="currentColor"/></svg>Lịch sử đăng nhập</a>
+    <a href="quanly_setting.html"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z" fill="currentColor"/></svg>Cài đặt</a>
+     <a href="quanly_chat.html" sandbox="allow-scripts allow-same-origin allow-popups">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+  <path
+    fill="currentColor"
+    d="M12 2C6.48 2 2 6.02 2 11c0 2.62 1.25 5 3.29 6.62V22l4.07-2.24c.85.23 1.74.36 2.64.36 5.52 0 10-4.02 10-9s-4.48-9-10-9z"
+  />
+</svg>
+      Tin nhắn nội bộ</a>
+    <a class="logout" href="javascript:void(0);" onclick="logout()">Đăng xuất</a>
+  </nav>
+</aside>
+
+<!-- floating action button (mobile) -->
+<button  id="openMenuBtn" aria-label="Mở menu"></button>
+
+<div class="container">
+
+  <!-- Topbar -->
+  <header class="topbar" role="banner">
     <div class="brand">
-      <div class="logo"><img src="./img/logo1.jpg" alt="logo" onerror="this.style.display='none'"></div>
-      <div class="brand-text">Quản Lý Thư Viện Pháp Luật</div>
+      <button class="hamburger" id="menuToggle" aria-label="Mở menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
 
-    <nav class="nav" role="navigation" aria-label="Menu">
-      <a href="dashboard.html" aria-current="true">Trang chủ</a>
-      <a href="quanly_users.html">Tài khoản</a>
-      <a href="quanly_thuvienphapluatso.html">Thư viện pháp luật số</a>
-      <a href="quanly_tailieunganh.html">Tài liệu ngành</a>
-      <a href="quanly_tailieutaphuan.html">Tập huấn</a>
-      <a href="quanly_tailieuthamkhao.html">Tài liệu tham khảo</a>
-      <a href="quanly_history.html">Lịch sử đăng nhập</a>
-      <a href="quanly_setting.html">Cài đặt</a>
-      <a onclick="logout()" href="javascript:void(0);">Đăng xuất</a>
-    </nav>
-  </aside>
+    <div class="searchBar" role="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <input id="quickSearch" type="search" placeholder="Tìm nhanh" aria-label="Tìm nhanh">
+      <button id="clearSearch" aria-label="Xoá tìm kiếm" style="background:transparent;border:0;padding:6px 0;display:none">✕</button>
+    </div>
 
-  <main class="main" id="main">
-    <header class="header" role="banner">
-      <button class="btn" id="sidebarToggle" aria-label="Mở menu">☰</button>
+    <div class="header-actions">
+      <div id="adminAvatar" class="avatar" title="User">Q</div>
+    </div>
+  </header>
 
-      <div class="search" role="search">
-        <input id="quickSearch" type="search" placeholder="Tìm nhanh..." aria-label="Tìm nhanh">
+  <!-- main content -->
+  <main class="content-wrap"> 
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:800;font-size:18px">Bảng điều khiển</div>
+          <div class="small">Quản lý tài liệu, người dùng và cấu hình hệ thống</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn" id="newItemBtn">Thêm tài liệu</button>
+          <button class="btn" ><a href="main.html">xem website</a></button>
+          <button class="btn" style="background:#fff;color:var(--accent);border:1px solid rgba(11,99,209,0.08)" id="refreshBtn">Làm mới</button>
+        </div>
       </div>
-
-      <div class="controls" id="controls">
-        <div id="adminAvatar" class="avatar" title="User"></div>
-        <a href="main.html"><button  id="collapseSidebar" title="Thu gọn menu">⇔</button></a>
-      </div>
-    </header>
-
-    <div id="mainContent">
-      <!-- optional notice injected here -->
-      <iframe id="contentFrame" src="dashboard.html" title="Nội dung quản trị"></iframe>
+    </div>
+    <div class="iframe-wrap">
+<iframe id="contentFrame" src="dashboard.html" title="Nội dung quản trị"
+        sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-downloads">
+</iframe>
     </div>
   </main>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbxrj25sWeIPBbhw7HzhC8CEdol5bW1nV1ZtppCbs3lLCn9CEgl__mWSw6WHbZDQjXM-/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwHc9P_C0PL7y1qiTVTxrqqwc50CqVoOWSTxCyEdu3dWIaUeP0ljTd4GSGXndaik0Gx/exec";
 
-/* ================= PROTECT PAGE: check-manager ================= */
+/* =========== PROTECT PAGE =========== */
 (async function protectAdminPage(){
   try {
     const raw = localStorage.getItem("loggedInUser");
@@ -119,11 +170,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxrj25sWeIPBbhw7HzhC8CE
       window.location.href = "index.html";
       return;
     }
-
     let parsed;
     try { parsed = JSON.parse(raw); } catch(e) { parsed = raw; }
-
-    // robust token extraction
     const token = (parsed && parsed.token) || (parsed && parsed.user && (parsed.user.token || parsed.user.accessToken)) || null;
     if(!token){
       alert("Không tìm thấy token, vui lòng đăng nhập lại.");
@@ -131,38 +179,31 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxrj25sWeIPBbhw7HzhC8CE
       window.location.href = "index.html";
       return;
     }
-
-    // call backend check-manager
+    // prefer check-manager, fallback to check-admin
     const resp = await fetch(`${API_URL}?route=check-manager&token=${encodeURIComponent(token)}`);
     if(!resp.ok){
-      // try fallback check-admin
-      try {
-        const fb = await fetch(`${API_URL}?route=check-admin&token=${encodeURIComponent(token)}`);
-        if(fb.ok){
-          const fbd = await fb.json();
-          if(fbd && fbd.status === 'success' && fbd.isAdmin){
-            window.__CURRENT_ADMIN_TOKEN = token;
-            window.__CURRENT_ADMIN_USER = (parsed && parsed.user) || fbd.user || {};
-            document.getElementById('protectLoader').remove();
-            initAfterAuth(true);
-            return;
-          }
+      const fb = await fetch(`${API_URL}?route=check-admin&token=${encodeURIComponent(token)}`).catch(()=>null);
+      if(fb && fb.ok){
+        const fbd = await fb.json();
+        if(fbd && fbd.status === 'success' && fbd.isAdmin){
+          window.__CURRENT_ADMIN_TOKEN = token;
+          window.__CURRENT_ADMIN_USER = (parsed && parsed.user) || fbd.user || {};
+          document.getElementById('protectLoader').remove();
+          initAfterAuth(true);
+          return;
         }
-      } catch(e){}
+      }
       alert("Lỗi xác thực. Vui lòng đăng nhập lại.");
       localStorage.removeItem("loggedInUser");
       window.location.href = "index.html";
       return;
     }
-
     const data = await resp.json();
     if(!data || data.status !== 'success' || !data.isManager){
       alert("Bạn không có quyền truy cập (chỉ admin hoặc editor).");
       window.location.href = "index.html";
       return;
     }
-
-    // ok -> continue
     window.__CURRENT_ADMIN_TOKEN = token;
     window.__CURRENT_ADMIN_USER = (data.user && Object.keys(data.user).length) ? data.user : ((parsed && parsed.user) || {});
     const loader = document.getElementById('protectLoader'); if(loader) loader.remove();
@@ -174,65 +215,40 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxrj25sWeIPBbhw7HzhC8CE
   }
 })();
 
-/* ================= INIT AFTER AUTH ================= */
 function initAfterAuth(isManager){
-  try {
+  try{
     const user = window.__CURRENT_ADMIN_USER || {};
-    const token = window.__CURRENT_ADMIN_TOKEN || "";
-
-    // avatar letter + title
-    const av = document.getElementById('adminAvatar');
     const name = (user.username || user.email || user.name || "Q").toString();
-    av.textContent = name.charAt(0).toUpperCase();
-    av.title = name;
+    const av = document.getElementById('adminAvatar'); av.textContent = name.charAt(0).toUpperCase(); av.title = name;
 
-    // build allowed links based on user.check (if backend provides)
-    let checkVal = (user.check !== undefined && user.check !== null) ? String(user.check).trim().toLowerCase() : 'all';
+    // simple access control (hide menu entries if not allowed)
+    const checkVal = (user.check !== undefined && user.check !== null) ? String(user.check).trim().toLowerCase() : 'all';
     const accessMap = {
-      'all': [
-        'dashboard.html','quanly_users.html','quanly_thuvienphapluatso.html','quanly_tailieunganh.html',
-        'quanly_tailieutaphuan.html','quanly_tailieuthamkhao.html','quanly_category.html','quanly_setting.html'
-      ],
+      'all': ['dashboard.html','quanly_users.html','quanly_thuvienphapluatso.html','quanly_tailieunganh.html','quanly_tailieutaphuan.html','quanly_tailieuthamkhao.html','quanly_category.html','quanly_setting.html'],
       '1': ['quanly_thuvienphapluatso.html'],
       '2': ['quanly_tailieunganh.html'],
       '3': ['quanly_tailieutaphuan.html','quanly_tailieuthamkhao.html'],
       '4': ['quanly_category.html','quanly_setting.html']
     };
     const allowed = accessMap[checkVal] || [];
-
-    // process nav links: hide those not allowed for limited users
-    const navLinks = Array.from(document.querySelectorAll('.nav a'));
-    let anyShown = false;
-    navLinks.forEach(a => {
-      const href = (a.getAttribute('href') || '').trim();
-      const isLogout = a.textContent.toLowerCase().includes('đăng xuất');
-      if(checkVal === 'all' || isLogout || allowed.includes(href) ){
+    const navLinks = Array.from(document.querySelectorAll('.menu a'));
+    navLinks.forEach(a=>{
+      const href = (a.getAttribute('href')||'').trim();
+      const isLogout = a.classList.contains('logout');
+      if(checkVal === 'all' || isLogout || allowed.includes(href)){
         a.style.display = '';
-        anyShown = true;
       } else {
         a.style.display = 'none';
       }
-
-      a.addEventListener('click', e=>{
-        // prevent hidden link navigation (extra guard)
-        const style = window.getComputedStyle(a);
-        if(style.display === 'none') { e.preventDefault(); alert('Bạn không có quyền truy cập mục này.'); return; }
-      });
     });
-
-    // inject notice for limited users
+    // if limited, show notice
     if(checkVal !== 'all'){
-      const mainEl = document.querySelector('.main');
-      if(mainEl && !document.getElementById('accessNotice')){
-        const note = document.createElement('div');
-        note.className = 'accessNotice';
-        note.id = 'accessNotice';
-        note.textContent = 'Quyền hạn hiện tại: bị giới hạn — bạn chỉ truy cập các mục được phân quyền.';
-        mainEl.insertBefore(note, mainEl.firstChild);
-      }
+      const note = document.createElement('div');
+      note.className = 'panel'; note.style.marginTop='12px'; note.innerHTML = '<strong>Quyền hạn bị giới hạn</strong> — bạn chỉ truy cập các mục được phân quyền.';
+      document.querySelector('.content-wrap').insertBefore(note, document.querySelector('.content-wrap').firstChild);
     }
 
-    // set iframe src default: if limited, pick first allowed, else dashboard
+    // iframe default
     const iframe = document.getElementById('contentFrame');
     if(iframe){
       if(checkVal === 'all') iframe.src = 'dashboard.html';
@@ -240,88 +256,72 @@ function initAfterAuth(isManager){
       else iframe.src = 'dashboard.html';
     }
 
-    // expose token/user globally for child pages if needed
-    window.__TOKEN = token;
-    window.__CURRENT_USER = user;
-
-    // hook UI interactions (sidebar toggle, search)
     bindUI();
-
-  } catch(e){
-    console.error('initAfterAuth error', e);
-  }
+  }catch(e){console.error(e)}
 }
 
-/* ================= UI BINDING ================= */
 function bindUI(){
   const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
-  const toggle = document.getElementById('sidebarToggle');
-  const collapseBtn = document.getElementById('collapseSidebar');
-  const links = document.querySelectorAll('.nav a');
+  const menuToggle = document.getElementById('menuToggle');
+  const openMenuBtn = document.getElementById('openMenuBtn');
+  const links = Array.from(document.querySelectorAll('.menu a'));
   const iframe = document.getElementById('contentFrame');
   const quickSearch = document.getElementById('quickSearch');
+  const clearSearch = document.getElementById('clearSearch');
 
-  toggle.addEventListener('click', ()=>{ sidebar.classList.add('open'); overlay.classList.add('active'); document.querySelector('.app').setAttribute('aria-hidden','false'); });
-  overlay.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('active'); });
-  document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ sidebar.classList.remove('open'); overlay.classList.remove('active'); } });
+  function closeSidebar(){ sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
+  function openSidebar(){ sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); }
 
-  collapseBtn.addEventListener('click', ()=>{
-    sidebar.classList.toggle('collapsed');
-    // adjust main margin if collapsed on large screens
-    if(window.innerWidth >= 1024){
-      document.querySelector('.main').style.marginLeft = sidebar.classList.contains('collapsed') ? '72px' : '260px';
-    }
+  menuToggle.addEventListener('click', ()=>{ if(window.innerWidth < 900) openSidebar(); else { /* focus search on desktop */ document.getElementById('quickSearch').focus(); } });
+  openMenuBtn.addEventListener('click', ()=> openSidebar());
+
+  // close sidebar when clicking outside
+  document.addEventListener('click', (e)=>{
+    if(!sidebar.contains(e.target) && !menuToggle.contains(e.target) && window.innerWidth < 900){ closeSidebar(); }
   });
 
+  // link navigation into iframe
   links.forEach(link=>{
     link.addEventListener('click', e=>{
-      const style = window.getComputedStyle(link);
-      if(style.display === 'none' || link.getAttribute('href') === 'javascript:void(0);'){
-        e.preventDefault(); return;
-      }
       const href = link.getAttribute('href');
-      if(href && href !== '#'){
-        e.preventDefault();
-        links.forEach(l=>l.removeAttribute('aria-current'));
-        link.setAttribute('aria-current','true');
-        // small delay to allow sidebar close animation
-        iframe.src = href;
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-      }
+      if(!href || href.startsWith('javascript')) return;
+      e.preventDefault();
+      links.forEach(l=>l.removeAttribute('aria-current'));
+      link.setAttribute('aria-current','true');
+      iframe.src = href;
+      if(window.innerWidth < 900) closeSidebar();
     });
   });
 
-  // quick search: forward keystrokes to iframe (try)
+  // quick search: postMessage to iframe if available
+  let lastQ = '';
   quickSearch.addEventListener('input', ()=>{
     const q = quickSearch.value.trim();
-    // naive: if iframe loaded same-origin, try to call function; otherwise just set focus to iframe
-    try {
-      const win = document.getElementById('contentFrame').contentWindow;
-      if(win && typeof win.postMessage === 'function'){
-        win.postMessage({ type:'quick-search', q }, '*');
-      }
-    } catch(e){}
+    clearSearch.style.display = q ? 'inline-block' : 'none';
+    try{ const win = iframe.contentWindow; win.postMessage({type:'quick-search', q}, '*'); }catch(e){}
+    lastQ = q;
   });
+  clearSearch.addEventListener('click', ()=>{ quickSearch.value = ''; quickSearch.dispatchEvent(new Event('input')); quickSearch.focus(); });
 
-  // resize iframe on window resize (keep height responsive)
+  // make iframe height responsive on desktop
   function updateIframeHeight(){
-    const headerH = document.querySelector('.header').getBoundingClientRect().height;
+    const headerH = document.querySelector('.topbar').getBoundingClientRect().height;
     const vh = window.innerHeight;
-    document.getElementById('contentFrame').style.height = `calc(${vh}px - ${headerH + 28}px)`;
+    iframe.style.height = `${Math.max(320, vh - headerH - 120)}px`;
   }
   window.addEventListener('resize', updateIframeHeight);
-  setTimeout(updateIframeHeight, 120);
+  setTimeout(updateIframeHeight,120);
+
+  // utility buttons
+  document.getElementById('refreshBtn').addEventListener('click', ()=>{ iframe.contentWindow ? iframe.contentWindow.location.reload() : iframe.contentWindow = iframe.contentWindow; });
+  document.getElementById('newItemBtn').addEventListener('click', ()=>{ alert('Chức năng thêm tài liệu — mở trang quản lý tài liệu.'); iframe.src = 'quanly_thuvienphapluatso.html'; });
 }
 
-/* ================= UTIL ================= */
-function logout(){
-  localStorage.removeItem('loggedInUser');
-  window.location.href = 'index.html';
-}
+function logout(){ localStorage.removeItem('loggedInUser'); window.location.href='index.html'; }
 
-/* allow other pages to read token/user by window.__TOKEN / window.__CURRENT_USER */
+// expose globals
+window.__TOKEN = window.__TOKEN || '';
+window.__CURRENT_USER = window.__CURRENT_USER || {};
 </script>
 
 </body>

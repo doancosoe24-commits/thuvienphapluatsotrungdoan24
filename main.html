@@ -1,13 +1,14 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thư Viện Số Sư Đoàn 10</title>
-    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+  <title>Thư Viện Số Trung Đoàn 24</title>
+  <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <link rel="stylesheet" href="css/style.css">
 
   <style>
+    /* --- Giữ nguyên style cũ --- */
     html, body { height: 100%; margin: 0; }
     body {
       display: flex;
@@ -105,6 +106,99 @@
       .arrow{ width:60px; height:40px; flex-shrink: 0; }
       .item p { font-size:10px; }
     }
+
+    /* --- Thêm style overlay (ít ảnh hưởng đến giao diện cũ) --- */
+    .flag-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+      z-index: 9999;
+      background: rgba(0,0,0,0);
+    }
+    .flag-overlay.active {
+      pointer-events: auto;
+      opacity: 1;
+      background: rgba(0,0,0,0.28);
+    }
+    .flag-center {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+      transform: scale(.6);
+      transition: transform .45s cubic-bezier(.2,.9,.3,1), opacity .25s ease;
+      opacity: 0;
+    }
+    .flag-overlay.active .flag-center {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .flag-image {
+      width: min(64vmin, 520px);
+      max-width: 92vw;
+      border-radius: 10px;
+      overflow: hidden;
+      background: none;
+      display:block;
+      transform-origin:center;
+      will-change: transform;
+      animation: gentleFloat 4.6s ease-in-out infinite;
+    }
+    @keyframes gentleFloat {
+      0% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+      100% { transform: translateY(0) rotate(-1deg); }
+    }
+    .flag-title {
+      color: #fff;
+      font-weight: 900;
+      font-size: clamp(26px, 6vw, 56px);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      transform: translateY(8px);
+      opacity: 0;
+      transition: transform .4s ease, opacity .4s ease;
+      -webkit-text-stroke: 1px rgba(0,0,0,0.18);
+    }
+    .flag-overlay.active .flag-title {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* confetti pieces */
+    .confetti {
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 10001;
+    }
+    .confetti-item {
+      position: absolute;
+      width: 10px; height: 14px;
+      border-radius: 2px;
+      opacity: 0;
+      transform-origin: center;
+      animation: confettiFall 1.6s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(-20vh) rotate(0deg) scale(1); }
+      70% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(60vh) rotate(360deg) scale(.6); }
+    }
+    @media (max-width:768px) {
+      .flag-title{
+        text-align: center;
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -124,12 +218,21 @@
 
   <div id="footer"></div>
   <script src="main.js"></script>
+
+  <!-- Overlay: hiển thị logo2.png ở giữa + chữ QUYẾT THẮNG -->
+  <div id="flagOverlay" class="flag-overlay" aria-hidden="true" role="dialog" aria-label="Hiệu ứng lá cờ">
+    <div class="flag-center" id="flagCenter" aria-hidden="true">
+      <!-- dùng ảnh logo2.png như bạn yêu cầu -->
+      <img src="./img/logo2.png" alt="Lá cờ" class="flag-image" id="flagImage">
+      <div class="flag-title" id="flagTitle">Trung Dũng Luôn Luôn Trung Dũng</div>
+    </div>
+  </div>
+
+  <!-- container confetti -->
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
 <script>
-  
-const webAppUrl = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
-
-// GỌI HEADER + FOOTER
-
+const webAppUrl = "https://script.google.com/macros/s/AKfycbzvjVVkV4dHAlhuT42mnw4f8pl9BDILKrL0SqF8dBw5LjhMbpBulNTV6DMWNhdbQ2zS/exec";
 
 // Escape HTML để an toàn
 function escapeHtml(str){
@@ -161,8 +264,9 @@ function createItemHTML(item, index){
   const slug = toSlug(item.title);
   const page = slug + ".html";
   const delay = index * 0.15; // delay từng item
+  // chỉ đổi onclick để gọi hiệu ứng trước khi chuyển trang
   return `
-    <div class="item" onclick="goToPage('${page}', '${slug}')" style="animation-delay:${delay}s">
+    <div class="item" onclick="showFlagThenGo('${page}', '${slug}')" style="animation-delay:${delay}s">
       <div class="arrow" style="animation-delay:${delay + 0.05}s"></div>
       <p>${escapeHtml(item.title)}</p>
       <div class="flag-vn" style="animation-delay:${delay + 0.1}s">
@@ -177,18 +281,99 @@ function createItemHTML(item, index){
   `;
 }
 
-// Chuyển sang trang tương ứng theo title/slug
+// Fallback: nếu cần chuyển thẳng (không dùng hiệu ứng)
 function goToPage(page, slug){
   window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
 }
 
-// Fetch Category từ Google Sheets
+/* ---------- Hiệu ứng overlay + chuyển trang ---------- */
+let overlayActive = false;
+const overlay = document.getElementById('flagOverlay');
+const flagCenter = document.getElementById('flagCenter');
+const flagTitle = document.getElementById('flagTitle');
+const confettiRoot = document.getElementById('confetti');
+
+function rand(min, max){ return Math.random()*(max-min)+min; }
+
+function spawnConfetti(count = 18){
+  const colors = ['#FFD200','#F94144','#F3722C','#90BE6D','#4DABF7','#6A4C93'];
+  const w = window.innerWidth;
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-item';
+    const size = Math.round(rand(6,14));
+    el.style.width = size + 'px';
+    el.style.height = Math.round(size * 1.4) + 'px';
+    el.style.left = (w/2 + rand(-200,200)) + 'px';
+    el.style.top = rand(-50, 50) + 'px';
+    el.style.background = colors[Math.floor(rand(0, colors.length))];
+    el.style.transform = `translateY(-20vh) rotate(${rand(-60,60)}deg)`;
+    el.style.animationDelay = (rand(0,0.25)) + 's';
+    confettiRoot.appendChild(el);
+    // remove later
+    setTimeout(()=> { if(el && el.parentNode) el.parentNode.removeChild(el); }, 2200);
+  }
+}
+
+// Hiển thị overlay, sau đó chuyển trang
+function showFlagThenGo(page, slug){
+  if(overlayActive) return;
+  overlayActive = true;
+
+  // show overlay
+  overlay.classList.add('active');
+  overlay.setAttribute('aria-hidden','false');
+
+  // lock body scroll
+  document.body.style.overflow = 'hidden';
+
+  // animate title appear slightly later
+  setTimeout(()=> {
+    flagTitle.classList.add('show'); // optional class, we use CSS based on overlay.active
+  }, 180);
+
+  // spawn confetti
+  spawnConfetti(24);
+
+  // delay trước khi chuyển trang (tùy chỉnh nếu muốn lâu hơn)
+  const delayMs = 1100;
+  setTimeout(()=> {
+    // small fade then redirect
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+    // redirect
+    window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
+  }, delayMs);
+}
+
+// Hủy overlay bằng ESC hoặc click ngoài (nếu người dùng muốn)
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && overlayActive){
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden','true');
+    overlayActive = false;
+    document.body.style.overflow = '';
+  }
+});
+
+// Click ngoài vùng trung tâm sẽ đóng overlay (không chuyển)
+overlay.addEventListener('click', function(evt){
+  if(evt.target === overlay){
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden','true');
+    overlayActive = false;
+    document.body.style.overflow = '';
+  }
+});
+
+// Fetch Category từ Google Sheets (giữ nguyên logic)
 async function fetchCategory(){
   try {
     const res = await fetch(webAppUrl);
     const data = await res.json();
     const list = document.getElementById("list");
-    const cat = data.data.Category || [];
+    const cat = (data && data.data && data.data.Category) ? data.data.Category : [];
     if(cat.length === 0){
       list.innerHTML = "<p>Không có dữ liệu Category.</p>";
       return;

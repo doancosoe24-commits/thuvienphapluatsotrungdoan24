@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
-    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
-=======
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
+<link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
 <title>Chi tiết tài liệu</title>
 
 <style>
@@ -34,6 +31,26 @@ h2{
     font-weight:700;
 }
 
+/* Back link */
+.back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    border-radius:999px;
+    background:#fff;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    color:#004aad;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+    margin-bottom:20px;
+}
+.back-link:hover{
+    background:#004aad;
+    color:#fff;
+}
+
 /* Tabs */
 .tabs-container{
     position:relative;
@@ -56,22 +73,14 @@ h2{
 }
 
 .tab-btn.active{
-<<<<<<< HEAD
-    background:#004aad;
-=======
     background:#ccae6e;
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 }
 
 .tab-underline{
     position:absolute;
     bottom:-2px;
     height:4px;
-<<<<<<< HEAD
-    background:#004aad;
-=======
     background:#ccae6e;
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
     border-radius:10px;
     width:100px;
     transition:.3s;
@@ -101,31 +110,8 @@ h2{
 
 @media(max-width:768px){
     body{ width:100%; }
-<<<<<<< HEAD
     h2{ text-align:center; padding:0 10px; }
 }
- .back-link{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:8px 14px;
-      border-radius:999px;
-      background:#fff;
-      box-shadow:0 10px 25px rgba(0,0,0,0.08);
-      color:#004aad;
-      font-weight:600;
-      cursor:pointer;
-      transition:.25s;
-      margin-bottom:20px;
-    }
-    .back-link:hover{
-      background:#004aad;
-      color:#fff;
-    }
-=======
-    h2{ text-align:start; padding:0 10px; }
-}
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 </style>
 </head>
 <body>
@@ -133,13 +119,7 @@ h2{
 <main>
     <div id="header"></div>
 
-<<<<<<< HEAD
     <span class="back-link" onclick="history.back()">← Quay lại</span>
-=======
-    <span onclick="history.back()" style="color:#ccae6e;padding:10px;font-weight:600;text-decoration:underline;cursor:pointer;">
-        Quay lại
-    </span>
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 
     <h2 id="docTitle"></h2>
 
@@ -160,11 +140,7 @@ h2{
    CONFIG
 -----------------------------------------------------*/
 const webAppUrl =
-<<<<<<< HEAD
-  "https://script.google.com/macros/s/AKfycbxU3AQTc_LrF7IRoOrcVMr8IWIMxiMWtVC-J2dEJ01VD1TvAYTeX-EAnzWqXKdnNesK/exec";
-=======
-  "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7dvWw8d7KK7vPw9_RKqH0nCDCrWB9skE7BlUPHNFn-KLdLb/exec";
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
+  "https://script.google.com/macros/s/AKfycbxe1dxDcrRp5yYz4xNFT4iFqI14XcOzkou8hFOaV0yCgcvCsMjMpYcoyTXAEX4wRAqA/exec";
 
 const slugURL = new URLSearchParams(window.location.search).get("slug");
 const tabContent = document.getElementById("tabContent");
@@ -175,7 +151,7 @@ const underline = document.querySelector(".tab-underline");
 let CURRENT_DATA = null;
 
 /* ---------------------------------------------------
-   HÀM TẠO SLUG GIỐNG TRANG INDEX
+   TẠO SLUG GIỐNG TRANG LIST
 -----------------------------------------------------*/
 function toSlugUpper(text){
     if(!text) return "";
@@ -190,7 +166,7 @@ function toSlugUpper(text){
 function getDriveID(link){
     if(!link) return "";
     const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    return match ? match[1] : link; // nếu đã là ID thì trả thẳng
+    return match ? match[1] : link;
 }
 
 /* ---------------------------------------------------
@@ -217,8 +193,8 @@ function showPDF(data){
     const pdfID = getDriveID(data.url);
 
     tabContent.innerHTML = `
-    <div style="position:relative; width:100%; height:700px;border-radius:10px;overflow:hidden;background:#fcf8e8;
-                box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+    <div style="position:relative;width:100%;height:700px;border-radius:10px;overflow:hidden;
+                background:#fcf8e8;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
         <iframe src="https://drive.google.com/file/d/${pdfID}/preview"
             style="width:100%;height:100%;border:none;"></iframe>
         <div class="watermark">Thư Viện Số Sư Đoàn 10</div>
@@ -232,7 +208,6 @@ tabs.forEach(tab=>{
     tab.addEventListener("click",()=>{
         document.querySelector(".tab-btn.active")?.classList.remove("active");
         tab.classList.add("active");
-
         showPDF(CURRENT_DATA);
         updateUnderline(tab);
     });
@@ -250,13 +225,9 @@ async function loadDetail(){
 
     try{
         const res = await fetch(webAppUrl).then(r=>r.json());
-<<<<<<< HEAD
-        const list = res.data.HocTaVaLamTheoTuTuongDaoDucPhongCachHoChiMinh || [];
-=======
-        const list = res.HocTaVaLamTheoTuTuongDaoDucPhongCachHoChiMinh || [];
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
+        const dataRoot = res.data ? res.data : res;
+        const list = dataRoot.HocTaVaLamTheoTuTuongDaoDucPhongCachHoChiMinh || [];
 
-        // Tìm item khớp slug
         const found = list.find(item => toSlugUpper(item.title) === slugURL);
 
         if(!found){
@@ -266,7 +237,6 @@ async function loadDetail(){
         }
 
         CURRENT_DATA = found;
-
         docTitle.innerText = found.title;
         showPDF(found);
 

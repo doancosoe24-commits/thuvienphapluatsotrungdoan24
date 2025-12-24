@@ -2,7 +2,7 @@
  *  CONFIG
  ****************************************************/
 const API_URL =
-  "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
+  "https://script.google.com/macros/s/AKfycbxe1dxDcrRp5yYz4xNFT4iFqI14XcOzkou8hFOaV0yCgcvCsMjMpYcoyTXAEX4wRAqA/exec";
 
 /****************************************************
  *  AUTO LOAD HEADER + FOOTER

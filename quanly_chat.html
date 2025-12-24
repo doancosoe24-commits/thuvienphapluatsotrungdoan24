@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Supabase Chat — Realtime, Modern UI</title>
+<link rel="icon" href="data:," />
+<style>
+:root{
+  --bg:#f6f8ff;
+  --card:#fff;
+  --muted:#8b93a7;
+  --accent:#3b82f6;
+  --accent-2:#7c3aed;
+  --me:#d9ecff;
+  --radius:14px;
+  --bubble-min-width:120px;
+  font-family: Inter, system-ui, -apple-system, Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);min-height:100vh;color:#111}
+.app{display:flex;flex-direction:row;max-width:1200px;margin:0 auto;height:100vh;gap:12px;padding:14px}
+.hidden{display:none !important}
+.sidebar{flex-shrink:0;width:340px;background:var(--card);border-radius:var(--radius);display:flex;flex-direction:column;padding:16px;overflow:hidden;box-shadow:0 8px 24px rgba(18,34,63,0.06)}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.brand h1{font-size:18px;font-weight:700;color:var(--accent);letter-spacing:0.2px;margin-top:2px}
+.logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px}
+.search{margin-bottom:12px}
+.search input{width:100%;padding:10px;border-radius:12px;border:1px solid #eef2ff;background:linear-gradient(180deg,#fbfdff,#f8fbff)}
+.users{flex:1;overflow-y:auto;padding-right:6px}
+.user-item{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;cursor:pointer;transition:all .12s;border:1px solid transparent;position:relative;margin-bottom:8px}
+.user-item:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,30,60,0.06)}
+.user-item.active{background:linear-gradient(90deg,#f3f6ff,#fbfbff);border-color:rgba(60,80,200,0.06)}
+.avatar{width:48px;height:48px;border-radius:12px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:18px}
+.user-meta{flex:1;overflow:hidden}
+.user-name{font-weight:700;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
+.user-sub{color:var(--muted);font-size:13px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin-top:4px}
+.preview-time{font-size:12px;color:var(--muted);margin-left:8px}
+.unread-badge{position:absolute;right:12px;top:14px;background:#ef4444;color:white;font-size:11px;padding:4px 8px;border-radius:999px;min-width:24px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.chat{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,0.95),#ffffff);border-radius:var(--radius);padding:0;box-shadow:0 10px 40px rgba(15,25,50,0.06);overflow:hidden}
+.chat-header{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #f0f3fa;flex-shrink:0;background:linear-gradient(180deg,#ffffff,#fbfdff)}
+.chat-identity{display:flex;align-items:center;gap:12px}
+.chat-title{font-weight:800;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chat-sub{color:var(--muted);font-size:13px}
+.controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:transparent;border:1px solid rgba(0,0,0,0.04);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.msg-wrap{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,#fbfdff,#fbfdff)}
+.date-sep{align-self:center;background:#eef2ff;color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
+.msg-row{display:flex;gap:10px;align-items:flex-end}
+.msg{min-width:var(--bubble-min-width);max-width:78%;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:0 6px 18px rgba(20,30,70,0.03);word-break:break-word;position:relative;display:flex;flex-direction:column;gap:6px}
+.msg.me{align-self:flex-end;background:linear-gradient(180deg,var(--me),#e6f4ff)}
+.msg .who{font-size:12px;color:var(--muted);margin-bottom:0;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.msg .content{font-size:15px;line-height:1.35}
+.msg .time-row{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+.msg .time{font-size:11px;color:var(--muted)}
+.msg img.msg-image{max-width:420px;border-radius:12px;display:block;margin-top:6px;cursor:pointer;overflow: hidden;}
+/* ===== File Item (Mobile First) ===== */
+.file-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:#fbfdff;
+  border:1px solid #eef2f8;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+/* icon file */
+.file-icon{
+  width:48px;
+  height:48px;
+  min-width:48px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#ffffff,#f3f7ff);
+  border:1px solid #e6eeff;
+}
+
+/* meta */
+.file-meta{
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+}
+
+/* tên file – tự xuống dòng mobile */
+.file-name{
+  font-weight:700;
+  font-size:14px;
+  line-height:1.25;
+  white-space:normal;
+  word-break:break-word;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* info phụ */
+.file-sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* actions */
+.file-actions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-shrink:0;
+}
+
+/* ===== SMALL PHONE (<360px) ===== */
+@media (max-width:360px){
+  .file-item{
+    padding:8px 10px;
+    gap:8px;
+  }
+
+  .file-icon{
+    width:42px;
+    height:42px;
+    min-width:42px;
+    border-radius:10px;
+  }
+
+  .file-name{
+    font-size:13px;
+  }
+
+  .file-actions{
+    gap:4px;
+  }
+}
+
+/* ===== DESKTOP ===== */
+@media (min-width:768px){
+  .file-item{
+    max-width:420px;
+  }
+}
+
+.msg .actions{position:absolute;top:8px;right:8px;display:flex;gap:6px;opacity:0;transition:opacity .12s}
+.msg:hover .actions{opacity:1}
+.action-btn{width:36px;height:36px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:0;background:rgba(0,0,0,0.04)}
+.action-btn.delete{background:rgba(239,68,68,0.08)}
+.edit-controls{display:flex;gap:6px;margin-top:6px}
+.small-btn{padding:8px 10px;border-radius:10px;border:0;color:white;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent-2));font-weight:700}
+.cancel-btn{background:transparent;color:var(--muted);border:1px solid rgba(0,0,0,0.06);padding:8px 10px;border-radius:10px}
+.composer{display:flex;flex-direction:column;gap:10px;padding:14px;border-top:1px solid #f0f3fa;flex-shrink:0;background:linear-gradient(180deg,#ffffff,#fbfdff)}
+.composer-row{display:flex;gap:8px;align-items:center}
+.composer input[type="text"]{flex:1;padding:12px;border-radius:12px;border:1px solid #e6e9f0;font-size:15px}
+.composer .icons{display:flex;gap:8px;align-items:center}
+.composer label{cursor:pointer;display:flex;align-items:center;justify-content:center}
+#filePreview{display:flex;flex-direction:column;gap:8px;border:1px dashed #e6e9f0;padding:8px;border-radius:10px;background:#fbfdff}
+#filePreview .thumbs{display:flex;gap:8px;flex-wrap:wrap}
+#filePreview img.thumb{width:96px;height:72px;object-fit:cover;border-radius:8px}
+.emoji-btn{width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(0,0,0,0.04);cursor:pointer}
+.emoji-pop{position:absolute;background:#fff;border:1px solid #eef2f8;padding:8px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);display:grid;grid-template-columns:repeat(8,32px);gap:6px}
+.emoji-pop button{background:transparent;border:0;font-size:18px;cursor:pointer;padding:4px}
+.users::-webkit-scrollbar,.msg-wrap::-webkit-scrollbar{width:8px}
+.users::-webkit-scrollbar-thumb,.msg-wrap::-webkit-scrollbar-thumb{background:rgba(100,120,160,0.2);border-radius:6px}
+.reply-preview{background:#f5f8ff;padding:8px;border-radius:8px;border-left:4px solid var(--accent);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.reply-preview .meta{font-size:13px;color:var(--muted);max-width:80%}
+.read-icon{font-size:12px;color:#9ca3af}
+.read-icon.seen{color:#0ea5e9}
+@media(max-width:880px){ .app{flex-direction:column;height:100vh;padding:8px} .sidebar{width:100%;height:auto;margin-bottom:8px} .chat{height:calc(100vh - 220px)} .msg-wrap{padding:12px} .composer{padding:10px} }
+@media(max-width:480px){
+.composer input[type="text"]{
+  padding:12px;
+  width: 20px;
+}
+.small-btn svg{
+  width:18px;
+  height:18px;
+}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" aria-label="Danh sách user">
+    <div class="brand">
+      <div class="logo">Số</div>
+      <div>
+        <h1>Nhắn tin nội bộ</h1>
+      </div>
+    </div>
+
+    <div class="search">
+      <input id="searchUser" placeholder="Tìm user (id / tên)..." />
+    </div>
+
+    <div class="users" id="userList" role="list"></div>
+
+    <div style="margin-top:12px;text-align:center;color:var(--muted);font-size:13px">
+      Đăng nhập: <span id="loginName">—</span>
+    </div>
+  </aside>
+
+  <main class="chat hidden" id="chatMain">
+    <div class="chat-header">
+      <div class="chat-identity">
+        <button id="backBtn" class="icon-btn" title="Quay lại" style="display:none">
+          ←
+        </button>
+
+        <div class="avatar" id="chatAvatar">?</div>
+        <div>
+          <div class="chat-title" id="chatTitle">Chọn user để bắt đầu</div>
+          <div class="chat-sub" id="chatSubtitle">—</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="icon-btn" id="btnProfile" title="Hồ sơ">⚙</button>
+      </div>
+    </div>
+
+    <div class="msg-wrap" id="msgList"></div>
+
+    <div class="composer">
+      <div id="replyPreview" style="display:none" class="reply-preview">
+        <div class="meta" id="replyMeta"></div>
+        <button class="cancel-btn" id="cancelReplyBtn">Hủy</button>
+      </div>
+
+      <div id="filePreview" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="meta" id="previewName"></div>
+          <div style="display:flex;gap:8px"><button class="small-btn" id="removePreviewBtn">X</button></div>
+        </div>
+        <div class="thumbs" id="previewThumbs"></div>
+      </div>
+
+      <div class="composer-row" style="position:relative">
+        <div class="icons" style="display:flex;align-items:center;gap:8px">
+          <button id="emojiBtn" class="emoji-btn" title="Emoji">😊</button>
+
+          <label title="Chọn ảnh" style="cursor:pointer">
+            <input type="file" id="imageInput" accept="image/*" style="display: none;" multiple />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                width="24" height="24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2"/>
+              <circle cx="8" cy="10" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </label>
+
+          <label title="Chọn file" style="cursor:pointer">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,application/*" style="display: none;" />
+            <svg xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20" height="20"
+                fill="none" stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="vertical-align:middle">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19
+                      a4 4 0 0 1 5.66 5.66l-9.2 9.19
+                      a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+          </label>
+        </div>
+
+        <input type="text" id="msgInput" placeholder="Gõ tin nhắn..." />
+
+        <button class="small-btn" id="sendBtn" title="Gửi (Enter)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            width="24" height="24" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="emojiPop" class="emoji-pop" style="display:none;position:fixed;z-index:5000"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/dist/umd/supabase.min.js"></script>
+<script>
+/* ====== CONFIG - thay bằng thông tin của bạn ====== */
+const SUPABASE_URL = "https://jpmyyuqzxhlbuegjapfs.supabase.co";
+const SUPABASE_KEY = "sb_publishable_GBmZcFie8VAgpO-9oCH0Ww_awOqrA3J";
+const STORAGE_BUCKET = "chat-uploads";
+/* ================================================== */
+
+const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ====== ELEMENTS ====== */
+const sidebarEl = document.querySelector('.sidebar');
+const chatMain = document.getElementById('chatMain');
+const backBtn = document.getElementById('backBtn');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const msgList = document.getElementById('msgList');
+const userListEl = document.getElementById('userList');
+const chatTitle = document.getElementById('chatTitle');
+const chatSubtitle = document.getElementById('chatSubtitle');
+const chatAvatar = document.getElementById('chatAvatar');
+const loginName = document.getElementById('loginName');
+const searchUser = document.getElementById('searchUser');
+const fileInput = document.getElementById('fileInput');
+const imageInput = document.getElementById('imageInput');
+const filePreview = document.getElementById('filePreview');
+const previewName = document.getElementById('previewName');
+const previewThumbs = document.getElementById('previewThumbs');
+const removePreviewBtn = document.getElementById('removePreviewBtn');
+const emojiBtn = document.getElementById('emojiBtn');
+const emojiPop = document.getElementById('emojiPop');
+const replyPreview = document.getElementById('replyPreview');
+const replyMeta = document.getElementById('replyMeta');
+const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+
+/* ====== AUTH / LOCAL USER (demo uses localStorage loggedInUser) ====== */
+let loggedInUser;
+try { const raw = localStorage.getItem('loggedInUser'); loggedInUser = raw ? JSON.parse(raw) : null; } catch(e){ loggedInUser = null }
+if(!loggedInUser || !loggedInUser.user){ loggedInUser = { loginAt: Date.now(), token:'demo', user:{id:'demo-user-1',username:'demo'}}; }
+const localUser = { id: loggedInUser.user.id, name: loggedInUser.user.username };
+loginName.textContent = localUser.name;
+
+/* ====== STATE ====== */
+let usersMap = {};
+let selectedUserId = null;
+let displayedIds = new Set();
+let unreadCounts = {};
+let pendingFiles = [];
+let pendingIsDoc = false;
+let replyTo = null;
+
+/* ====== UTIL ====== */
+function timeFmt(t){
+  try{
+    if(!t) return '';
+    const d = new Date(t);
+    return d.toLocaleString();
+  }catch(e){ return ''; }
+}
+function findMsgEl(id){ return document.querySelector(`[data-mid="${id}"]`); }
+function showChatView(){ sidebarEl.classList.add('hidden'); chatMain.classList.remove('hidden'); backBtn.style.display='inline-flex'; }
+function showUserListView(){ selectedUserId = null; document.querySelectorAll('.user-item').forEach(el=>el.classList.remove('active')); msgList.innerHTML = ''; chatTitle.textContent = 'Chọn user để bắt đầu'; chatSubtitle.textContent = '—'; chatAvatar.textContent = '?'; sidebarEl.classList.remove('hidden'); chatMain.classList.add('hidden'); backBtn.style.display='none'; }
+backBtn.addEventListener('click', showUserListView);
+
+/* download helpers */
+async function tryProgrammaticDownload(url, filename){ try{ const res = await fetch(url, { mode: 'cors' }); if(!res.ok) throw new Error('Fetch lỗi ' + res.status); const blob = await res.blob(); const blobUrl = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = blobUrl; a.download = filename || ''; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=> URL.revokeObjectURL(blobUrl), 1000 * 30); return true; }catch(err){ console.warn('tryProgrammaticDownload lỗi', err && err.message); return false; } }
+function tryOpenInNewTab(url){ try{ const w = window.open(url, '_blank', 'noopener'); if(!w) return false; try { w.opener = null; } catch(e){} return true; }catch(e){ return false; } }
+async function attemptDownloadOrFallback(url, filename){ const opened = tryOpenInNewTab(url); if(opened) return; const ok = await tryProgrammaticDownload(url, filename); if(ok) return; alert('Không thể tải trực tiếp. Mở link: ' + url); }
+function extFromName(name){ return (name.split('.').pop() || '').toLowerCase(); }
+
+/* file icon helper (same as before) */
+function createFileIconElement(ext, mime){ const wrap = document.createElement('div'); wrap.className = 'file-icon'; let svg = '';
+ switch(ext){ case 'pdf': svg = `<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="8" ry="8" fill="#E33E3E"/><path d="M16 12h32v40H16z" fill="#fff"/><text x="32" y="44" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#E33E3E" text-anchor="middle">PDF</text></svg>`; break; case 'doc': case 'docx': svg = `<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="8" ry="8" fill="#2B579A"/><path d="M16 12h32v40H16z" fill="#fff"/><text x="32" y="44" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2B579A" text-anchor="middle">W</text></svg>`; break; case 'xls': case 'xlsx': svg = `<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="8" ry="8" fill="#217346"/><path d="M16 16h32v32H16z" fill="#fff"/><text x="32" y="44" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#217346" text-anchor="middle">X</text></svg>`; break; case 'ppt': case 'pptx': svg = `<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="8" ry="8" fill="#D24726"/><path d="M16 12h32v40H16z" fill="#fff"/><text x="32" y="44" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#D24726" text-anchor="middle">P</text></svg>`; break; case 'zip': case 'rar': svg = `<svg viewBox="0 0 24 24" width="35" height="35"><rect width="20" height="20" x="2" y="2" rx="3" fill="#fff"/><path d="M7 7h10v10H7z" fill="#6b7280"/><text x="12" y="15" font-family="Arial" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">ZIP</text></svg>`; break; case 'txt': svg = `<svg viewBox="0 0 24 24" width="35" height="35"><rect width="20" height="20" x="2" y="2" rx="3" fill="#fff"/><path d="M7 7h10v10H7z" fill="#9CA3AF"/><text x="12" y="15" font-family="Arial" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">TXT</text></svg>`; break; case 'png': case 'jpg': case 'jpeg': case 'gif': case 'webp': svg = `<svg viewBox="0 0 24 24" width="35" height="35"><rect width="20" height="20" x="2" y="2" rx="3" fill="#fff"/><path d="M7 7h10v10H7z" fill="#10b981"/><text x="12" y="15" font-family="Arial" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">IMG</text></svg>`; break; default: svg = `<svg viewBox="0 0 24 24" width="35" height="35"><rect width="20" height="20" x="2" y="2" rx="3" fill="#fff"/><path d="M7 7h10v10H7z" fill="#3b82f6"/><text x="12" y="15" font-family="Arial" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">FILE</text></svg>`; }
+ wrap.innerHTML = svg; return wrap;
+}
+
+/* ====== RENDER MESSAGE (supports reply_to, is_deleted/is_edited/status/seen) ====== */
+async function renderMessage(m){
+  if(!m) return;
+  if(!m.id) m.id = 'tmp_' + Math.random().toString(36).slice(2);
+  if(displayedIds.has(String(m.id))) return;
+  displayedIds.add(String(m.id));
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg';
+  if(m.sender === localUser.id) wrap.classList.add('me');
+  wrap.dataset.mid = m.id;
+
+  // reply_to box
+  if(m.reply_to){
+    const replyBox = document.createElement('div');
+    replyBox.style.fontSize='13px';
+    replyBox.style.color='var(--muted)';
+    replyBox.style.borderLeft='3px solid rgba(59,130,246,0.12)';
+    replyBox.style.padding='6px 8px';
+    replyBox.style.borderRadius='8px';
+    replyBox.textContent = 'Đang tải trích dẫn...';
+    wrap.appendChild(replyBox);
+    // fetch original
+    (async ()=>{
+      try{
+        const { data: orig } = await sbClient.from('messages').select('id, sender, user_name, content, meta, type').eq('id', m.reply_to).single();
+        if(orig){
+          const who = orig.sender === localUser.id ? 'Bạn' : (usersMap[orig.sender] || orig.user_name || orig.sender);
+          const snippet = orig.type && orig.type.startsWith('file') ? (orig.meta?.name || (orig.meta?.files?.[0]?.name || 'File')) : (orig.content || '');
+          replyBox.innerHTML = `<strong style="font-weight:700">${who}</strong>: <span style="opacity:0.9">${snippet}</span>`;
+        } else {
+          replyBox.textContent = 'Tin gốc không tồn tại';
+        }
+      }catch(e){
+        replyBox.textContent = 'Không lấy được tin gốc';
+      }
+    })();
+  }
+
+  // header who + edited
+  const whoDiv = document.createElement('div'); whoDiv.className = 'who';
+  let whoText = (m.sender === localUser.id ? 'Bạn' : (usersMap[m.sender] || m.user_name || m.sender));
+  if(m.is_edited) whoText += ' · (đã sửa)';
+  whoDiv.textContent = whoText;
+  wrap.appendChild(whoDiv);
+
+  // body
+  const body = document.createElement('div'); body.className = 'content';
+  // files/images
+  if(m.meta && (m.type === 'file' || m.type === 'files' || (m.meta.type === 'file' || m.meta.type === 'files')) ){
+    const files = (m.type === 'files') ? (m.meta.files || []) : (m.meta.type === 'files' ? (m.meta.files || []) : [m.meta]);
+    const imageFiles = files.filter(f => (f.mime || '').startsWith('image/') || ['png','jpg','jpeg','gif','webp'].includes(extFromName(f.name)));
+    if(imageFiles.length){
+      const gallery = document.createElement('div'); gallery.style.display='flex'; gallery.style.gap='8px'; gallery.style.flexWrap='wrap';
+      files.forEach(f=>{
+        if((f.mime || '').startsWith('image/') || ['png','jpg','jpeg','gif','webp'].includes(extFromName(f.name))){
+          const img = document.createElement('img'); img.className='msg-image'; img.src = f.url; img.alt = f.name;
+          img.addEventListener('click', ()=> attemptDownloadOrFallback(f.url, f.name));
+          gallery.appendChild(img);
+        }
+      });
+      body.appendChild(gallery);
+    }
+    files.forEach(f=>{
+      if((f.mime || '').startsWith('image/')) return;
+      const fileContainer = document.createElement('div'); fileContainer.className='file-item';
+      const icon = createFileIconElement(extFromName(f.name), f.mime);
+      fileContainer.appendChild(icon);
+      const metaBox = document.createElement('div'); metaBox.className='file-meta';
+      const nameEl = document.createElement('div'); nameEl.className='file-name'; nameEl.textContent = f.name || 'file';
+      const subEl = document.createElement('div'); subEl.className='file-sub'; subEl.textContent = `${(f.size ? (Math.round(f.size/1024)+' KB') : '')}`;
+      metaBox.appendChild(nameEl); metaBox.appendChild(subEl);
+      fileContainer.appendChild(metaBox);
+      const actions = document.createElement('div'); actions.className='file-actions';
+      const dl = document.createElement('button'); dl.className='small-btn'; dl.textContent='↓'; dl.addEventListener('click', ()=> attemptDownloadOrFallback(f.url, f.name));
+      const sh = document.createElement('button'); sh.className='cancel-btn'; sh.textContent='Share'; sh.addEventListener('click', ()=> shareFile(f.url));
+      actions.appendChild(dl); actions.appendChild(sh);
+      fileContainer.appendChild(actions);
+      body.appendChild(fileContainer);
+    });
+  } else {
+    // text — linkify
+    const p = document.createElement('div');
+    p.innerText = m.content || '';
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    p.innerHTML = p.innerHTML.replace(urlRegex, function(url){ return `<a href="${url}" target="_blank" rel="noopener">${url}</a>`; });
+    body.appendChild(p);
+  }
+
+  wrap.appendChild(body);
+
+  // time + status
+  const timeRow = document.createElement('div'); timeRow.className = 'time-row';
+  const t = document.createElement('div'); t.className='time'; t.textContent = timeFmt(m.created_at);
+  timeRow.appendChild(t);
+
+  // status icon only for my messages
+ if (String(m.sender) === String(localUser.id)) {
+  const st = document.createElement('div');
+  st.className = 'read-icon';
+
+  if (m.status === 'seen') {
+    st.textContent = '✓Đã xem';
+    st.classList.add('seen');
+  } 
+  else if (m.status === 'delivered') {
+    st.textContent = '✓ Đã nhận';
+    st.classList.remove('seen');
+  } 
+  else {
+    // sent / pending
+    st.textContent = '✓ Đã gửi';
+    st.classList.remove('seen');
+  }
+
+  timeRow.appendChild(st);
+}
+
+  wrap.appendChild(timeRow);
+
+  // actions: reply for everyone, edit/delete for owner
+  const actions = document.createElement('div'); actions.className = 'actions';
+  const replyBtn = document.createElement('button'); replyBtn.className='action-btn'; replyBtn.title='Trả lời'; replyBtn.innerHTML='↩';
+  replyBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); startReplyTo(m.id, (m.content || (m.meta?.name || (m.meta?.files?.[0]?.name || '')))); });
+  actions.appendChild(replyBtn);
+
+  if(String(m.sender) === String(localUser.id)){
+    if((!m.type || m.type === 'text') && (!m.meta || Object.keys(m.meta).length === 0)){
+      const editBtn = document.createElement('button'); editBtn.className='action-btn'; editBtn.title='Sửa'; editBtn.innerHTML='✎';
+      editBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); startEditMessage(m.id); });
+      actions.appendChild(editBtn);
+    }
+    const delBtn = document.createElement('button'); delBtn.className='action-btn delete'; delBtn.title='Thu hồi'; delBtn.innerHTML='🗑';
+    delBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); deleteMessage(m.id); });
+    actions.appendChild(delBtn);
+  } else {
+    // for others, allow download/share if file
+    // already shown inside body
+  }
+
+  wrap.appendChild(actions);
+
+  msgList.appendChild(wrap);
+  msgList.scrollTop = msgList.scrollHeight;
+}
+
+/* update/remove helpers */
+function updateMessageInDOM(m){ const el = findMsgEl(m.id); if(el){ el.remove(); displayedIds.delete(String(m.id)); } renderMessage(m); }
+function removeMessageFromDOM(id){
+  const el = findMsgEl(id);
+  if(el){ el.remove(); displayedIds.delete(String(id)); }
+}
+
+/* ====== LOAD USERS (from Google Sheet as example) + unread counts ====== */
+async function loadUsers() {
+  try {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbzUuQFf7PNcRJR-MxW03F2aTuDY5_BQXbqJXB0K1PdAJomdFgvHVZkirmIB24CbZnBk/exec');
+    const json = await res.json();
+    const data = json.data?.Users || [];
+    userListEl.innerHTML = '';
+    usersMap = {};
+    unreadCounts = {};
+    const loggedInUserId = localUser.id;
+
+    // Fetch latest message per other user to show preview and compute unread
+    const { data: msgs } = await sbClient.from('messages').select('*').order('created_at', { ascending: false });
+    const latestMessages = {};
+    msgs?.forEach(m => {
+      if(m.is_deleted) return;
+      const otherId = (m.sender === loggedInUserId) ? m.recipient : m.sender;
+      if(!latestMessages[otherId]) latestMessages[otherId] = m;
+      // compute unread counts
+      if(m.recipient === loggedInUserId && m.status !== 'seen'){
+        unreadCounts[otherId] = (unreadCounts[otherId] || 0) + 1;
+      }
+    });
+
+    // sort users by activity
+    data.sort((a,b)=>{
+      const tA = latestMessages[a.id]?.created_at || 0;
+      const tB = latestMessages[b.id]?.created_at || 0;
+      return tB - tA;
+    });
+
+    data.forEach(u => {
+      if (u.id === loggedInUserId) return;
+      usersMap[u.id] = u.username || u.name || u.id;
+      const li = document.createElement('div'); li.className = 'user-item'; li.dataset.id = u.id;
+      const av = document.createElement('div'); av.className = 'avatar'; av.textContent = (usersMap[u.id] || 'U').slice(0, 1).toUpperCase();
+      const meta = document.createElement('div'); meta.className = 'user-meta';
+      const nameEl = document.createElement('div'); nameEl.className = 'user-name'; nameEl.textContent = usersMap[u.id];
+      const sub = document.createElement('div'); sub.className = 'user-sub'; sub.textContent = u.email || u.id;
+      const msgPreview = document.createElement('div'); msgPreview.className = 'user-sub-message';
+      const latestMsg = latestMessages[u.id];
+      if(latestMsg){
+        const senderName = latestMsg.sender === loggedInUserId ? 'Bạn: ' : '';
+        msgPreview.textContent = senderName + (latestMsg.content || (latestMsg.meta?.name || (latestMsg.meta?.files?.[0]?.name || '')) );
+        msgPreview.style.fontSize='13px'; msgPreview.style.color='#8b93a7';
+        msgPreview.style.whiteSpace='nowrap'; msgPreview.style.textOverflow='ellipsis'; msgPreview.style.overflow='hidden';
+      }
+      meta.append(nameEl, sub, msgPreview); li.appendChild(av); li.appendChild(meta);
+      const badge = document.createElement('div'); badge.className = 'unread-badge';
+      const uc = unreadCounts[u.id] || 0;
+      if(uc > 0){ badge.style.display='block'; badge.textContent = uc>99?'99+':String(uc); } else badge.style.display='none';
+      li.appendChild(badge);
+
+      li.addEventListener('click', async () => {
+        document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+        li.classList.add('active');
+        selectedUserId = u.id;
+        chatTitle.textContent = usersMap[u.id];
+        chatSubtitle.textContent = 'Đang nhắn tin với — ' + usersMap[u.id];
+        chatAvatar.textContent = (usersMap[u.id] || '?').slice(0, 1).toUpperCase();
+        unreadCounts[u.id] = 0; badge.style.display = 'none';
+        await loadMessages();
+        showChatView();
+      });
+      userListEl.appendChild(li);
+    });
+    attachSearchFilter();
+  } catch (e) { console.error('Lỗi lấy user từ Sheet:', e); }
+}
+
+/* ====== LOAD MESSAGES for the 1:1 (no conversation_id required) ====== */
+async function loadMessages(){
+  if(!selectedUserId) return;
+  try{
+    displayedIds = new Set();
+    msgList.innerHTML = '';
+    // Query messages between the two users, excluding deleted
+    const { data, error } = await sbClient.from('messages')
+      .select('*')
+      .or(`and(sender.eq.${localUser.id},recipient.eq.${selectedUserId}),and(sender.eq.${selectedUserId},recipient.eq.${localUser.id})`)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: true });
+
+    if(error){ console.error('Lỗi lấy tin nhắn:', error); return; }
+    data.forEach(m=> renderMessage(m) );
+
+    // mark unseen messages addressed to me in this convo as seen
+    try{
+      const now = new Date().toISOString();
+      await sbClient.from('messages')
+        .update({ status: 'seen', seen_at: now })
+        .or(`and(sender.eq.${selectedUserId},recipient.eq.${localUser.id})`)
+        .eq('is_deleted', false)
+        .is('seen_at', null);
+      // Note: above update may mark more than intended depending on concurrency; it's acceptable for basic chat
+    }catch(e){ console.warn('Không thể cập nhật seen_at', e); }
+
+  }catch(e){ console.error('Lỗi tải tin nhắn:', e); }
+}
+
+/* ====== MIME helper & upload ====== */
+function guessMimeType(fileName, fallback='application/octet-stream'){ const ext = (fileName.split('.').pop() || '').toLowerCase(); const map = { 'pdf':'application/pdf','doc':'application/msword','docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','ppt':'application/vnd.ms-powerpoint','pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation','xls':'application/vnd.ms-excel','xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','png':'image/png','jpg':'image/jpeg','jpeg':'image/jpeg','gif':'image/gif','webp':'image/webp','txt':'text/plain','zip':'application/zip' }; return map[ext] || fallback; }
+
+async function uploadFileToStorage(file){
+  if(!file) throw new Error('No file provided');
+  const safeName = file.name.replace(/[^\w.\-() ]+/g, '_');
+  const path = `${localUser.id}/${Date.now()}_${safeName}`;
+  const mime = file.type || guessMimeType(file.name);
+  const { data: uploadData, error: uploadError } = await sbClient.storage.from(STORAGE_BUCKET).upload(path, file, { cacheControl: '3600', upsert: true });
+  if(uploadError){ console.error('Supabase upload error:', uploadError); throw uploadError; }
+  let publicUrl = null;
+  try {
+    const { data: publicData, error: publicErr } = sbClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+    if(publicErr){ console.warn('getPublicUrl error:', publicErr); }
+    publicUrl = publicData?.publicUrl || null;
+  } catch(e){ publicUrl = null; }
+  if(!publicUrl){
+    try{
+      const expiresIn = 60 * 60; // 1 hour signed URL
+      const { data: signedData, error: signedErr } = await sbClient.storage.from(STORAGE_BUCKET).createSignedUrl(path, expiresIn);
+      if(signedErr){ console.error('createSignedUrl error:', signedErr); throw signedErr; }
+      publicUrl = signedData?.signedUrl || null;
+    }catch(e){ console.error('Failed to create signed URL:', e); throw e; }
+  }
+  if(!publicUrl) throw new Error('Không có URL truy cập file sau khi upload.');
+  return { type: 'file', name: file.name, mime: mime, size: file.size, url: publicUrl, path };
+}
+
+/* ====== SEND MESSAGE (sync with table fields) ======
+   NOTE: We do NOT send a non-UUID conversation_id here to avoid UUID errors.
+*/
+async function sendMessage({ content = '', meta = null, type = 'text', reply_to = null } = {}) {
+  if(!selectedUserId) return alert('Chọn user để chat!');
+  if(!content && !meta) return;
+  const payload = {
+    // conversation_id: null, // omit if you don't have conversations table; leave DB NULLable
+    sender: localUser.id,
+    user_name: localUser.name,
+    recipient: selectedUserId,
+    type: type || (meta ? (meta.type || 'file') : 'text'),
+    content: content,
+    meta: meta,
+    status: 'sent',
+    is_deleted: false,
+    is_edited: false,
+    reply_to: reply_to || null
+  };
+  try{
+    const { data, error } = await sbClient.from('messages').insert([payload]).select().single();
+    if(error){ console.error('Lỗi gửi:', error); alert('Gửi thất bại, xem console'); return; }
+    if(data && data.id) {
+      renderMessage(data);
+      updateSidebarPreviewForUser(selectedUserId, data);
+      // reset reply if any
+      clearReply();
+      // reset input file preview handled by caller
+    }
+  }catch(e){ console.error('Lỗi gửi:', e); }
+}
+
+/* ====== preview management for multiple images */
+function resetPreview(){ pendingFiles = []; pendingIsDoc = false; filePreview.style.display = 'none'; previewThumbs.innerHTML = ''; previewName.textContent = ''; imageInput.value = ''; fileInput.value = ''; }
+function showPreviewFiles(files, isDoc=false){
+  pendingFiles = Array.from(files); pendingIsDoc = !!isDoc; previewName.textContent = isDoc ? (pendingFiles[0]?.name || '') : (pendingFiles.length + ' ảnh được chọn'); previewThumbs.innerHTML = '';
+  pendingFiles.forEach((f, idx)=>{
+    if(!isDoc){
+      const img = document.createElement('img'); img.className='thumb'; img.src = URL.createObjectURL(f); img.title = f.name;
+      const remove = document.createElement('button'); remove.className='cancel-btn'; remove.style.marginTop='6px'; remove.textContent='X';
+      remove.addEventListener('click', ()=>{ pendingFiles.splice(idx,1); showPreviewFiles(pendingFiles, isDoc); });
+      const wrapper = document.createElement('div'); wrapper.style.display='flex'; wrapper.style.flexDirection='column'; wrapper.appendChild(img); wrapper.appendChild(remove);
+      previewThumbs.appendChild(wrapper);
+    } else {
+       previewThumbs.innerHTML = '';
+    }
+  });
+  filePreview.style.display = 'flex';
+}
+
+imageInput.addEventListener('change', (e)=>{ const files = e.target.files; if(!files || !files.length) return; showPreviewFiles(files, false); });
+fileInput.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(!f) return; showPreviewFiles([f], true); });
+removePreviewBtn.addEventListener('click', ()=>{ resetPreview(); });
+
+sendBtn.addEventListener('click', async ()=>{
+  const text = msgInput.value.trim();
+  if(pendingFiles && pendingFiles.length){
+    try{
+      if(pendingIsDoc){
+        const metaUploaded = await uploadFileToStorage(pendingFiles[0]);
+        await sendMessage({ content: text || pendingFiles[0].name, meta: metaUploaded, type: 'file', reply_to: replyTo });
+        resetPreview(); msgInput.value = '';
+      } else {
+        const uploads = await Promise.all(pendingFiles.map(f => uploadFileToStorage(f)));
+        const meta = { type: 'files', files: uploads };
+        await sendMessage({ content: text || (uploads.map(u=>u.name).join(', ')), meta, type: 'files', reply_to: replyTo });
+        resetPreview(); msgInput.value = '';
+      }
+    }catch(err){ console.error('Upload thất bại', err); alert('Upload thất bại — xem console để biết chi tiết.'); }
+  } else { if(!text) return; await sendMessage({ content: text, meta: null, type: 'text', reply_to: replyTo }); msgInput.value = ''; }
+});
+msgInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); }});
+
+/* ====== delete (mark as deleted) ====== */
+async function deleteMessage(id){
+  if(!confirm('Xác nhận thu hồi tin nhắn này?')) return;
+  try{
+    const now = new Date().toISOString();
+    const { data, error } = await sbClient.from('messages')
+      .update({ is_deleted: true, deleted_at: now, status: 'deleted' })
+      .eq('id', id)
+      .select()
+      .single();
+    if(error){ console.error('Thu hồi thất bại', error); alert('Thu hồi thất bại'); return; }
+    if(data) {
+      // visually show placeholder
+      removeMessageFromDOM(id);
+      // Optionally show a system message that message was recalled
+    }
+  }catch(e){ console.error('Lỗi thu hồi:', e); }
+}
+
+/* ====== edit message -> set is_edited + edited_at ====== */
+function startEditMessage(id){
+  const el = findMsgEl(id); if(!el) return;
+  const body = el.querySelector('.content');
+  const existingText = (body && body.innerText) ? body.innerText.trim() : '';
+  body.innerHTML = '';
+  const input = document.createElement('input'); input.type = 'text'; input.value = existingText; input.style.width='100%'; input.style.padding='8px'; input.style.borderRadius='8px'; input.style.border='1px solid #e6e9f0';
+  body.appendChild(input);
+  const controls = document.createElement('div'); controls.className='edit-controls';
+  const saveBtn = document.createElement('button'); saveBtn.className='small-btn'; saveBtn.textContent='Lưu';
+  const cancelBtn = document.createElement('button'); cancelBtn.className='cancel-btn'; cancelBtn.textContent='Hủy';
+  controls.appendChild(saveBtn); controls.appendChild(cancelBtn); body.appendChild(controls); input.focus();
+  saveBtn.addEventListener('click', async ()=>{
+    const newText = input.value.trim();
+    try{
+      const now = new Date().toISOString();
+      const { data, error } = await sbClient.from('messages')
+        .update({ content: newText, is_edited: true, edited_at: now, status: 'edited' })
+        .eq('id', id)
+        .select()
+        .single();
+      if(error){ console.error('Cập nhật thất bại', error); alert('Cập nhật thất bại'); return; }
+      updateMessageInDOM(data);
+    }catch(e){ console.error('Lỗi cập nhật:', e); }
+  });
+  cancelBtn.addEventListener('click', async ()=>{
+    try{
+      const { data, error } = await sbClient.from('messages').select('*').eq('id', id).single();
+      if(error){ console.error('Lỗi fetch lại', error); return; }
+      updateMessageInDOM(data);
+    }catch(e){ console.error(e); }
+  });
+}
+
+/* ====== reply helpers ====== */
+function startReplyTo(id, snippet){
+  replyTo = id;
+  replyPreview.style.display = 'flex';
+  replyMeta.textContent = (snippet || '').slice(0, 180);
+  msgInput.focus();
+}
+function clearReply(){
+  replyTo = null;
+  replyPreview.style.display = 'none';
+  replyMeta.textContent = '';
+}
+cancelReplyBtn.addEventListener('click', clearReply);
+
+/* ====== sidebar preview update helper ====== */
+function updateSidebarPreviewForUser(userId, message){
+  const item = Array.from(document.querySelectorAll('.user-item')).find(x=>x.dataset.id === userId);
+  if(!item) return;
+  const preview = item.querySelector('.user-sub-message');
+  if(preview){ const senderName = message.sender === localUser.id ? 'Bạn: ' : ''; preview.textContent = senderName + (message.content || (message.meta?.name || (message.meta?.files?.[0]?.name || ''))); }
+  // move to top
+  try{ item.parentNode.prepend(item); }catch(e){}
+}
+
+/* ====== Realtime subscription & status updates ====== */
+let channel = null;
+function startRealtime(){
+  channel = sbClient.channel('public:messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+      const m = payload.new;
+      if(!m) return;
+      if(m.is_deleted) return;
+      const otherId = (m.sender === localUser.id) ? m.recipient : m.sender;
+
+      // update sidebar preview & unread badge
+      const previewItem = Array.from(document.querySelectorAll('.user-item')).find(x=>x.dataset.id === otherId);
+      if(previewItem){
+        const preview = previewItem.querySelector('.user-sub-message');
+        if(preview){ const senderName = m.sender === localUser.id ? 'Bạn: ' : ''; preview.textContent = senderName + (m.content || (m.meta?.name || (m.meta?.files?.[0]?.name || ''))); }
+        // unread logic if message to me
+        if(m.recipient === localUser.id && otherId !== selectedUserId){
+          unreadCounts[otherId] = (unreadCounts[otherId]||0) + 1;
+          updateUnreadBadge(otherId);
+        }
+        try{ previewItem.parentNode.prepend(previewItem); }catch(e){}
+      }
+
+      // If message belongs to current open convo -> render and mark seen
+      const isRelevant = ( (m.sender === localUser.id && m.recipient === selectedUserId) || (m.sender === selectedUserId && m.recipient === localUser.id) );
+      if(isRelevant){
+        renderMessage(m);
+        // If the message is to me -> mark seen immediately
+        if(m.recipient === localUser.id){
+          try{
+            const now = new Date().toISOString();
+            await sbClient.from('messages').update({ status: 'seen', seen_at: now }).eq('id', m.id);
+            // update UI (will be pushed by realtime UPDATE or we can update local DOM)
+            updateMessageInDOM({...m, status:'seen', seen_at: now});
+          }catch(e){ console.warn('Không thể set seen', e); }
+        }
+      } else {
+        // Not open: if page visible, mark as delivered (device received)
+        if(m.recipient === localUser.id && document.visibilityState === 'visible'){
+          try{
+            await sbClient.from('messages').update({ status: 'delivered' }).eq('id', m.id);
+          }catch(e){ console.warn('Không thể set delivered', e); }
+        }
+      }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
+      const m = payload.new;
+      if(!m) return;
+      // if deleted - remove or show placeholder
+      if(m.is_deleted){
+        removeMessageFromDOM(m.id);
+        return;
+      }
+      updateMessageInDOM(m);
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, (payload) => {
+      const old = payload.old;
+      if(!old) return;
+      removeMessageFromDOM(old.id);
+    })
+    .subscribe(status => { console.log('realtime status', status); });
+}
+
+/* unread badge helper */
+function updateUnreadBadge(userId){
+  const el = Array.from(document.querySelectorAll('.user-item')).find(x => x.dataset.id === userId);
+  if(!el) return;
+  const badge = el.querySelector('.unread-badge');
+  const count = unreadCounts[userId] || 0;
+  if(count > 0){ badge.style.display = 'block'; badge.textContent = count > 99 ? '99+' : String(count); } else { badge.style.display = 'none'; }
+}
+
+/* search filter */
+function attachSearchFilter(){ searchUser.addEventListener('input', ()=>{ const q = searchUser.value.trim().toLowerCase(); document.querySelectorAll('.user-item').forEach(el=>{ const name = (el.querySelector('.user-name')?.textContent||'').toLowerCase(); const sub = (el.querySelector('.user-sub')?.textContent||'').toLowerCase(); el.style.display = (name.includes(q) || sub.includes(q)) ? 'flex' : 'none'; }); }); }
+
+/* emoji */
+const EMOJIS = ['😊','😂','😍','👍','🙏','🔥','🎉','😢','😮','🤔','🙌','💯','🎯','📎','📅','✅','❌','💬','📸','🔗'];
+function showEmojiPop(x=0,y=0){ emojiPop.style.left = x + 'px'; emojiPop.style.top = y + 'px'; emojiPop.innerHTML = ''; EMOJIS.forEach(em => { const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = em; btn.addEventListener('click', ()=> { msgInput.value = msgInput.value + em; emojiPop.style.display = 'none'; msgInput.focus(); }); emojiPop.appendChild(btn); }); emojiPop.style.display = 'grid'; }
+emojiBtn.addEventListener('click', (ev)=>{ const rect = emojiBtn.getBoundingClientRect(); showEmojiPop(rect.left, rect.top - 220); }); document.addEventListener('click', (e)=>{ if(!emojiPop.contains(e.target) && e.target !== emojiBtn){ emojiPop.style.display = 'none'; } });
+
+/* share file helper (uses Web Share or clipboard) */
+async function shareFile(url){ try{ if(navigator.share){ await navigator.share({ title: 'File', url }); } else { await navigator.clipboard.writeText(url); alert('Link đã được copy vào clipboard.'); } }catch(e){ alert('Không thể share: '+ e.message); } }
+
+/* ====== INIT ====== */
+(async function init(){
+  await loadUsers();
+  startRealtime();
+  // show user list on small screens
+  if(window.innerWidth < 880) showUserListView();
+})();
+</script>
+</body>
+</html>

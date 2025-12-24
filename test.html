@@ -1,67 +1,83 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trang chính</title>
-<style>
-body { font-family: Arial, sans-serif; margin:20px; background:#f7f9fb; }
-h1 { color:#004aad; }
-iframe { border:1px solid #ccc; border-radius:8px; width:100%; height:600px; }
-.toast {position:fixed; top:-120px; left:50%; transform:translateX(-50%); padding:16px 28px; border-radius:12px; color:#fff; font-weight:700; opacity:0; transition:top 0.45s, opacity 0.45s; z-index:9999; font-size:14px;}
-.toast.show {top:22px; opacity:1;}
-.toast.success {background:#28a745;}
-.toast.error {background:#dc3545;}
-</style>
+  <meta charset="UTF-8">
+  <title>Upload + Save Message</title>
 </head>
 <body>
+  <h2>Upload file và lưu vào bảng messages</h2>
+  
+  <input type="file" id="fileInput" />
+  <button id="uploadBtn">Upload & Save</button>
+  
+  <div id="result"></div>
 
-<h1>Trang chính</h1>
-<iframe id="pdfFrame"></iframe>
-<div id="toast" class="toast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.4/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = "https://jpmyyuqzxhlbuegjapfs.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_GBmZcFie8VAgpO-9oCH0Ww_awOqrA3J"; 
+    const STORAGE_BUCKET = "chat-uploads";
 
-<script>
-const API = "https://script.google.com/macros/s/AKfycbyAOorM4eSNT2CfFDlr4Uwc3_khZCOQR3IK6zADswDBklxZBJUvqVhXRpg0dkxlY5NZ/exec"; // Thay bằng URL Apps Script
-const toastEl = document.getElementById("toast");
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function showToast(msg,type="success",duration=4000){
-    toastEl.textContent = msg;
-    toastEl.className = `toast ${type} show`;
-    setTimeout(()=>toastEl.className="toast", duration);
-}
+    const localUser = { id: "user123", name: "Vu" };
+    const activeUserId = "user456";
 
-async function loadPDF(){
-    const token = localStorage.getItem("jwt_token");
-    if(!token){
-        showToast("Vui lòng đăng nhập để xem nội dung","error");
-        setTimeout(()=>window.location.href="login.html",1000);
+    async function uploadAndSave() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      const resultDiv = document.getElementById("result");
+
+      if (!file) {
+        alert("Vui lòng chọn file!");
         return;
+      }
+
+      resultDiv.innerHTML = "<p>Đang upload...</p>";
+
+      const filePath = `${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        resultDiv.innerHTML = "<p style='color:red'>Upload thất bại: " + uploadError.message + "</p>";
+        return;
+      }
+
+      const { data: publicData } = supabaseClient
+        .storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(filePath);
+
+      const fileUrl = publicData.publicUrl;
+
+      const { data: msgData, error: msgError } = await supabaseClient
+        .from("messages")
+        .insert({
+          sender: localUser.id,
+          user_name: localUser.name,
+          recipient: activeUserId,
+          content: fileUrl, // lưu link vào cột content
+          meta: { type: "file", name: file.name }
+        })
+        .select();
+
+      if (msgError) {
+        resultDiv.innerHTML = "<p style='color:red'>Insert thất bại: " + msgError.message + "</p>";
+        return;
+      }
+
+      resultDiv.innerHTML = `
+        <p style="color:green">Upload + lưu message thành công!</p>
+        <p>File URL: <a href="${fileUrl}" target="_blank">${fileUrl}</a></p>
+        <p>Message ID: ${msgData[0].id}</p>
+      `;
     }
 
-    try{
-        const resp = await fetch(`${API}?route=data&token=${token}`);
-        const data = await resp.json();
-        if(data.status==="success"){
-            // Ví dụ: lấy PDF đầu tiên từ sheet matkhauopen
-            const pdfUrl = data.matkhauopen?.[0]?.Link || "";
-            if(pdfUrl){
-                document.getElementById("pdfFrame").src = pdfUrl;
-            } else showToast("Chưa có PDF để hiển thị","error");
-        } else{
-            showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại","error");
-            localStorage.removeItem("jwt_token");
-            setTimeout(()=>window.location.href="login.html",1500);
-        }
-    }catch(err){
-        console.error(err);
-        showToast("Lỗi kết nối server","error");
-        localStorage.removeItem("jwt_token");
-        setTimeout(()=>window.location.href="login.html",1500);
-    }
-}
-
-loadPDF();
-</script>
-
+    document.getElementById("uploadBtn").addEventListener("click", uploadAndSave);
+  </script>
 </body>
 </html>

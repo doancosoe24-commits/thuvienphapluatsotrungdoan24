@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đổi mật khẩu</title>
+  <style>
+    :root{
+      --primary:#004aad; --accent:#f5b042; --bg:#f0f4f8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,Arial;}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px;}
+    .card{width:460px;background:#fff;padding:26px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.08);}
+    h2{color:var(--primary);margin-bottom:6px;}
+    .desc{color:#556;margin-bottom:14px;}
+    label{display:block;font-size:13px;color:#333;margin-top:10px;margin-bottom:6px;}
+    input{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:15px;}
+    .btn{margin-top:14px;width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#ffd86b);font-weight:700;cursor:pointer;}
+    .toast{position:fixed;top:-120px;left:50%;transform:translateX(-50%);padding:14px 22px;border-radius:12px;color:#fff;font-weight:700;opacity:0;transition:top 0.45s,opacity 0.45s;z-index:9999;font-size:14px;}
+    .toast.show{top:22px;opacity:1;}
+    .toast.success{background:#28a745;}
+    .toast.error{background:#dc3545;}
+    .note{font-size:13px;color:#666;margin-top:8px;}
+    .hint{font-size:13px;color:#6b7280;margin-top:6px;}
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div class="card" role="main" aria-label="Đổi mật khẩu">
+    <img src="./img/logo.png" alt="logo" style="width:110px;margin:0 auto 6px;display:block;">
+    <h2>Đổi mật khẩu</h2>
+    <div class="desc">Nhập mật khẩu tạm (từ email) và đặt mật khẩu mới của bạn.</div>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" placeholder="Email" autocomplete="email" />
+
+    <label for="temp">Mật khẩu tạm (từ email)</label>
+    <input id="temp" type="password" placeholder="Mật khẩu tạm" />
+
+    <label for="newpw">Mật khẩu mới</label>
+    <input id="newpw" type="password" placeholder="Mật khẩu mới (ít nhất 8 ký tự)" />
+
+    <label for="confirm">Xác nhận mật khẩu mới</label>
+    <input id="confirm" type="password" placeholder="Nhập lại mật khẩu mới" />
+
+    <button id="submitBtn" class="btn">Đổi mật khẩu</button>
+
+    <div class="hint">Sau khi đổi mật khẩu thành công, bạn sẽ được chuyển về trang đăng nhập.</div>
+  </div>
+
+<script>
+  // ========== CẤU HÌNH ==========
+  const API = "https://script.google.com/macros/s/AKfycbwHc9P_C0PL7y1qiTVTxrqqwc50CqVoOWSTxCyEdu3dWIaUeP0ljTd4GSGXndaik0Gx/exec";
+
+  // ========== TOAST ==========
+  const toastEl = document.getElementById('toast');
+  function showToast(msg, type='success', dur=3500){
+    toastEl.textContent = msg;
+    toastEl.className = `toast ${type} show`;
+    setTimeout(()=> toastEl.className='toast', dur);
+  }
+
+  function setLoading(on){
+    const b = document.getElementById('submitBtn');
+    b.disabled = on;
+    b.innerHTML = on
+      ? '<span style="display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;animation:spin 0.9s linear infinite;margin-right:8px;vertical-align:middle;"></span> Đang xử lý...'
+      : 'Đổi mật khẩu';
+  }
+
+  function fetchJson(url, options={}, timeout=20000){
+    return new Promise((resolve,reject)=>{
+      const t = setTimeout(()=> reject(new Error('Timeout')), timeout);
+      fetch(url, options)
+        .then(r => { clearTimeout(t); return r.text(); })
+        .then(txt => {
+          try{ resolve(JSON.parse(txt)); }
+          catch(e){ reject(new Error('Invalid JSON')); }
+        })
+        .catch(err => { clearTimeout(t); reject(err); });
+    });
+  }
+
+  // ========== PREFILL EMAIL ==========
+  (function init(){
+    const params = new URLSearchParams(window.location.search);
+    const mail = params.get('email');
+    if(mail) document.getElementById('email').value = decodeURIComponent(mail);
+  })();
+
+  // ========== SUBMIT ==========
+  document.getElementById('submitBtn').addEventListener('click', async ()=>{
+    const email   = document.getElementById('email').value.trim().toLowerCase();
+    const temp    = document.getElementById('temp').value;
+    const newpw   = document.getElementById('newpw').value;
+    const confirm = document.getElementById('confirm').value;
+
+    if(!email || !temp || !newpw || !confirm){
+      showToast('Vui lòng nhập đầy đủ thông tin', 'error');
+      return;
+    }
+    if(newpw.length < 8){
+      showToast('Mật khẩu mới phải có ít nhất 8 ký tự', 'error');
+      return;
+    }
+    if(newpw !== confirm){
+      showToast('Xác nhận mật khẩu không khớp', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try{
+      const body = new URLSearchParams();
+      body.append('route', 'users-update-no-token'); // 🔑 map đúng backend
+      body.append('email', email);
+      body.append('oldPassword', temp);   // 🔑 mật khẩu tạm
+      body.append('password', newpw);     // 🔑 mật khẩu mới
+
+      const res = await fetchJson(API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: body.toString()
+      });
+
+      if(!(res && (res.status === 'success' || res.success === true))){
+        showToast(res?.message || 'Đổi mật khẩu thất bại', 'error');
+        setLoading(false);
+        return;
+      }
+
+      showToast('Đổi mật khẩu thành công. Đang chuyển về đăng nhập...', 'success', 3000);
+      setTimeout(()=> location.href = 'index.html', 2000);
+
+    }catch(err){
+      console.error(err);
+      showToast('Lỗi kết nối server', 'error');
+    }finally{
+      setLoading(false);
+    }
+  });
+
+  // Enter submit
+  ['email','temp','newpw','confirm'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown', e=>{
+      if(e.key === 'Enter') document.getElementById('submitBtn').click();
+    });
+  });
+
+  // spinner css
+  (function(){
+    const css='@keyframes spin{to{transform:rotate(360deg);}}';
+    const s=document.createElement('style');s.innerHTML=css;document.head.appendChild(s);
+  })();
+</script>
+
+</body>
+</html>

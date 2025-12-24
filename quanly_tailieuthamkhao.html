@@ -1,386 +1,434 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
-<title>Admin - Tài liệu tham khảo</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — Tài liệu tham khảo</title>
+<link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f8fb;
-  --card:#fff;
+  --bg:#eef6ff;
+  --card:#ffffff;
   --text:#0f172a;
-  --accent:#0b6cff; /* đồng bộ với Code 1 */
-  --muted:#6b7280;
-  --radius:12px;   /* đồng bộ */
-  --shadow:0 10px 30px rgba(15,23,42,.08);
+  --accent:#0b6cff;
+  --accent-2:#06b6d4;
+  --muted:#64748b;
+  --radius:14px;
+  --shadow-sm:0 8px 24px rgba(7,16,36,0.06);
+  --shadow-lg:0 20px 60px rgba(7,16,36,0.12);
   --danger:#ef4444;
   --success:#10b981;
-  font-family:Inter,system-ui,Arial;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
 }
+
+/* base */
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);padding:20px}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#f8fbff,var(--bg));color:var(--text);-webkit-font-smoothing:antialiased}
+.container{max-width:1200px;margin:20px auto;padding:18px}
 
-.container{max-width:1200px;margin:auto}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-
-h1{margin:0;color:var(--accent);text-align:center}
-.small{font-size:13px;color:var(--muted)}
-
-.toolbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  margin-bottom:12px;
-  flex-wrap:wrap;
+/* header */
+.header{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:16px;border-radius:16px;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#fff;box-shadow:var(--shadow-lg);
 }
-.search{flex:1;min-width:200px}
-.search input{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #e6e9ef;
-}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.12);display:grid;place-items:center;font-weight:800}
+.brand h1{margin:0;font-size:18px}
+.brand p{margin:0;font-size:13px;opacity:.95}
+.user-meta{background:rgba(255,255,255,0.12);padding:8px 12px;border-radius:999px;font-weight:600;display:flex;gap:10px;align-items:center}
 
-/* Buttons like Code 1 */
-.btn{
-  padding:9px 14px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-}
-.btn-add{background:var(--accent);color:#fff}
-.btn-edit{background:#f59e0b;color:#fff}
-.btn-del{background:var(--danger);color:#fff}
-.btn-ghost{background:transparent;border:1px solid #e6e9ef}
+/* card */
+.card{background:var(--card);border-radius:14px;padding:16px;margin-top:14px;box-shadow:var(--shadow-sm)}
 
-/* Table */
-.table-wrap{overflow:auto;border-radius:10px}
+/* toolbar */
+.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.search{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#fbfdff,#f6f9ff);padding:8px;border-radius:12px;border:1px solid rgba(7,16,36,0.04);flex:1;min-width:180px}
+.search input{border:0;background:transparent;outline:none;padding:8px;font-size:14px;width:100%}
+.controls{display:flex;gap:8px}
+.btn{border:0;padding:9px 14px;border-radius:10px;font-weight:700;cursor:pointer;transition:transform .12s ease}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 8px 26px rgba(11,108,255,0.12)}
+.btn.ghost{background:transparent;border:1px solid rgba(7,16,36,0.06)}
+.btn.warn{background:#f59e0b;color:#fff}
+.btn.danger{background:var(--danger);color:#fff}
+
+/* table */
+.table-wrap{overflow:auto;border-radius:12px}
 table{width:100%;border-collapse:collapse;min-width:900px}
-thead th{
-  padding:12px 14px;
-  font-size:12px;
-  color:var(--muted);
-  text-transform:uppercase;
-  text-align:left;
-}
-tbody td{
-  padding:12px 14px;
-  border-bottom:1px solid rgba(0,0,0,.05);
-}
-tbody tr:hover{background:rgba(11,108,255,.04)}
+thead th{padding:12px 14px;font-size:12px;color:var(--muted);text-transform:uppercase;text-align:left;white-space:nowrap}
+tbody td{padding:12px 14px;border-bottom:1px solid rgba(7,16,36,0.04);vertical-align:middle}
+tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,108,255,0.02))}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.actions{display:flex;gap:8px}
-
-/* Popup / form */
-.popup{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-.form{
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-  width:520px;
-  max-height:90vh;
-  overflow:auto;
-  box-shadow:var(--shadow);
-}
+/* popup modal */
+.popup{display:none;position:fixed;inset:0;background:rgba(7,16,36,0.45);align-items:center;justify-content:center;z-index:1200;padding:18px}
+.form{background:var(--card);padding:18px;border-radius:12px;width:100%;max-width:720px;box-shadow:var(--shadow-lg);max-height:92vh;overflow:auto}
 .form h3{margin:0 0 12px;color:var(--accent)}
-.form input,.form textarea{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #e6e9ef;
-  margin-bottom:8px;
-}
-.form textarea{min-height:90px;resize:vertical}
+.form .row{margin-bottom:10px}
+.form input,.form textarea,.form select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px}
+.form textarea{min-height:100px;resize:vertical}
+.form .muted{color:var(--muted);font-size:13px}
 
-/* Toast */
-.toast{
-  position:fixed;
-  left:50%;
-  top:20px;
-  transform:translateX(-50%);
-  background:#111;
-  color:#fff;
-  padding:10px 16px;
-  border-radius:10px;
-  display:none;
-  z-index:10000;
-}
-.toast.show{display:block}
-
-/* responsive -> card style */
-@media(max-width:900px){
+/* cards for mobile */
+.cards{display:none}
+@media (max-width:900px){
   table{min-width:0}
   thead{display:none}
-  tbody tr{
-    display:block;
-    margin-bottom:12px;
-    background:#fff;
-    border-radius:10px;
-    box-shadow:var(--shadow);
-  }
-  tbody td{display:block;border-bottom:none}
-  tbody td:before{
-    display:block;
-    font-weight:700;
-    color:var(--muted);
-    margin-bottom:6px;
-  }
+  tbody tr{display:block;margin-bottom:12px;background:var(--card);border-radius:12px;box-shadow:var(--shadow-sm);padding:12px}
+  tbody td{display:block;border-bottom:none;padding:6px 0}
+  tbody td:before{display:inline-block;width:120px;font-weight:700;color:var(--muted);margin-right:6px}
   tbody td:nth-child(1):before{content:"ID"}
   tbody td:nth-child(2):before{content:"Tiêu đề"}
   tbody td:nth-child(3):before{content:"Tên file"}
   tbody td:nth-child(4):before{content:"URL"}
   tbody td:nth-child(5):before{content:"Ghi chú"}
   tbody td:nth-child(6):before{content:"Hành động"}
+
+  .cards{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+  .card-item{background:linear-gradient(180deg,#fff,#fbfdff);padding:12px;border-radius:12px;box-shadow:var(--shadow-sm)}
+  .card-item .meta{color:var(--muted);font-size:13px;margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
 }
+
+/* toast & loader */
+.toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:1400}
+.toast.show{display:block}
+.loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);z-index:1500}
+.loader.show{display:flex}
+.spinner{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#fff,#f4f7fb);display:grid;place-items:center;box-shadow:var(--shadow-sm);font-weight:700;color:var(--accent-2)}
+
+/* focus */
+input:focus,button:focus,select:focus{outline:3px solid rgba(11,108,255,0.08);outline-offset:2px;border-radius:8px}
 </style>
 </head>
-
 <body>
-
-<div id="toast" class="toast"></div>
-
-<div class="container">
-  <div class="card">
-
-    <div class="toolbar">
-      <div>
-        <h1>Admin — Tài liệu tham khảo</h1>
-        <div class="small">Quản lý tài liệu tham khảo</div>
+  <div class="container">
+    <header class="header" role="banner" aria-label="Header quản trị">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div id="meta" class="user-meta">Đang tải...</div>
+        <button id="logoutBtn" class="btn ghost" title="Đăng xuất">Đăng xuất</button>
       </div>
-      <div id="meta"></div>
-    </div>
+    </header>
 
-    <div class="toolbar">
-      <div class="search">
-        <input id="q" placeholder="Tìm kiếm tài liệu...">
+    <main class="card" role="main">
+      <div class="toolbar">
+        <div class="search" role="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#667085" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="#667085" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="q" placeholder="Tìm kiếm tài liệu..." aria-label="Tìm kiếm">
+          <button id="clearSearch" class="btn ghost" title="Xóa">✕</button>
+        </div>
+
+        <div class="controls" role="toolbar">
+          <button id="reloadBtn" class="btn ghost" title="Làm mới">⟳</button>
+          <button id="btnAdd" class="btn primary" title="Thêm tài liệu">+ Thêm</button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button id="reloadBtn" class="btn btn-ghost">⟳ Tải lại</button>
-        <button id="btnAdd" class="btn btn-add">+ Thêm</button>
+
+      <div class="table-wrap" aria-live="polite">
+        <table role="table" aria-label="Bảng tài liệu">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tiêu đề</th>
+              <th>Tên file</th>
+              <th>URL</th>
+              <th>Ghi chú</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tb">
+            <tr><td colspan="6" style="text-align:center;padding:18px">Đang tải…</td></tr>
+          </tbody>
+        </table>
       </div>
-    </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Tiêu đề</th>
-            <th>Tên file</th>
-            <th>URL</th>
-            <th>Ghi chú</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tb"></tbody>
-      </table>
-      <div id="empty" class="empty" style="display:none">Chưa có dữ liệu</div>
-    </div>
-
+      <div class="cards" id="cards" hidden aria-live="polite"></div>
+    </main>
   </div>
-</div>
 
-<!-- POPUP -->
-<div id="popup" class="popup" onclick="if(event.target===this) closePopup()">
-  <div class="form">
-    <h3 id="formTitle">Thêm tài liệu</h3>
-    <input id="fid" type="hidden">
-    <input id="ftitle" placeholder="Tiêu đề">
-    <input id="fname" placeholder="Tên file">
-    <input id="furl" placeholder="URL">
-    <textarea id="fghi" placeholder="Ghi chú"></textarea>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-      <button id="saveBtn" class="btn btn-add">Lưu</button>
-      <button class="btn btn-ghost" onclick="closePopup()">Hủy</button>
+  <!-- Modal -->
+  <div id="popup" class="popup" aria-hidden="true">
+    <div class="form" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Thêm tài liệu</h3>
+
+      <input id="fid" type="hidden" />
+      <div class="row">
+        <label class="muted">Tiêu đề</label>
+        <input id="ftitle" placeholder="Tiêu đề tài liệu">
+      </div>
+
+      <div class="row">
+        <label class="muted">Tên file</label>
+        <input id="fname" placeholder="Ví dụ: thamkhao.pdf">
+      </div>
+
+      <div class="row">
+        <label class="muted">URL</label>
+        <input id="furl" placeholder="https://...">
+      </div>
+
+      <div class="row">
+        <label class="muted">Ghi chú</label>
+        <textarea id="fghi" placeholder="Ghi chú, mô tả ngắn"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+        <button id="saveBtn" class="btn primary">Lưu</button>
+        <button id="cancelBtn" class="btn ghost">Hủy</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="loader" class="loader" aria-hidden="true"><div class="spinner">⟳</div></div>
 
 <script>
 /* ================= CONFIG ================= */
-const API="https://script.google.com/macros/s/AKfycbxzWMJ5FSuka8J50wPcNI6nIxt_Rn5TvO6s0TEG87Ek31Z0h2U6n8F5wTKuvwg05OPo/exec";
+const API = "https://script.google.com/macros/s/AKfycbxe1dxDcrRp5yYz4xNFT4iFqI14XcOzkou8hFOaV0yCgcvCsMjMpYcoyTXAEX4wRAqA/exec";
 
-/* ================= AUTH ================= */
-const session = JSON.parse(localStorage.getItem("loggedInUser")||"{}");
-const token = session.token;
-if(!token){
-  alert("Bạn chưa đăng nhập");
-  location.href="/login.html";
-}
+/* ========== ELEMENTS ========== */
+const tb = document.getElementById('tb');
+const cardsRoot = document.getElementById('cards');
+const popup = document.getElementById('popup');
+const modalTitle = document.getElementById('modalTitle');
+const toast = document.getElementById('toast');
+const loader = document.getElementById('loader');
 
-/* ================= STATE ================= */
-let role="viewer"; // admin | editor | viewer
-let items=[];
+const qInput = document.getElementById('q');
+const clearSearchBtn = document.getElementById('clearSearch');
+const reloadBtn = document.getElementById('reloadBtn');
+const addBtn = document.getElementById('btnAdd');
+const logoutBtn = document.getElementById('logoutBtn');
 
-/* ================= ELEMENTS ================= */
-const tb=document.getElementById("tb");
-const empty=document.getElementById("empty");
-const btnAdd=document.getElementById("btnAdd");
-const popup=document.getElementById("popup");
-const toast=document.getElementById("toast");
-const meta=document.getElementById("meta");
+const fid = document.getElementById('fid');
+const ftitle = document.getElementById('ftitle');
+const fname = document.getElementById('fname');
+const furl = document.getElementById('furl');
+const fghi = document.getElementById('fghi');
 
-const fid=document.getElementById("fid");
-const ftitle=document.getElementById("ftitle");
-const fname=document.getElementById("fname");
-const furl=document.getElementById("furl");
-const fghi=document.getElementById("fghi");
-const formTitle=document.getElementById("formTitle");
-const saveBtn=document.getElementById("saveBtn");
-const qInput=document.getElementById("q");
-const reloadBtn=document.getElementById("reloadBtn");
+const saveBtn = document.getElementById('saveBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+const metaEl = document.getElementById('meta');
 
-/* ================= HELPERS ================= */
-const esc=s=>s==null?"":String(s).replace(/[&<>"]/g,m=>(
-  {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]
-));
-const showToast=m=>{
-  toast.textContent=m;
-  toast.classList.add("show");
-  setTimeout(()=>toast.classList.remove("show"),2000);
-};
-function closePopup(){ popup.style.display="none"; }
+let session = null;
+let role = '';
+let roleLower = '';
+let items = [];
 
-/* ================= ROLE ================= */
-async function detectRole(){
+/* ========== HELPERS ========== */
+function esc(s){ return s == null ? '' : String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showToast(msg, time=2200){ toast.textContent = msg; toast.classList.add('show'); setTimeout(()=> toast.classList.remove('show'), time); }
+function showLoader(on=true){ loader.style.display = on ? 'flex' : 'none'; loader.setAttribute('aria-hidden', !on); }
+function parseJwtPayload(t){ try{ if(!t) return null; const body = t.split('.')[1]; if(!body) return null; let b = body.replace(/-/g,'+').replace(/_/g,'/'); while(b.length%4) b+='='; return JSON.parse(atob(b)); }catch(e){return null;} }
+
+/* ========== AUTH & INIT ========== */
+function getSession(){ try{ return JSON.parse(localStorage.getItem('loggedInUser')||'null'); }catch(e){ return null; } }
+
+async function init(){
+  const s = getSession();
+  if(!s || !s.token){ alert('Vui lòng đăng nhập'); location.href='login.html'; return; }
+  session = s;
+
+  // try check-admin -> check-manager; fallback parse token
   try{
-    const r1=await fetch(API,{method:"POST",body:new URLSearchParams({route:"check-admin",token})});
-    const j1=await r1.json();
-    if(j1?.status==="success" && j1.isAdmin){
-      role="admin";
-      btnAdd.style.display="";
-      meta.innerHTML = `<div><strong>${esc(j1.user?.username||j1.user?.email||'')}</strong><div class="small">Quyền: <span class="small">${esc('Admin')}</span></div></div>`;
-      return;
+    const r1 = await fetch(API, { method:'POST', body: new URLSearchParams({ route:'check-admin', token: session.token }) });
+    const j1 = await r1.json();
+    if(j1 && j1.isAdmin){ role = 'admin'; roleLower = 'admin'; metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(j1.user?.username||j1.user?.email||'Admin')}</div><div class="muted">Quyền: <strong>Admin</strong></div></div>`; }
+    else {
+      const r2 = await fetch(API, { method:'POST', body: new URLSearchParams({ route:'check-manager', token: session.token }) });
+      const j2 = await r2.json();
+      if(j2 && j2.isManager){ role = j2.role || 'manager'; roleLower = String(role).toLowerCase(); metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(j2.user?.username||j2.user?.email||'User')}</div><div class="muted">Quyền: <strong>${esc(role)}</strong></div></div>`; }
+      else {
+        // fallback parse token
+        const p = parseJwtPayload(session.token);
+        role = (p && p.role) ? p.role : (session.user && session.user.role) || 'user';
+        roleLower = String(role).toLowerCase();
+        metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(session.user?.username||session.user?.email||'User')}</div><div class="muted">Quyền: <strong>${esc(role)}</strong></div></div>`;
+        if(!['admin','manager','editor'].includes(roleLower) && roleLower !== 'admin') { alert('Bạn không có quyền truy cập'); location.href='login.html'; return; }
+      }
     }
-
-    const r2=await fetch(API,{method:"POST",body:new URLSearchParams({route:"check-manager",token})});
-    const j2=await r2.json();
-    if(j2?.status==="success" && j2.isManager){
-      role="editor";
-      btnAdd.style.display="none";
-      meta.innerHTML = `<div><strong>${esc(j2.user?.username||j2.user?.email||'')}</strong><div class="small">Quyền: <span class="small">${esc('Editor')}</span></div></div>`;
-      return;
-    }
-
-    alert("Bạn không có quyền truy cập");
-    location.href="/login.html";
   }catch(e){
-    console.error(e);
-    alert("Lỗi xác thực");
-    location.href="/login.html";
+    console.error('auth check error', e);
+    const p = parseJwtPayload(session.token);
+    role = (p && p.role) ? p.role : (session.user && session.user.role) || 'user';
+    roleLower = String(role).toLowerCase();
+    metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(session.user?.username||session.user?.email||'User')}</div><div class="muted">Quyền: <strong>${esc(role)}</strong></div></div>`;
   }
+
+  if(roleLower !== 'admin') addBtn.style.display = 'none';
+
+  await load();
 }
 
-/* ================= LOAD ================= */
+/* ========== LOAD DATA ========== */
 async function load(){
-  tb.innerHTML="<tr><td colspan=6>Đang tải...</td></tr>";
+  showLoader(true);
+  tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">Đang tải…</td></tr>`;
+  cardsRoot.innerHTML = '';
+  cardsRoot.hidden = true;
   try{
-    const r=await fetch(API,{method:"POST",body:new URLSearchParams({route:"thamkhao-list",token})});
-    const j=await r.json();
-    if(j.status!=="success"){ throw new Error(j.message||'Lỗi'); }
-    items=j.data||[];
+    const res = await fetch(API, { method:'POST', body: new URLSearchParams({ route:'thamkhao-list', token: session.token }) });
+    const j = await res.json();
+    items = j.data || [];
     render();
   }catch(e){
-    tb.innerHTML="<tr><td colspan=6>Lỗi tải dữ liệu</td></tr>";
+    console.error('load error', e);
+    tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">Lỗi tải dữ liệu</td></tr>`;
+    showToast('Lỗi khi tải dữ liệu');
+  }finally{
+    showLoader(false);
   }
 }
 
+/* ========== RENDER ========== */
 function render(){
-  if(!items.length){
-    tb.innerHTML="";
-    empty.style.display="";
+  if(!items || !items.length){
+    tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>`;
+    cardsRoot.hidden = true;
     return;
   }
-  empty.style.display="none";
-  tb.innerHTML = items.map(it=>`
-    <tr>
-      <td>${esc(it.id)}</td>
-      <td>${esc(it.title)}</td>
-      <td>${esc(it.name||"")}</td>
-      <td>${it.url?`<a href="${esc(it.url)}" target="_blank">Link</a>`:""}</td>
-      <td>${esc(it.ghi_chu||"")}</td>
-      <td>
-        ${role==="admin"
-          ? `<div class="actions">
-               <button class="btn btn-edit" onclick="editItem('${esc(it.id)}')">Sửa</button>
-               <button class="btn btn-del" onclick="delItem('${esc(it.id)}')">Xóa</button>
-             </div>`
-          : "—"}
-      </td>
-    </tr>
-  `).join("");
+
+  tb.innerHTML = items.map(it=>{
+    const id = esc(it.id);
+    const title = esc(it.title);
+    const name = esc(it.name || '');
+    const urlCell = it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener">Link</a>` : '';
+    const note = esc(it.ghi_chu || '');
+    const actions = roleLower === 'admin' ? `
+      <div class="actions">
+        <button class="btn btn-edit" data-json='${esc(JSON.stringify(it))}'>Sửa</button>
+        <button class="btn btn-del" data-id="${id}">Xóa</button>
+      </div>` : '—';
+    return `<tr data-id="${id}">
+      <td>${id}</td>
+      <td>${title}</td>
+      <td>${name}</td>
+      <td>${urlCell}</td>
+      <td>${note}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  // mobile cards
+  cardsRoot.hidden = false;
+  cardsRoot.innerHTML = items.map(it=>{
+    const id = esc(it.id);
+    const title = esc(it.title);
+    const name = esc(it.name || '');
+    const note = esc(it.ghi_chu || '');
+    const slug = esc(it.slug || '');
+    const actions = roleLower === 'admin' ? `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Sửa</button><button class="btn danger" onclick="deleteItem('${id}')">Xóa</button></div>` : `<div><button class="btn ghost" onclick="openEditFromCard('${id}')">Xem</button></div>`;
+    return `<div class="card-item" role="article"><strong>${title}</strong><div class="meta muted">File: ${name} • ${slug}</div><div style="margin-top:8px">${note}</div><div style="margin-top:10px">${actions}</div></div>`;
+  }).join('');
+
+  attachRowListeners();
 }
 
-/* ================= CRUD ================= */
-btnAdd.onclick=()=>{
-  if(role!=="admin") return showToast("Không có quyền");
-  fid.value=""; ftitle.value=""; fname.value=""; furl.value=""; fghi.value="";
-  formTitle.textContent="Thêm tài liệu";
-  popup.style.display="flex";
-};
-
-function editItem(id){
-  const it=items.find(x=>String(x.id)===String(id));
-  if(!it) return;
-  fid.value=it.id;
-  ftitle.value=it.title||"";
-  fname.value=it.name||"";
-  furl.value=it.url||"";
-  fghi.value=it.ghi_chu||"";
-  formTitle.textContent="Sửa tài liệu";
-  popup.style.display="flex";
-}
-
-saveBtn.onclick=async()=>{
-  if(role!=="admin") return showToast("Bạn không có quyền");
-  const route=fid.value?"thamkhao-update":"thamkhao-add";
-  const payload={route,token,id:fid.value,title:ftitle.value,name:fname.value,url:furl.value,ghi_chu:fghi.value};
-  try{
-    const r=await fetch(API,{method:"POST",body:new URLSearchParams(payload)});
-    const j=await r.json();
-    if(j.status==="success"){
-      showToast("Đã lưu");
-      closePopup();
-      load();
-    }else showToast(j.message||"Lỗi");
-  }catch(e){ showToast("Lỗi mạng"); }
-};
-
-async function delItem(id){
-  if(!confirm("Xóa tài liệu này?")) return;
-  const r=await fetch(API,{method:"POST",body:new URLSearchParams({route:"thamkhao-delete",token,id})});
-  const j=await r.json();
-  if(j.status==="success"){ showToast("Đã xóa"); load(); }
-}
-
-/* ================= SEARCH ================= */
-qInput.oninput=e=>{
-  const v=e.target.value.toLowerCase();
-  [...tb.rows].forEach(r=>{
-    r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
+/* ========== ATTACH ROW BUTTONS ========== */
+function attachRowListeners(){
+  document.querySelectorAll('.btn.btn-edit').forEach(b=>{
+    b.onclick = ()=> {
+      const data = JSON.parse(b.getAttribute('data-json') || '{}');
+      openEditForm(data);
+    };
   });
-};
-reloadBtn.onclick=load;
+  document.querySelectorAll('.btn.btn-del').forEach(b=>{
+    b.onclick = ()=> {
+      const id = b.dataset.id;
+      if(confirm('Bạn chắc chắn muốn xóa tài liệu này?')) deleteItem(id);
+    };
+  });
+}
 
-/* ================= INIT ================= */
-(async()=>{
-  await detectRole();
-  if(role==="admin"||role==="editor") load();
-})();
+/* ========== MODAL ========== */
+function openEditForm(item = {}){
+  modalTitle.textContent = item && item.id ? 'Sửa tài liệu' : 'Thêm tài liệu';
+  fid.value = item.id || '';
+  ftitle.value = item.title || '';
+  fname.value = item.name || '';
+  furl.value = item.url || '';
+  fghi.value = item.ghi_chu || '';
+  popup.style.display = 'flex';
+  popup.setAttribute('aria-hidden','false');
+  setTimeout(()=> document.querySelector('.form').classList.add('show'), 20);
+}
+function closeModal(){
+  document.querySelector('.form').classList.remove('show');
+  setTimeout(()=> { popup.style.display = 'none'; popup.setAttribute('aria-hidden','true'); }, 160);
+}
+function openEditFromCard(id){
+  const it = items.find(x=>String(x.id)===String(id));
+  if(it) openEditForm(it); else openEditForm({ id });
+}
+
+/* ========== CRUD ========== */
+addBtn.addEventListener('click', ()=> {
+  if(roleLower !== 'admin'){ showToast('Bạn không có quyền thêm'); return; }
+  openEditForm({});
+});
+
+saveBtn.addEventListener('click', async ()=>{
+  if(roleLower !== 'admin'){ showToast('Bạn không có quyền'); return; }
+  const id = fid.value;
+  const route = id ? 'thamkhao-update' : 'thamkhao-add';
+  const payload = new URLSearchParams({
+    token: session.token,
+    id: fid.value,
+    title: ftitle.value.trim(),
+    name: fname.value.trim(),
+    url: furl.value.trim(),
+    ghi_chu: fghi.value.trim()
+  });
+  if(!payload.get('title')){ showToast('Tiêu đề không được để trống'); return; }
+  showLoader(true);
+  try{
+    const res = await fetch(API + '?route=' + route, { method:'POST', body: payload });
+    const j = await res.json();
+    showToast(j?.message || 'Đã lưu');
+    closeModal();
+    await load();
+  }catch(e){
+    console.error('save error', e);
+    showToast('Lỗi khi lưu dữ liệu');
+  }finally{ showLoader(false); }
+});
+
+async function deleteItem(id){
+  if(roleLower !== 'admin'){ showToast('Bạn không có quyền'); return; }
+  showLoader(true);
+  try{
+    const res = await fetch(API + '?route=thamkhao-delete', { method:'POST', body: new URLSearchParams({ token: session.token, id }) });
+    const j = await res.json();
+    showToast(j?.message || 'Đã xóa');
+    await load();
+  }catch(e){
+    console.error('delete error', e);
+    showToast('Lỗi khi xóa');
+  }finally{ showLoader(false); }
+}
+
+/* ========== SEARCH / UI EVENTS ========== */
+qInput.addEventListener('input', ()=> {
+  const v = qInput.value.trim().toLowerCase();
+  Array.from(tb.querySelectorAll('tr')).forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
+  Array.from(cardsRoot.children).forEach(c => { c.style.display = c.textContent.toLowerCase().includes(v) ? '' : 'none'; });
+});
+clearSearchBtn.addEventListener('click', ()=> { qInput.value=''; qInput.dispatchEvent(new Event('input')); });
+reloadBtn.addEventListener('click', load);
+cancelBtn.addEventListener('click', closeModal);
+logoutBtn.addEventListener('click', ()=> { localStorage.removeItem('loggedInUser'); location.href='login.html'; });
+document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
+
+/* responsive toggle */
+function updateResponsive(){ if(window.innerWidth <= 900){ document.querySelector('.table-wrap').style.display = 'none'; cardsRoot.style.display = ''; } else { document.querySelector('.table-wrap').style.display = ''; cardsRoot.style.display = 'none'; } }
+window.addEventListener('resize', updateResponsive);
+updateResponsive();
+
+/* bootstrap */
+init();
 </script>
 </body>
 </html>

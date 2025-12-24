@@ -62,17 +62,9 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <div class="login-card">
         <img style="width: 120px;" src="./img/logo.png" alt="">
         <h2>Đăng nhập</h2>
-=======
-  <div id="footer"></div>
-  <script src="main.js"></script>
-<script>
-  
-const webAppUrl = "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7dvWw8d7KK7vPw9_RKqH0nCDCrWB9skE7BlUPHNFn-KLdLb/exec";
->>>>>>> a485a5b4f6cf8977fda54b928ca0d830b6726b7d
 
         <form id="loginForm" autocomplete="off">
             <div class="input-group">
@@ -83,11 +75,15 @@ const webAppUrl = "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7
                 <input type="password" id="password" placeholder="Mật khẩu" required autocomplete="current-password">
             </div>
 
-            <button type="submit" class="btn-auth" id="btnAuth">Đăng nhập</button>
+            <button type="submit" class="btn-auth" id="btnAuth">
+                <span>Đăng nhập</span>
+                <div class="progress"></div>
+            </button>
+
         </form>
 
         <div class="login-footer" style="margin-top:10px;">
-            <a href="#" id="forgotLink">Quên mật khẩu?</a>
+            <a href="./forgot.html" >Quên mật khẩu?</a>
         </div>
 
         <div class="login-footer">
@@ -102,7 +98,7 @@ const webAppUrl = "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7
         /* ================== CẤU HÌNH ==================
            * Thay URL API phía dưới bằng URL WebApp (Apps Script) bạn đã deploy
         */
-        const API = "https://script.google.com/macros/s/AKfycbz4yMlZF6IHhTL_vVeD3eHeZ8aZPpq9-qMBsRDRCHirbamqgdmJnu8dIS7uj9H-fBg_/exec"; // <-- thay bằng WebApp URL của bạn
+        const API = "https://script.google.com/macros/s/AKfycbwHc9P_C0PL7y1qiTVTxrqqwc50CqVoOWSTxCyEdu3dWIaUeP0ljTd4GSGXndaik0Gx/exec"; // <-- thay bằng WebApp URL của bạn
 
         // EmailJS init (nếu dùng) - thay bằng khoá của bạn nếu muốn
         const USE_EMAILJS = false; // chuyển true nếu enable
@@ -123,6 +119,7 @@ const webAppUrl = "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7
         const btnAuth = document.getElementById("btnAuth");
         function setLoading(is){ btnAuth.disabled = is; btnAuth.innerHTML = is ? '<span class="spinner"></span> Đang xử lý...' : 'Đăng nhập'; }
 
+        
         /* ================== Helper: fetch JSON with timeout ================== */
         function fetchJson(url, options, timeout = 20000){
             return new Promise((resolve, reject) => {
@@ -246,7 +243,7 @@ const webAppUrl = "https://script.google.com/macros/s/AKfycbz60A1jjEVAwnSs6HDeN7
 
                     setTimeout(()=> {
                         if(isManager){
-                            window.location.href = "quanly.html";
+                            window.location.href = "main.html";
                         } else {
                             window.location.href = "main.html";
                         }

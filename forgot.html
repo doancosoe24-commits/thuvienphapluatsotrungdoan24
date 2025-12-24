@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quên mật khẩu</title>
+  <style>
+    :root{
+      --primary:#004aad;
+      --secondary:#f5b042;
+      --bg:#f0f4f8;
+      --card:#fff;
+      --text:#08304a;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,Arial;}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px;}
+    .card{width:420px;background:var(--card);padding:28px;border-radius:14px;box-shadow:0 12px 30px rgba(10,20,30,0.08);text-align:center;}
+    h2{color:var(--primary);margin-bottom:12px;}
+    .desc{color:#556;margin-bottom:18px;}
+    input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;margin-bottom:12px;font-size:15px;}
+    .btn{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--secondary),#ffd86b);font-weight:700;cursor:pointer;}
+    .btn.secondary{background:#e5e7eb;color:#111;margin-top:8px;}
+    .toast{position:fixed;top:-120px;left:50%;transform:translateX(-50%);padding:14px 22px;border-radius:12px;color:#fff;font-weight:700;opacity:0;transition:top 0.45s,opacity 0.45s;z-index:9999;font-size:14px;}
+    .toast.show{top:22px;opacity:1;}
+    .toast.success{background:#28a745;}
+    .toast.error{background:#dc3545;}
+    .spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;animation:spin 0.8s linear infinite;display:inline-block;vertical-align:middle;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .note{font-size:13px;color:#666;margin-top:10px;}
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div class="card" role="main" aria-label="Quên mật khẩu">
+    <img src="./img/logo.png" alt="logo" style="width:110px;margin:0 auto 8px;display:block;">
+    <h2>Quên mật khẩu</h2>
+    <div class="desc">Nhập email đã đăng ký. Hệ thống sẽ tạo mật khẩu tạm thời và gửi tới email của bạn.</div>
+
+    <input id="email" type="email" placeholder="Nhập email đăng ký" autocomplete="email" />
+    <button id="sendBtn" class="btn">Gửi yêu cầu</button>
+    <button id="backBtn" class="btn secondary">Trở về đăng nhập</button>
+
+    <div class="note">Lưu ý: Nếu server trả mật khẩu tạm trực tiếp (chỉ dev/test), bạn sẽ thấy mật khẩu trên màn hình. Ở môi trường thực tế, mật khẩu tạm sẽ được gửi qua email.</div>
+  </div>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    // ========== CẤU HÌNH ==========
+    const API = "https://script.google.com/macros/s/AKfycbwHc9P_C0PL7y1qiTVTxrqqwc50CqVoOWSTxCyEdu3dWIaUeP0ljTd4GSGXndaik0Gx/exec"; // <-- thay bằng WebApp URL của bạn
+    const EMAILJS_PUBLIC_KEY = "q9a3FrQ_V8WsnNmaM";
+    const EMAILJS_SERVICE = "service_14en4nb";
+    const EMAILJS_TEMPLATE = "template_ka1t9za";
+
+    // init
+    if(window.emailjs){
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
+
+    // ========== HELPERS ==========
+    const toastEl = document.getElementById('toast');
+    function showToast(msg, type='success', dur=3500){
+      toastEl.textContent = msg;
+      toastEl.className = `toast ${type} show`;
+      setTimeout(()=> toastEl.className='toast', dur);
+    }
+    function setLoading(on){
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = on;
+      btn.innerHTML = on ? '<span class="spinner"></span> Đang xử lý...' : 'Gửi yêu cầu';
+    }
+
+    function fetchJson(url, options={}, timeout=20000){
+      return new Promise((resolve,reject)=>{
+        const t = setTimeout(()=> reject(new Error('Timeout')), timeout);
+        fetch(url, options).then(r => { clearTimeout(t); return r.text(); })
+          .then(txt => {
+            try{ resolve(JSON.parse(txt)); } catch(e){ reject(new Error('Invalid JSON')); }
+          }).catch(err => { clearTimeout(t); reject(err); });
+      });
+    }
+
+    // utility: get name from email for template to_name
+    function nameFromEmail(email){
+      if(!email) return "";
+      return email.split('@')[0];
+    }
+
+    // ========== ACTION ==========
+    document.getElementById('sendBtn').addEventListener('click', async ()=>{
+      const email = (document.getElementById('email').value || '').trim();
+      if(!email){ showToast('Vui lòng nhập email!', 'error'); return; }
+      setLoading(true);
+
+      try{
+        const url = `${API}?action=forgotpassword&email=${encodeURIComponent(email)}`;
+        const res = await fetchJson(url, { method: 'GET' }, 20000);
+        const ok = res && (res.success === true || res.status === 'success');
+        if(!ok){
+          showToast(res && (res.message || res.error) ? (res.message || res.error) : 'Email không tồn tại', 'error');
+          setLoading(false);
+          return;
+        }
+
+        // server có thể trả temp password (chỉ dev/test)
+        const temp = res.password || res.tempPassword || '';
+
+        if(temp){
+          // Nếu server trả temp -> frontend sẽ gửi EmailJS (bạn có thể tắt nếu backend đã gửi)
+          if(window.emailjs){
+            const templateParams = {
+                to_email: email,
+                to_name: nameFromEmail(email),
+                name: nameFromEmail(email),
+                email: email,
+                temp_password: temp, // ✅ PHẢI ĐÚNG TÊN
+                title: "Đặt lại mật khẩu",
+                time: new Date().toLocaleString("vi-VN"),
+                message: "Mật khẩu tạm thời để đăng nhập hệ thống"
+                };
+
+
+            try{
+              await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, templateParams);
+              showToast('Đã gửi mật khẩu tạm tới email của bạn. Kiểm tra hộp thư (hoặc spam).', 'success', 5000);
+              // redirect to reset page (prefill email)
+              setTimeout(()=> { window.location.href = `reset.html?email=${encodeURIComponent(email)}`; }, 2400);
+            }catch(e){
+              console.error('EmailJS send error', e);
+              // fallback: show temp on screen (dev)
+              showToast('Không gửi được email qua EmailJS. Mật khẩu tạm: ' + temp, 'error', 8000);
+              setTimeout(()=> { window.location.href = `reset.html?email=${encodeURIComponent(email)}`; }, 3000);
+            }
+          } else {
+            // EmailJS not available -> show temp for dev
+            showToast('Mật khẩu tạm: ' + temp, 'success', 7000);
+            setTimeout(()=> { window.location.href = `reset.html?email=${encodeURIComponent(email)}`; }, 2200);
+          }
+        } else {
+          // server already sent email -> just inform user and redirect
+          showToast(res.message || 'Đã gửi email chứa mật khẩu tạm. Kiểm tra hộp thư (hoặc spam).', 'success', 5000);
+          setTimeout(()=> { window.location.href = `reset.html?email=${encodeURIComponent(email)}`; }, 2400);
+        }
+      }catch(err){
+        console.error('forgot error', err);
+        showToast('Lỗi kết nối server', 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    document.getElementById('backBtn').addEventListener('click', ()=> {
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('email').addEventListener('keydown', (e)=> { if(e.key === 'Enter') document.getElementById('sendBtn').click(); });
+  </script>
+</body>
+</html>

@@ -1,562 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
-<title>Đăng ký tài khoản</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Đăng ký — Bước 1</title>
 
-<!-- ============================
-   CSS gốc (giữ nguyên, không thay đổi)
-   ============================ -->
+<!-- Favicon (nếu có) -->
+<link rel="shortcut icon" href="./img/logo.png" type="image/png">
+
 <style>
 :root{
-    --primary:#004aad;
-    --secondary:#f5b042;
-    --success:#28a745;
-    --error:#dc3545;
-    --bg:#f0f4f8;
-    --input-bg:#ffffffcc;
-    --text-dark:#08304a;
+  --primary:#004aad;
+  --accent:#0b6bd6;
+  --bg:#f0f4f8;
+  --card:#ffffff;
+  --input-bg:#fff;
+  --muted:#6b7a90;
+  --success:#28a745;
+  --danger:#dc3545;
 }
 
-/* Reset cơ bản */
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
-body{height:100vh; display:flex; justify-content:center; align-items:center; background:var(--bg);}
-
-/* Card đăng ký */
-.register-card{
-    background:#fff;
-    padding:40px 30px;
-    border-radius:16px;
-    width:360px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
-    text-align:center;
-    transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease;
-    opacity:0;
-    transform: translateY(20px);
-}
-.register-card.show{
-    opacity:1;
-    transform: translateY(0);
-}
-.register-card:hover{transform: translateY(-5px);}
-.register-card h2{
-    margin-bottom:24px;
-    color:var(--primary);
-    font-size:28px;
-}
-.input-group{margin-bottom:16px; text-align:left;}
-.input-group input{
-    width:100%;
-    padding:14px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    background:var(--input-bg);
-    font-size:16px;
-    color:var(--text-dark);
-    transition: border 0.3s;
-}
-.input-group input:focus{border-color:var(--primary); outline:none;}
-.btn-auth{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    font-weight:700;
-    font-size:16px;
-    cursor:pointer;
-    background:linear-gradient(90deg,var(--secondary),#ffd86b);
-    color:var(--text-dark);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.btn-auth:hover{transform: translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-.register-footer{
-    margin-top:18px;
-    font-size:14px;
-    color:#555;
-}
-.register-footer a{color:var(--primary); text-decoration:none; font-weight:600;}
-.register-footer a:hover{text-decoration:underline;}
-
-/* Toast */
-.toast{
-    position:fixed;
-    top:-120px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:16px 28px;
-    border-radius:12px;
-    color:#fff;
-    font-weight:700;
-    opacity:0;
-    transition:top 0.45s, opacity 0.45s;
-    z-index:9999;
-    font-size:14px;
-}
-.toast.show{top:22px; opacity:1;}
-.toast.success{background:var(--success);}
-.toast.error{background:var(--error);}
-.spinner{
-    width:18px;
-    height:18px;
-    border-radius:50%;
-    border:2px solid rgba(255,255,255,0.3);
-    border-top-color:#fff;
-    animation:spin 0.8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* Thông báo đăng ký khóa */
-.disabled-message{
-    font-size:16px;
-    color:var(--error);
-    font-weight:600;
-    margin-top:20px;
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter, 'Segoe UI', Roboto, Arial, sans-serif}
+html,body{height:100%}
+body{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#f6fbff, var(--bg));
+  padding:20px;
 }
 
-/* Overlay loading nâng cấp */
-#overlayLoading {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(255,255,255,0.85);
-    backdrop-filter: blur(4px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:9998;
-    transition: opacity 0.3s;
-    flex-direction: column;
-}
-#overlayLoading.hidden {
-    opacity:0;
-    pointer-events:none;
-}
-.overlay-content{
-    text-align:center;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    align-items:center;
-}
-.overlay-content .spinner {
-    width:40px;
-    height:40px;
-    border:4px solid rgba(0,0,0,0.1);
-    border-top-color:var(--primary);
-    border-radius:50%;
-    animation: spin 1s linear infinite;
-}
-.overlay-content .dots {
-    display:flex;
-    gap:6px;
-    margin-top:6px;
-}
-.overlay-content .dots span {
-    display:block;
-    width:10px;
-    height:10px;
-    background:var(--primary);
-    border-radius:50%;
-    animation: dotsBounce 1.2s infinite ease-in-out;
-}
-.overlay-content .dots span:nth-child(2){animation-delay:0.2s;}
-.overlay-content .dots span:nth-child(3){animation-delay:0.4s;}
-.overlay-content .loading-text {
-    font-size:16px;
-    font-weight:600;
-    color:var(--primary);
-    animation: textPulse 1.5s infinite;
-}
-@keyframes dotsBounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
-}
-@keyframes textPulse {
-  0%,100%{opacity:0.6;}
-  50%{opacity:1;}
+/* Card */
+.card{
+  width:100%;
+  max-width:420px;
+  background:var(--card);
+  padding:26px;
+  border-radius:14px;
+  box-shadow: 0 10px 30px rgba(10,30,60,0.08);
+  text-align:center;
+  border: 1px solid rgba(10,30,60,0.03);
 }
 
-/* ======= thêm vài style nhỏ cho OTP/UI ======= */
-.row { display:flex; gap:8px; align-items:center; }
-.small-btn {
-  padding:10px 12px;
-  border-radius:8px;
-  border:none;
-  background:var(--primary);
-  color:#fff;
-  cursor:pointer;
-  font-weight:600;
+/* Logo */
+.brand {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  margin-bottom:6px;
 }
-.small-btn[disabled]{opacity:0.6;cursor:not-allowed;}
-.countdown { font-size:13px;color:var(--primary);font-weight:600;margin-left:6px; }
+.brand img{
+  width:122px;
+  height:122px;
+  object-fit:contain;
+  border-radius:14px;
+  box-shadow: 0 6px 18px rgba(6,24,40,0.06);
+  background: #fff;
+  padding:6px;
+}
+.brand .sitename{
+  font-size:16px;
+  color:var(--primary);
+  font-weight:800;
+}
+.brand .tag{
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* Form */
+h2{color:var(--primary);font-size:20px;margin:6px 0 12px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #e1e8f0;background:var(--input-bg);margin:10px 0;font-size:15px}
+.btn{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#4aa3ff);color:#fff;font-weight:800;cursor:pointer;font-size:15px;box-shadow:0 6px 18px rgba(11,107,214,0.12)}
+.btn:active{transform:translateY(1px)}
+.note{font-size:13px;color:var(--muted);margin-top:10px}
+.row {display:flex; gap:8px; align-items:center; justify-content:center}
+
+/* Tiny helpers */
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:20px;background:var(--success);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9999;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
+.toast.error{background:var(--danger)}
+.small{font-size:13px;color:#8a98ad}
+
+/* Responsive */
+@media (max-width:420px){
+  .card{padding:18px}
+  .brand img{width:78px;height:78px}
+}
 </style>
 
-<!-- EmailJS SDK (dùng để gửi email từ client) -->
+<!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-  /* INIT EmailJS: giữ public key bạn đã khai báo */
-  (function(){
-    emailjs.init('aL-gGjOA0UWePMm7O'); // <-- public key (giữ nguyên)
-  })();
-</script>
-
+<script> (function(){ emailjs.init('q9a3FrQ_V8WsnNmaM'); })(); </script>
 </head>
 <body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<!-- Overlay loading -->
-<div id="overlayLoading">
-  <div class="overlay-content">
-    <div class="spinner"></div>
-    <div class="dots">
-      <span></span><span></span><span></span>
-    </div>
-    <div class="loading-text">Đang kiểm tra trạng thái đăng ký...</div>
+<div class="card" role="region" aria-label="Form đăng ký">
+  <div class="brand" aria-hidden="false">
+    <!-- LOGO: đặt file logo của bạn tại ./img/logo.png -->
+    <img src="./img/logo.png" alt="Logo — Thư viện số Trung đoàn 24" />
   </div>
-</div>
 
-<div id="toast" class="toast"></div>
+  <h2>Tạo tài khoản</h2>
 
-<div class="register-card">
-    <img style="width: 120px;" src="./img/logo.png" alt="">
-    <h2>Đăng ký tài khoản</h2>
+  <label for="username" class="small" style="display:block;text-align:left;margin-bottom:6px;color:#425b76">Tên đăng nhập</label>
+  <input id="username" class="input" placeholder="Tên đăng nhập" required aria-label="Tên đăng nhập">
 
-    <!-- Form đăng ký (đã thêm email + otp) -->
-    <form id="registerForm" style="display:none;">
+  <label for="email" class="small" style="display:block;text-align:left;margin-bottom:6px;color:#425b76">Email</label>
+  <input id="email" class="input" type="email" placeholder="Email (để nhận mã xác thực)" required aria-label="Email nhận OTP">
 
-        <!-- Email (gửi OTP) -->
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Email (nhận OTP)" required>
-        </div>
+  <label for="password" class="small" style="display:block;text-align:left;margin-bottom:6px;color:#425b76">Mật khẩu</label>
+  <input id="password" class="input" type="password" placeholder="Mật khẩu (>=6 ký tự)" required aria-label="Mật khẩu">
 
-        <!-- Gửi OTP + countdown -->
-        <div class="input-group row" style="margin-bottom:12px;">
-            <button type="button" id="btnSendOtp" class="small-btn">Gửi mã OTP</button>
-            <div id="otpStatus" style="flex:1; text-align:left;">
-              <span id="otpHint" style="color:#666;font-size:13px;">Bạn sẽ nhận mã trong email.</span>
-              <span id="countdown" class="countdown" style="display:none;"></span>
-            </div>
-        </div>
+  <label for="password2" class="small" style="display:block;text-align:left;margin-bottom:6px;color:#425b76">Nhập lại mật khẩu</label>
+  <input id="password2" class="input" type="password" placeholder="Nhập lại mật khẩu" required aria-label="Nhập lại mật khẩu">
 
-        <!-- Nhập OTP -->
-        <div class="input-group">
-            <input type="text" id="otp" placeholder="Nhập mã OTP (6 chữ số)">
-        </div>
+  <button id="btnSend" class="btn" aria-label="Đăng ký và gửi mã">Đăng ký & Gửi mã xác thực</button>
 
-        <!-- Tên tài khoản -->
-        <div class="input-group">
-            <input type="text" id="username" placeholder="Tài khoản" required>
-        </div>
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Mật khẩu" required>
-        </div>
-        <div class="input-group">
-            <input type="password" id="password2" placeholder="Nhập lại mật khẩu" required>
-        </div>
-        <button type="submit" class="btn-auth" id="btnAuth">Tạo tài khoản</button>
-    </form>
-
-    <!-- Thông báo đăng ký khóa -->
-    <div id="registrationClosed" class="disabled-message" style="display:none;">
-        Đăng ký hiện đang tạm khóa. Vui lòng liên hệ admin.
-    </div>
-
-    <div class="register-footer">
-        Đã có tài khoản? <a href="index.html">Đăng nhập</a>
-    </div>
+  <div class="note">Bạn sẽ nhận mã OTP trong email để kích hoạt tài khoản.</div>
+  <div style="margin-top:12px;font-size:13px;color:#8a98ad">Đã có tài khoản? <a href="index.html" style="color:var(--accent);text-decoration:none;font-weight:700">Đăng nhập</a></div>
 </div>
 
 <script>
-/*
-  FULL JS A–Z (ĐỒNG BỘ VỚI APPS SCRIPT)
-  - Gửi OTP qua EmailJS (client)
-  - Lưu OTP + email + expiry vào localStorage
-  - Giới hạn gửi lại (cooldown 60s)
-  - Verify OTP trước khi gọi API register
-  - Gọi API bằng GET ?route=register&username=...&password=...&email=...
-  - Client hash password bằng SHA-256 để backend so sánh trực tiếp (backend lưu password đã hash)
-*/
+/* ========== Cấu hình ========== */
+const EMAILJS_SERVICE_ID = 'service_fb3dyvt';
+const EMAILJS_TEMPLATE_ID = 'template_wpzqqrw';
+const API = 'https://script.google.com/macros/s/AKfycbzUuQFf7PNcRJR-MxW03F2aTuDY5_BQXbqJXB0K1PdAJomdFgvHVZkirmIB24CbZnBk/exec';
 
-/* ================== CẤU HÌNH (bạn có thể thay nếu cần) ================== */
-const EMAILJS_SERVICE_ID = "service_tif4jt4";   // <-- thay nếu cần
-const EMAILJS_TEMPLATE_ID = "template_sia2iwe"; // <-- thay nếu cần
-
-// API Apps Script (PHẢI TRÙNG VỚI DEPLOY URL CỦA BẠN)
-const API = "https://script.google.com/macros/s/AKfycbwuTB_4rOY_mX9S90793Qu55pVLLOdzwsiR7jEYNlRVVMbZDj2G0MU0b2F3OAg0KUuK/exec";
-
-/* ================== UI Elements ================== */
-const registerForm = document.getElementById("registerForm");
-const btnAuth = document.getElementById("btnAuth");
-const toastEl = document.getElementById("toast");
-const registrationClosedEl = document.getElementById("registrationClosed");
-const overlay = document.getElementById("overlayLoading");
-const registerCard = document.querySelector(".register-card");
-
-const btnSendOtp = document.getElementById("btnSendOtp");
-const emailInput = document.getElementById("email");
-const otpInput = document.getElementById("otp");
-const countdownEl = document.getElementById("countdown");
-const otpHint = document.getElementById("otpHint");
-
-let REGISTRATION_OPEN = false;
-
-/* ================== TOAST ================== */
-function showToast(msg,type="success",duration=2500){
-    toastEl.textContent = msg;
-    toastEl.className = `toast ${type} show`;
-    setTimeout(()=>toastEl.className='toast',duration);
+/* ========== Helpers UI ========== */
+const toastEl = document.getElementById('toast');
+function showToast(text, type='success', ms=2800){
+  toastEl.textContent = text;
+  toastEl.className = 'toast' + (type==='error' ? ' error' : '');
+  toastEl.style.display = 'block';
+  setTimeout(()=>{ toastEl.style.display = 'none'; }, ms);
 }
 
-/* ================== Loading nút ================== */
-function setLoading(isLoading){
-    btnAuth.disabled = isLoading;
-    btnAuth.innerHTML = isLoading ? '<span class="spinner"></span> Đang xử lý...' : 'Tạo tài khoản';
+/* ========== simple sha256 ========= */
+async function sha256(s){
+  const enc = new TextEncoder();
+  const b = enc.encode(s);
+  const h = await crypto.subtle.digest('SHA-256', b);
+  return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 
-/* ================== SHA-256 hash password (client) ================== */
-async function hashPassword(password){
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password.trim());
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,"0")).join("");
+/* ========== localStorage helpers ========== */
+function savePendingRegistration(obj){ localStorage.setItem('pending_registration', JSON.stringify(obj)); }
+function saveOtpLocal(email, otp){ const rec={email,otp,exp: Date.now()+5*60*1000}; localStorage.setItem('pending_otp', JSON.stringify(rec)); }
+function getLastSent(){ const v = localStorage.getItem('otp_last_sent'); return v ? Number(v) : 0; }
+function setLastSent(){ localStorage.setItem('otp_last_sent', String(Date.now())); }
+
+/* ========== send handlers: server first, fallback EmailJS ========== */
+async function sendOtpViaServer(email, name, otp){
+  try{
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ route:'sendOtp', email, name, otp })
+    });
+    if(!res.ok) throw new Error('Server trả lỗi ' + res.status);
+    const j = await res.json();
+    if(j && j.success) return { ok:true };
+    return { ok:false, msg: j && j.message ? j.message : 'Server phản hồi không rõ' };
+  }catch(err){
+    console.warn('sendOtpViaServer error', err);
+    return { ok:false, msg: String(err) };
+  }
 }
-
-/* ================== KIỂM TRA SETTINGS (để mở/khóa đăng ký) ==================
-   API trả về cấu trúc data.matkhauopen (mảng) theo Apps Script ở server.
-   Hỗ trợ các kiểu trả về khác nhau.
-*/
-async function checkRegistrationStatus(){
-    try{
-        const resp = await fetch(`${API}?route=settings`);
-        const data = await resp.json();
-
-        // Nhiều biến thể: server có thể trả { status:"success", data: { matkhauopen: [ { key, value } ] } }
-        // hoặc những cấu trúc khác — chúng ta cố gắng lấy matkhauopen an toàn.
-        let itemObj = null;
-        if(data && data.data && data.data.matkhauopen && Array.isArray(data.data.matkhauopen) && data.data.matkhauopen.length){
-            itemObj = data.data.matkhauopen[0];
-        } else if(data && data.matkhauopen && Array.isArray(data.matkhauopen) && data.matkhauopen.length){
-            itemObj = data.matkhauopen[0];
-        } else if(data && data.data && data.data.settings && Array.isArray(data.data.settings) && data.data.settings.length){
-            itemObj = data.data.settings.find(x => x.key === "registration_open") || null;
-        }
-
-        // mặc định false
-        REGISTRATION_OPEN = false;
-        if(itemObj){
-            const k = (itemObj.key || itemObj.Key || "").toString().trim().toLowerCase();
-            const v = (itemObj.value || itemObj.Value || itemObj.val || "").toString().trim().toLowerCase();
-            if(k === "registration_open" && (v === "true" || v === "1" || v === "yes")) REGISTRATION_OPEN = true;
-        }
-
-        overlay.classList.add("hidden");
-        registerCard.classList.add("show");
-
-        if(!REGISTRATION_OPEN){
-            registerForm.style.display = "none";
-            registrationClosedEl.style.display = "block";
-        } else {
-            registerForm.style.display = "block";
-            registrationClosedEl.style.display = "none";
-        }
-    } catch(err){
-        console.error("checkRegistrationStatus error:", err);
-        // nếu lỗi — để an toàn: hiện form để admin test (hoặc bạn muốn khóa, thay đổi ở đây)
-        overlay.classList.add("hidden");
-        registerCard.classList.add("show");
-        // mặc định khóa để tránh spam nếu server unreachable
-        registerForm.style.display = "none";
-        registrationClosedEl.style.display = "block";
-        showToast("Không thể kiểm tra trạng thái đăng ký (lỗi server)", "error", 3500);
-    }
-}
-checkRegistrationStatus();
-
-/* ================== OTP LOGIC (localStorage) ==================
-   Storage keys:
-     otp_email -> JSON { otp, email, exp }
-     otp_last_sent_at -> timestamp ms (for cooldown)
-======================================================================== */
-
-function saveOtpToLocal(email, otp){
-    const payload = { otp: otp, email: email, exp: Date.now() + 5*60*1000 }; // 5 phút
-    localStorage.setItem('otp_email', JSON.stringify(payload));
-    localStorage.setItem('otp_last_sent_at', String(Date.now()));
-}
-
-function getOtpFromLocal(){
-    const s = localStorage.getItem('otp_email');
-    if(!s) return null;
-    try{ return JSON.parse(s); } catch(e){ return null; }
-}
-function clearOtpLocal(){ localStorage.removeItem('otp_email'); }
-
-/* ================== COOLDOWN ================== */
-function getLastSentAt(){ const v = localStorage.getItem('otp_last_sent_at'); return v ? Number(v) : 0; }
-function canSendAgain(cooldownSec = 60){
-    const last = getLastSentAt();
-    return (Date.now() - last) > cooldownSec*1000;
-}
-let countdownTimer = null;
-function startCooldown(seconds = 60){
-    const end = Date.now() + seconds*1000;
-    countdownEl.style.display = 'inline-block';
-    btnSendOtp.disabled = true;
-    updateCountdown();
-
-    function updateCountdown(){
-        const left = Math.max(0, Math.ceil((end - Date.now())/1000));
-        countdownEl.textContent = `Gửi lại sau ${left}s`;
-        if(left <= 0){
-            clearInterval(countdownTimer);
-            countdownEl.style.display = 'none';
-            btnSendOtp.disabled = false;
-            countdownEl.textContent = '';
-        }
-    }
-    updateCountdown();
-    countdownTimer = setInterval(updateCountdown, 900);
-}
-
-/* ================== SEND OTP via EmailJS ==================
-   EmailJS: template should accept variables:
-    - to_email
-    - otp_code
-    - passcode
-    - time
-*/
-btnSendOtp.addEventListener('click', async ()=>{
-    const email = emailInput.value.trim();
-    if(!email) { showToast('Nhập email để nhận OTP','error'); return; }
-
-    if(!canSendAgain(60)){ showToast('Vui lòng chờ trước khi gửi lại','error'); return; }
-
-    // tạo OTP 6 chữ số
-    const otp = String(Math.floor(100000 + Math.random()*900000));
-    const expiryTime = new Date(Date.now() + 5*60*1000); // 5 phút
-    const expiryText = expiryTime.toLocaleString('vi-VN');
-
-    // Lưu local (trước khi gửi để verify email trùng)
-    saveOtpToLocal(email, otp);
-
-    // Gọi EmailJS - gửi nhiều biến để template nhận được
-    try{
-        btnSendOtp.disabled = true;
-        btnSendOtp.textContent = 'Đang gửi...';
-        const templateParams = {
-            to_email: email,
-            otp_code: otp,
-            passcode: otp, // thêm nữa cho template dùng passcode
-            time: expiryText
-        };
-
-        console.log('Sending EmailJS with params:', templateParams);
-
-        const res = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-        console.log('EmailJS response:', res);
-        // EmailJS trả về response object; coi là success
-        showToast('OTP đã gửi đến email', 'success', 3000);
-        startCooldown(60);
-        otpHint.textContent = 'Kiểm tra hộp thư (Spam nếu không thấy). OTP hết hạn sau 5 phút.';
-        btnSendOtp.textContent = 'Gửi mã OTP';
-    }catch(err){
-        console.error('EmailJS error', err);
-        if(err && err.status === 422){
-            console.error('EmailJS 422 response text:', err.text || err);
-        }
-        showToast('Gửi OTP thất bại', 'error', 3000);
-        btnSendOtp.disabled = false;
-        btnSendOtp.textContent = 'Gửi mã OTP';
-    }
-});
-
-/* ================== VERIFY OTP (local) ================== */
-function verifyOtpLocal(email, otp){
-    const record = getOtpFromLocal();
-    if(!record) return { ok:false, msg:'Chưa gửi OTP' };
-    if(record.email !== email) return { ok:false, msg:'Email không khớp với OTP đã gửi' };
-    if(Date.now() > record.exp) return { ok:false, msg:'OTP đã hết hạn' };
-    if(record.otp !== otp) return { ok:false, msg:'OTP không đúng' };
+async function sendOtpViaEmailJS(email, name, otp){
+  try{
+    const params = {
+      to_email: email,
+      otp_code: otp,
+      passcode: otp,
+      name: name,
+      time: new Date(Date.now()+5*60*1000).toLocaleString('vi-VN')
+    };
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
     return { ok:true };
+  }catch(err){
+    console.error('EmailJS send error', err);
+    return { ok:false, msg: String(err) };
+  }
 }
 
-/* ================== REGISTER (gọi API nếu OTP hợp lệ) ================== */
-registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!REGISTRATION_OPEN){
-        showToast('Đăng ký hiện đang tạm khóa','error'); return;
+/* ========== Main ========== */
+document.getElementById('btnSend').addEventListener('click', async ()=>{
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+  const password2 = document.getElementById('password2').value;
+
+  if(!username || !email || !password || !password2){
+    showToast('Nhập đầy đủ thông tin', 'error'); return;
+  }
+  if(password !== password2){
+    showToast('Mật khẩu không khớp', 'error'); return;
+  }
+  if(password.length < 6){
+    showToast('Mật khẩu tối thiểu 6 ký tự', 'error'); return;
+  }
+  if(Date.now() - getLastSent() < 60*1000){
+    showToast('Vui lòng chờ trước khi gửi lại', 'error'); return;
+  }
+
+  try{
+    // Hash mật khẩu client-side trước khi lưu pending (tùy server bạn có yêu cầu hay không)
+    savePendingRegistration({ username, email, passwordHash: password });
+
+    // tạo OTP và lưu local
+    const otp = String(Math.floor(100000 + Math.random()*900000));
+    saveOtpLocal(email, otp);
+    setLastSent();
+
+    // ưu tiên gửi qua server (nếu bạn đã deploy Apps Script sendOtp handler)
+    const srv = await sendOtpViaServer(email, username, otp);
+    if(srv.ok){
+      showToast('OTP đã gửi qua server. Chuyển tới trang xác thực...', 'success');
+      setTimeout(()=> location.href = 'register_email-verify.html', 900);
+      return;
     }
 
-    const email = emailInput.value.trim();
-    const otp = otpInput.value.trim();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const password2 = document.getElementById('password2').value;
-
-    // Kiểm tra dữ liệu
-    if (!email || !otp || !username || !password || !password2) {
-        showToast('Nhập đầy đủ thông tin', 'error');
-        return;
+    // fallback EmailJS (client)
+    const js = await sendOtpViaEmailJS(email, username, otp);
+    if(js.ok){
+      showToast('OTP đã gửi (EmailJS). Chuyển tới trang xác thực...', 'success');
+      setTimeout(()=> location.href = 'register_email-verify.html', 900);
+      return;
     }
 
-    if (password !== password2) {
-        showToast('Mật khẩu không trùng khớp', 'error');
-        return;
-    }
-
-    // Verify OTP local
-    const otpCheck = verifyOtpLocal(email, otp);
-    if (!otpCheck.ok) {
-        showToast(otpCheck.msg || 'OTP không hợp lệ', 'error');
-        return;
-    }
-
-    // OTP hợp lệ -> tiến hành register
-    setLoading(true);
-
-    try {
-        // hash password client-side (server expects client hash)
-
-        // Build GET URL (Apps Script expects route=register&username=...&password=...&email=...)
-        const url =
-            `${API}?route=register` +
-            `&username=${encodeURIComponent(username)}` +
-            `&password=${encodeURIComponent(password)}` +
-            `&email=${encodeURIComponent(email)}`;
-
-        const resp = await fetch(url, { method: "GET" });
-        const data = await resp.json();
-
-        // server có thể trả { status:"success", userId:..., message:... } hoặc { status:"error", message:... }
-        const ok = (data && (data.status === "success" || data.success === true));
-        if(ok){
-            showToast(data.message || 'Đăng ký thành công!', 'success', 2000);
-            // Clear OTP sau khi đăng ký thành công
-            clearOtpLocal();
-            // Redirect sau 1.5s
-            setTimeout(()=> window.location.href = 'index.html', 1500);
-            return;
-        }
-
-        // handle specific errors
-        const msg = data.message || data.error || "Đăng ký thất bại";
-        showToast(msg, "error", 3500);
-    } catch (err) {
-        console.error('Lỗi register:', err);
-        showToast('Lỗi server', 'error', 3500);
-    } finally {
-        setLoading(false);
-    }
+    showToast('Gửi OTP thất bại: ' + (srv.msg || js.msg || 'Không rõ'), 'error');
+  }catch(err){
+    console.error(err);
+    showToast('Gửi OTP thất bại', 'error');
+  }
 });
-
-/* ================== Optional: clear expired OTP periodically ================== */
-setInterval(()=> {
-    const rec = getOtpFromLocal();
-    if(rec && Date.now() > rec.exp) clearOtpLocal();
-}, 30*1000);
-
 </script>
-
 </body>
 </html>

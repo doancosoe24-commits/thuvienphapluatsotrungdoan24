@@ -40,7 +40,6 @@
       padding:28px 0 40px;
     }
 
-    /* ---------- BACK (ĐỒNG BỘ CODE 1) ---------- */
     .back-link{
       display:inline-flex;
       align-items:center;
@@ -60,7 +59,6 @@
       color:#fff;
     }
 
-    /* ---------- TITLE ---------- */
     #pageTitle{
       text-align:center;
       color:var(--gold);
@@ -70,7 +68,6 @@
       margin:10px 0 28px;
     }
 
-    /* ---------- LIST ---------- */
     .item_list{
       display:flex;
       align-items:center;
@@ -101,7 +98,6 @@
       color:#fff;
     }
 
-    /* ---------- LOADING (ĐỒNG BỘ CODE 1) ---------- */
     #loadingBox{
       display:flex;
       flex-direction:column;
@@ -127,12 +123,10 @@
       to{ transform:rotate(360deg); }
     }
 
-    /* ---------- ERROR ---------- */
     #loadingBox.error{
       color:#dc2626;
     }
 
-    /* ---------- RESPONSIVE ---------- */
     @media(max-width:768px){
       body{ width:100%; }
       .item p{ font-size:14px; }
@@ -160,7 +154,7 @@
 
 <script src="main.js"></script>
 <script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbyxCsXIZzJAL3TnEoSZaAGIbfjOZJ9lbBfMxqUQx5_-6UKsIaHcOmERT1hp8Z3k9fC6/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbzvjVVkV4dHAlhuT42mnw4f8pl9BDILKrL0SqF8dBw5LjhMbpBulNTV6DMWNhdbQ2zS/exec";
 
 let ALL_DOCUMENTS = [];
 let ALL_CATEGORIES = [];
@@ -205,9 +199,8 @@ function showError(msg){
 async function loadPage(){
   try{
     const res = await fetch(webAppUrl).then(r=>r.json());
-
-    ALL_DOCUMENTS = res.TruyenThongDakTo || [];
-    ALL_CATEGORIES = res.Category || [];
+    ALL_DOCUMENTS = res.data.TruyenThongDakTo || [];
+    ALL_CATEGORIES = res.data.Category || [];
 
     if(!ALL_DOCUMENTS.length){
       showError("Không tìm thấy tài liệu nào.");
@@ -245,8 +238,12 @@ function renderList(data){
   uniqueMap.forEach(i=>{
     const div=document.createElement("div");
     div.className="item_list";
+
+    // thêm data-active lấy từ thuộc tính i.active (nếu không có mặc định '0')
+    const activeVal = (i.active === 1 || i.active === '1') ? '1' : (i.active ? String(i.active) : '0');
+
     div.innerHTML=`
-      <div class="item" data-title="${escapeHtml(i.title)}">
+      <div class="item" data-title="${escapeHtml(i.title)}" data-active="${escapeHtml(activeVal)}">
         <p>${escapeHtml(i.title)}</p>
       </div>
     `;
@@ -257,15 +254,23 @@ function renderList(data){
   loading.style.display="none";
   list.style.display="block";
 
+  // click handler: nếu active === '1' thì chuyển sang lichsutrungdoan24.html, ngược lại KHÔNG làm gì
   list.onclick=e=>{
     const item=e.target.closest(".item");
     if(item){
       const slug=toSlug(item.dataset.title);
-      if(slug==="LICHSUSUDOAN"){
-        window.location.href="lichsudoandakto.html";
-        return;
+      const active = item.dataset.active;
+
+      if(active === '1'){
+        // nếu active = 1 -> chuyển tới lichsutrungdoan24.html
+        window.location.href = "lichsutrungdoan24.html";
       }
-      window.location.href=`TaiLieuNganh_detail.html?slug=${slug}`;
+      else{
+      window.location.href = `TaiLieuNganh_detail.html?slug=${slug}`;
+      }
+
+      // nếu muốn chuyển tới trang chi tiết cho các trường hợp khác,
+      // hãy bỏ comment dòng bên dưới. Hiện tại theo yêu cầu: "con lại thì không" => không điều hướng.
     }
   };
 }

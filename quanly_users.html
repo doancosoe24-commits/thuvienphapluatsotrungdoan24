@@ -3,100 +3,125 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-      <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
-  <title>Admin - Quản lý Users</title>
+  <title>Admin — Quản lý Users (Mobile-first)</title>
+  <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#f6f8fb;
-      --card:#ffffff;
-      --text:#0f172a;
-      --accent:#0b6cff;
-      --muted:#6b7280;
-      --radius:14px;
-      --shadow:0 10px 30px rgba(15,23,42,0.08);
-      --danger:#ef4444;
-      --success:#10b981;
-      --max-width:1100px;
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --muted: #6b7280;
+      --text: #0f172a;
+      --accent: #0b6cff;
+      --accent-2: #06b6d4;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(15,23,42,0.06);
+      --glass: rgba(255,255,255,0.6);
+      --maxw: 1100px;
+      --ease: cubic-bezier(.2,.9,.25,1);
     }
+
     *{box-sizing:border-box}
-    html,body{height:100%;}
-    body{background:var(--bg); color:var(--text); margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial; -webkit-font-smoothing:antialiased; padding:28px; display:flex; justify-content:center}
-    .app{width:100%; max-width:var(--max-width)}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
-    .title{font-size:28px; color:var(--accent); font-weight:700}
-    .card{background:linear-gradient(180deg,var(--card),#fbfdff); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);}
-    .toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
-    .left{display:flex;gap:12px;align-items:center;flex:1;min-width:220px}
-    .search{flex:1;min-width:180px}
-    .search input{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #e6e9ef;font-size:14px;background:#fff}
-    .controls{display:flex;gap:8px;align-items:center}
-    .btn{padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600;font-size:14px}
-    .btn-ghost{background:transparent;border:1px solid #e6e9ef}
-    .btn-add{background:var(--accent);color:#fff}
-    .table-wrap{border-radius:10px;overflow:auto;background:transparent}
-    table{width:100%;border-collapse:collapse;min-width:900px}
-    thead th{text-align:left;padding:12px 14px;font-size:12px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
-    tbody td{padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.04);font-size:14px;vertical-align:middle}
-    tbody tr:hover{background:rgba(11,108,255,0.03)}
-    .action-btn{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;border:none;color:#fff;cursor:pointer;font-size:13px}
-    .edit{background:#f59e0b}
-    .del{background:var(--danger)}
-    .lock{background:#64748b}
-    .role-toggle{background:#06b6d4}
-    .badge{padding:6px 8px;border-radius:8px;font-size:12px;color:#fff;display:inline-block}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#eef6ff);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--text);-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+
+    /* App container */
+    .wrap{max-width:var(--maxw);margin:18px auto;padding:12px}
+
+    /* Topbar */
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#fff;font-weight:800}
+    .brand h1{margin:0;font-size:18px}
+    .brand p{margin:0;font-size:13px;color:var(--muted)}
+
+    /* Card */
+    .card{background:var(--surface);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+
+    /* Toolbar */
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .search{flex:1;min-width:180px;display:flex;align-items:center;background:#f8fafc;padding:8px;border-radius:12px}
+    .search svg{opacity:.6}
+    .search input{border:0;background:transparent;outline:none;padding:8px;font-size:14px;flex:1}
+    .controls{display:flex;gap:8px}
+    .btn{padding:9px 12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;box-shadow:0 8px 20px rgba(11,108,255,0.08);transition:transform .18s var(--ease)}
+    .btn.ghost{background:transparent;border:1px solid rgba(15,23,42,0.06);color:var(--text);box-shadow:none}
+    .btn:active{transform:scale(.98)}
+
+    /* table (desktop) */
+    .table-wrap{margin-top:12px;border-radius:10px;overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:820px}
+    thead th{font-size:12px;color:var(--muted);text-transform:uppercase;padding:12px 14px;text-align:left;white-space:nowrap}
+    tbody td{padding:12px 14px;border-bottom:1px solid rgba(15,23,42,0.04);vertical-align:middle}
+    tbody tr{transition:background .18s var(--ease)}
+    tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,108,255,0.02))}
+
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:6px 8px;border-radius:999px;font-size:12px;background:rgba(15,23,42,0.04);display:inline-flex;align-items:center;gap:8px}
+    .badge{padding:6px 8px;border-radius:8px;font-size:12px;color:#fff}
     .badge.admin{background:#0ea5b7}
-    .badge.user{background:#60a5fa}
-    .badge.locked{background:var(--danger)}
-    .badge.active{background:var(--success)}
-    .badge.inactive{background:var(--muted)}
-    .canview{font-size:12px;color:#374151;display:inline-block;padding:6px 8px;border-radius:8px;border:1px dashed #e6e9ef;background:#fff;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .small{font-size:12px;color:var(--muted)}
-    .readonly { background:#f3f4f6 !important; }
-    /* popup modal */
-    .popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:999}
-    .form{background:#fff;padding:18px;border-radius:12px;width:min(560px,94%);box-shadow:var(--shadow);animation:pop .18s ease;max-height:86vh;overflow:auto}
-    @keyframes pop{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .form h3{margin:0 0 10px;color:var(--accent)}
-    .form .row{margin-bottom:10px}
-    .form input, .form select, .form textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px}
-    .form .muted{font-size:12px;color:var(--muted)}
-    .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:10000}
-    .toast.show{display:block}
-    /* responsive: convert rows to card-list for small widths */
-    @media (max-width:820px){
+    .badge.editor{background:#60a5fa}
+    .badge.user{background:#94a3b8}
+    .badge.lock{background:var(--danger)}
+    .badge.ok{background:var(--success)}
+
+    /* responsive: cards for small screens */
+    @media (max-width:880px){
       table{min-width:0}
       thead{display:none}
-      tbody td{display:block;padding:12px 10px;border-bottom:1px solid rgba(15,23,42,0.04)}
-      tbody tr{display:block;margin-bottom:12px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:10px;padding:10px}
-      tbody td:before{content:attr(data-label);display:block;font-weight:600;color:var(--muted);font-size:12px;margin-bottom:6px}
-      .canview{max-width:100%}
+      tbody td{display:block;padding:12px 14px}
+      tbody tr{display:block;background:linear-gradient(180deg,var(--surface),#fbfdff);border-radius:12px;margin-bottom:12px;padding:12px}
+      tbody td:before{content:attr(data-label);display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+      .controls{width:100%;justify-content:flex-end}
     }
-    @media (max-width:420px){
-      body{padding:12px}
-      .title{font-size:30px;text-align: center;}
-      .form{padding:14px}
-    }
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:999}
+    .modal{background:var(--surface);border-radius:12px;padding:14px;max-width:720px;width:100%;box-shadow:var(--shadow);transform:translateY(8px);transition:all .18s var(--ease)}
+    .modal.show{transform:none}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-row{margin-bottom:8px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type=text],input[type=email],input[type=password],select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.06)}
+    textarea{min-height:96px}
+
+    /* tiny helpers */
+    .muted{font-size:13px;color:var(--muted)}
+    .small{font-size:12px;color:var(--muted)}
+    .float-add{position:fixed;right:18px;bottom:100px;width:56px;height:56px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#fff;font-size:22px;box-shadow:0 12px 30px rgba(11,108,255,0.12);z-index:80}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.06), rgba(0,0,0,0.04));border-radius:8px;height:14px}
+
+    /* toast */
+    .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:1100}
+    .toast.show{display:block}
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="header">
-      <div class="title">Admin — Quản lý tài khoản</div>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div>
+          <h1>Quản lý tài khoản</h1>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="search" role="search" aria-label="Tìm nhanh">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <input id="q" placeholder="Tìm username, email, ngày tạo..." aria-label="Tìm kiếm" />
+        </div>
+        <div class="controls">
+          <button id="reload" class="btn ghost" title="Làm mới">⟳</button>
+          <button id="openAdd" class="btn" title="Thêm tài khoản">+ Thêm</button>
+        </div>
+      </div>
     </div>
 
     <div class="card">
-      <div class="toolbar">
-        <div class="left">
-          <div class="search"><input id="q" placeholder="Tìm kiếm username / email / ngày tạo ..." aria-label="Tìm kiếm" /></div>
-        </div>
-        <div class="controls">
-          <button id="btnReload" class="btn btn-ghost">⟳ Tải lại</button>
-          <button id="btnAdd" class="btn btn-add">+ Thêm tài khoản</button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
+      <div class="table-wrap" id="tableWrap">
         <table aria-describedby="user-table">
           <thead>
             <tr>
@@ -104,204 +129,210 @@
               <th>Email</th>
               <th>Role</th>
               <th>Active</th>
-              <th>Can View</th>
+              <th>Can view</th>
               <th>Khóa</th>
               <th>Ngày tạo</th>
-              <th>Hành động</th>
+              <th></th>
             </tr>
           </thead>
-          <tbody id="tb">
-            <tr><td colspan="9" style="text-align:center;padding:18px">Chưa tải dữ liệu...</td></tr>
+          <tbody id="tbody">
+            <!-- rows injected -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- popup form -->
-  <div id="popup" class="popup" aria-hidden="true">
-    <div class="form" role="dialog" aria-modal="true">
-      <h3 id="ftitle">Thêm user</h3>
+  <!-- floating add (mobile) -->
+  <button id="fab" class="float-add" aria-label="Thêm tài khoản">+</button>
 
-      <input id="fid" type="hidden" />
-      <div class="row"><input id="fusername_inp" placeholder="Username" /></div>
-      <div class="row"><input id="femail_inp" placeholder="Email" /></div>
-      <div class="row"><input id="fpassword_inp" placeholder="Mật khẩu (để trống nếu không đổi)" /></div>
-      <div class="row">
-        <select id="frole_inp">
-          <option value="user">user</option>
-          <option value="admin">admin</option>
-          <option value="editor">editor</option>
-        </select>
-      </div>
-      <div class="row">
-        <label style="display:flex;gap:10px;align-items:center">
-          <input id="factive_inp" type="checkbox" />
-          <span>Active (kích hoạt)</span>
-        </label>
+  <!-- modal -->
+  <div id="backdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Thêm / Sửa tài khoản</h3>
+      <div class="form-grid">
+        <div>
+          <div class="form-row">
+            <label>Username</label>
+            <input id="username" type="text" placeholder="username" />
+          </div>
+          <div class="form-row">
+            <label>Email</label>
+            <input id="email" type="email" placeholder="email@domain" />
+          </div>
+          <div class="form-row">
+            <label>Mật khẩu (để trống nếu không đổi)</label>
+            <input id="password" type="password" placeholder="••••••••" />
+          </div>
+        </div>
+        <div>
+          <div class="form-row">
+            <label>Role</label>
+            <select id="role">
+              <option value="user">user</option>
+              <option value="editor">editor</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Active</label>
+            <select id="active">
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Can view</label>
+            <select id="can_view" multiple size="6" style="min-height:120px"></select>
+            <div class="small">Chọn user mà tài khoản này được phép xem tài liệu. Chọn "all" để cho phép tất cả.</div>
+          </div>
+        </div>
       </div>
 
-      <hr />
-      <div class="row small">Phân quyền xem tài liệu cho user này:</div>
-      <div class="row" style="margin-bottom:6px">
-        <label style="display:flex;gap:8px;align-items:center;">
-          <input id="fcanview_all" type="checkbox" />
-          <span>Allow view <strong>ALL</strong> documents (all)</span>
-        </label>
-      </div>
-      <div class="row">
-        <label class="small">Hoặc chọn từng user (multiselect):</label>
-        <select id="fcanview_select" multiple size="6" style="min-height:120px"></select>
-        <div class="small" style="margin-top:6px;color:#475569">Chọn những user mà <em>tài khoản này</em> được phép xem tài liệu của họ. Nếu không chọn và không bật "ALL" thì chỉ xem tài liệu gán trực tiếp cho id này.</div>
-      </div>
-
-      <div style="text-align:right;margin-top:10px">
-        <button id="saveBtn" class="btn btn-add">Lưu</button>
-        <button id="cancelBtn" class="btn btn-ghost">Hủy</button>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button id="cancel" class="btn ghost">Hủy</button>
+        <button id="save" class="btn">Lưu</button>
       </div>
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
-    /* ================= CONFIG ================= */
-    // Thay URL Apps Script nếu cần
-    const API = "https://script.google.com/macros/s/AKfycbwSHrvLBgztcDnw06CMm7aDqWF37rTEOR4nmg0Ik-5sAr1CUJR4qk27MhCwx-uCZyxe/exec";
+    // --- CONFIG ---
+    const API = 'https://script.google.com/macros/s/AKfycbzUuQFf7PNcRJR-MxW03F2aTuDY5_BQXbqJXB0K1PdAJomdFgvHVZkirmIB24CbZnBk/exec';
 
-    /* LẤY TOKEN TỪ localStorage */
-    const rawUser = localStorage.getItem("loggedInUser");
-    if(!rawUser){ alert("Bạn cần đăng nhập"); window.location.href = "/login.html"; }
-    let token = "";
-    let currentRole = "";
-    let currentUserId = "";
-    try{
-      const parsed = JSON.parse(rawUser);
-      token = parsed.token || (parsed.user && parsed.user.token) || parsed.accessToken || "";
-      if(parsed.user){ currentRole = parsed.user.role || currentRole; currentUserId = parsed.user.id || currentUserId; }
-      if(!currentRole && token){ const p = parseTokenPayload(token); currentRole = (p && p.role) ? p.role : currentRole; currentUserId = (p && p.id) ? p.id : currentUserId; }
-    }catch(e){ console.error(e); localStorage.removeItem("loggedInUser"); alert("Token không hợp lệ, vui lòng đăng nhập lại."); window.location.href = "/login.html"; }
-    if(!currentRole){ alert("Không xác định role. Vui lòng đăng nhập lại."); localStorage.removeItem("loggedInUser"); window.location.href = "/login.html"; }
-    const roleLower = String(currentRole).toLowerCase();
-    if(roleLower !== 'admin' && roleLower !== 'editor'){ alert("Bạn không có quyền truy cập trang quản trị."); window.location.href = "/login.html"; }
+    // --- AUTH (tương tự project của bạn) ---
+    const raw = localStorage.getItem('loggedInUser');
+    if(!raw){ alert('Bạn cần đăng nhập'); window.location.href = '/login.html'; }
+    let token = '';
+    try{ const parsed = JSON.parse(raw); token = parsed.token || (parsed.user && parsed.user.token) || parsed.accessToken || ''; }catch(e){ console.error(e); }
 
-    /* elements */
-    const tb = document.getElementById('tb');
-    const popup = document.getElementById('popup');
+    // --- elements ---
+    const tbody = document.getElementById('tbody');
+    const q = document.getElementById('q');
+    const reload = document.getElementById('reload');
+    const openAdd = document.getElementById('openAdd');
+    const fab = document.getElementById('fab');
+    const backdrop = document.getElementById('backdrop');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const roleInput = document.getElementById('role');
+    const activeInput = document.getElementById('active');
+    const canViewSelect = document.getElementById('can_view');
+    const saveBtn = document.getElementById('save');
+    const cancelBtn = document.getElementById('cancel');
     const toast = document.getElementById('toast');
-    const btnAdd = document.getElementById('btnAdd');
-    const btnReload = document.getElementById('btnReload');
-    const fid = document.getElementById('fid');
-    const fusername = document.getElementById('fusername_inp');
-    const femail = document.getElementById('femail_inp');
-    const fpassword = document.getElementById('fpassword_inp');
-    const frole = document.getElementById('frole_inp');
-    const factive = document.getElementById('factive_inp');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const qInput = document.getElementById('q');
-    const fcanview_all = document.getElementById('fcanview_all');
-    const fcanview_select = document.getElementById('fcanview_select');
 
-    let allUsersCache = [];
+    let users = [];
+    let editingId = null;
 
-    /* helpers */
-    function showToast(msg){ toast.textContent = msg; toast.classList.add('show'); toast.style.display='block'; setTimeout(()=>{ toast.style.display='none'; toast.classList.remove('show'); }, 2600); }
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]; }); }
-    function formatDate(v){ if(!v) return ''; const n = Number(v); if(!isNaN(n) && n > 1000){ const d = new Date(n); return d.toLocaleString(); } const d = new Date(v); if(!isNaN(d)) return d.toLocaleString(); return v; }
-    function isLocked(lock_until){ const n = Number(lock_until)||0; return n && Date.now() < n; }
+    // helpers
+    function showToast(msg){ toast.textContent = msg; toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); }, 2600); }
+    function escapeHtml(s){ return String(s||'').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+    function formatDate(v){ try{ const d = new Date(Number(v) || v); if(isNaN(d)) return v; return d.toLocaleString(); }catch(e){ return v; } }
 
-    function parseTokenPayload(t){ try{ if(!t || t.indexOf('.')<0) return null; const body = t.split('.')[0]; let s = body.replace(/-/g,'+').replace(/_/g,'/'); while(s.length % 4) s += '='; const json = atob(s); return JSON.parse(json); }catch(e){ return null; } }
+    // debounce helper
+    function debounce(fn, ms=250){ let t; return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), ms); }; }
 
-    function parseCanViewString(s){ if(!s) return []; if(typeof s === 'string' && s.trim().toLowerCase()==='all') return ['all']; return String(s).split(',').map(x=>x.trim()).filter(x=>x!==''); }
-    function resolveCanViewText(s){ if(!s) return '-'; const arr = parseCanViewString(s); if(arr.length===0) return '-'; if(arr.indexOf('all')>=0) return 'all'; const names = arr.map(id => { const u = allUsersCache.find(x=>String(x.id)===String(id)); return u ? (u.username||u.email||id) : id; }); if(names.length>3) return `${names.length} users`; return names.join(', '); }
-    function canViewTooltip(s){ if(!s) return ''; const arr = parseCanViewString(s); if(arr.indexOf('all')>=0) return 'Allowed: ALL'; return arr.map(id => { const u = allUsersCache.find(x=>String(x.id)===String(id)); return u ? `${u.username} (${u.id})` : id; }).join('\n'); }
-
-    /* ================= LOAD DATA ================= */
-    async function load(){
-      tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:18px">Đang tải...</td></tr>`;
-      try{
-        let users = [];
-        const roleL = String(currentRole).toLowerCase();
-
-        if(roleL === 'admin'){
-          const body = new URLSearchParams({ route:'users-list', token });
-          const res = await fetch(API, { method:'POST', body });
-          const json = await res.json();
-          if(!json || json.status !== 'success'){ tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:18px">Lỗi khi lấy danh sách</td></tr>`; showToast(json && json.message ? json.message : 'Lỗi'); return; }
-          users = json.data || [];
-        } else {
-          const res = await fetch(API, { method:'GET', cache:'no-store' });
-          const json = await res.json();
-          if(!json || json.status !== 'success'){ tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:18px">Không thể lấy dữ liệu</td></tr>`; showToast('Lỗi khi lấy dữ liệu'); return; }
-          users = (json.data && json.data.Users) ? json.data.Users : [];
-        }
-
-        allUsersCache = users.slice();
-        populateCanViewOptions();
-
-        if(!users || users.length === 0){ tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>`; return; }
-
-        tb.innerHTML = users.map(it => {
-          const locked = isLocked(it.lock_until);
-          const activeBadge = (String(it.active) === '1' || String(it.active).toLowerCase() === 'true') ? `<span class=\"badge active\">Active</span>` : `<span class=\"badge inactive\">Inactive</span>`;
-          const roleLowerIt = String(it.role||'').toLowerCase();
-          const roleBadge = (roleLowerIt === 'admin') ? `<span class=\"badge admin\">Admin</span>` : (roleLowerIt === 'editor' ? `<span class=\"badge user\">Editor</span>` : `<span class=\"badge user\">User</span>`);
-          const canViewCell = `<div class=\"canview\" title=\"${escapeHtml(canViewTooltip(it.can_view))}\">${escapeHtml(resolveCanViewText(it.can_view))}</div>`;
-          const safeJson = escapeHtml(JSON.stringify(it));
-          return `<tr data-id=\"${escapeHtml(it.id)}\">\n            \n            <td data-label=\"Username\">${escapeHtml(it.username || '')}</td>\n            <td data-label=\"Email\">${escapeHtml(it.email || '')}</td>\n            <td data-label=\"Role\">${roleBadge}</td>\n            <td data-label=\"Active\">${activeBadge}</td>\n            <td data-label=\"Can View\">${canViewCell}</td>\n            <td data-label=\"Khóa\">${locked ? `<span class=\\\"badge locked\\\">Khóa tới ${formatDate(it.lock_until)}</span>` : (it.failed_login ? `<small>Failed:${it.failed_login}</small>` : '-')}</td>\n            <td data-label=\"Ngày tạo\">${formatDate(it.created_at)}</td>\n            <td data-label=\"Hành động\">\n              <button class=\"action-btn edit\" data-id=\"${escapeHtml(it.id)}\" data-json='${safeJson}'>✏ Sửa</button>\n              ${roleL === 'admin' ? `<button class=\"action-btn lock\" data-id=\"${escapeHtml(it.id)}\" data-locked=\"${locked}\" data-lock=\"${escapeHtml(it.lock_until||'0')}\">${locked ? '🔓 Mở' : '🔒 Khóa'}</button>` : ''}\n              ${roleL === 'admin' ? `<button class=\"action-btn role-toggle\" data-id=\"${escapeHtml(it.id)}\" data-role=\"${escapeHtml(it.role||'user')}\">${(String(it.role).toLowerCase()==='admin') ? '⇄ Thay User' : '⇄ Thay Admin'}</button>` : ''}\n              ${roleL === 'admin' ? `<button class=\"action-btn del\" data-id=\"${escapeHtml(it.id)}\">🗑 Xóa</button>` : ''}\n            </td>\n          </tr>`;
-        }).join('');
-
-        attachRowListeners();
-      }catch(err){ console.error(err); tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:18px">Lỗi tải dữ liệu</td></tr>`; showToast('Lỗi tải dữ liệu'); }
+    // fetch list
+    async function fetchUsers(){ tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:18px">Đang tải dữ liệu...</td></tr>'; try{
+        const body = new URLSearchParams({ route:'users-list', token });
+        const res = await fetch(API, { method:'POST', body });
+        const json = await res.json();
+        if(!json || json.status !== 'success'){ tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:18px">Không thể lấy dữ liệu</td></tr>'; showToast((json && json.message) || 'Lỗi khi tải danh sách'); return; }
+        users = json.data || [];
+        renderTable(users);
+        populateCanView(users);
+      }catch(e){ console.error(e); tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:18px">Lỗi khi tải</td></tr>'; showToast('Lỗi khi tải dữ liệu'); }
     }
 
-    function populateCanViewOptions(){ fcanview_select.innerHTML = ''; allUsersCache.forEach(u => { const opt = document.createElement('option'); opt.value = u.id || ''; opt.textContent = (u.username || u.email || u.id); fcanview_select.appendChild(opt); }); }
+    function populateCanView(list){ canViewSelect.innerHTML = ''; const optAll = document.createElement('option'); optAll.value = 'all'; optAll.textContent = 'all (tất cả)'; canViewSelect.appendChild(optAll); list.forEach(u=>{ const o = document.createElement('option'); o.value = u.id || u.email || u.username; o.textContent = u.username || u.email || u.id; canViewSelect.appendChild(o); }); }
 
-    function attachRowListeners(){ document.querySelectorAll('.action-btn.edit').forEach(b => { b.onclick = ()=>{ let obj = {}; try{ obj = JSON.parse(b.getAttribute('data-json')); }catch(e){ obj = { id: b.dataset.id }; } openEditForm(obj); }; });
-      if(String(currentRole).toLowerCase() === 'admin'){
-        document.querySelectorAll('.action-btn.lock').forEach(b=>{ b.onclick = async ()=> { const id = b.dataset.id; const currentlyLocked = (b.getAttribute('data-locked') === 'true'); await toggleLock(id, currentlyLocked); }; });
-        document.querySelectorAll('.action-btn.role-toggle').forEach(b=>{ b.onclick = async ()=> { const id = b.dataset.id; const role = b.getAttribute('data-role') || 'user'; await toggleRole(id, role); }; });
-        document.querySelectorAll('.action-btn.del').forEach(b=>{ b.onclick = async ()=> { const id = b.dataset.id; if(!confirm('Bạn chắc chắn muốn xóa user này?')) return; await deleteUser(id); }; });
-      }
+    function renderTable(list){ if(!list || !list.length){ tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>'; return; }
+      tbody.innerHTML = list.map(u => {
+        const canViewText = (u.can_view && String(u.can_view).toLowerCase()==='all') ? 'all' : (u.can_view || '-');
+        const active = (String(u.active) === '1' || String(u.active).toLowerCase()==='true');
+        const locked = (u.lock_until && Date.now() < Number(u.lock_until));
+        return `
+          <tr data-id="${escapeHtml(u.id)}">
+            <td data-label="Username">${escapeHtml(u.username||'')}</td>
+            <td data-label="Email">${escapeHtml(u.email||'')}</td>
+            <td data-label="Role"><span class="badge ${escapeHtml((u.role||'user').toLowerCase())}">${escapeHtml(u.role||'user')}</span></td>
+            <td data-label="Active">${active?'<span class="badge ok">Active</span>':'<span class="chip">Inactive</span>'}</td>
+            <td data-label="Can view"><div class="small">${escapeHtml(canViewText)}</div></td>
+            <td data-label="Khóa">${locked?`<span class='badge lock'>Khóa tới ${formatDate(u.lock_until)}</span>`:'-'}</td>
+            <td data-label="Ngày tạo">${formatDate(u.created_at||u.createdAt||u.created)}</td>
+            <td data-label="Hành động">
+              <div class="row-actions">
+                <button class="btn ghost" data-action="edit" data-id="${escapeHtml(u.id)}">✏</button>
+                <button class="btn ghost" data-action="lock" data-id="${escapeHtml(u.id)}">🔒</button>
+                <button class="btn ghost" data-action="role" data-id="${escapeHtml(u.id)}">⇄</button>
+                <button class="btn" data-action="delete" data-id="${escapeHtml(u.id)}" style="background:${'#ef4444'}">🗑</button>
+              </div>
+            </td>
+          </tr>`; }).join('');
+
+      attachRowEvents();
     }
 
-    function openEditForm(item = {}){
-      const isAdmin = String(currentRole).toLowerCase() === 'admin';
-      document.getElementById('ftitle').textContent = item && item.id ? 'Sửa user' : 'Thêm user';
-      fid.value = item.id || '';
-      fusername.value = item.username || '';
-      femail.value = item.email || '';
-      fpassword.value = '';
-      frole.value = item.role || 'user';
-      factive.checked = (String(item.active) === '1' || String(item.active).toLowerCase() === 'true');
+    function attachRowEvents(){ tbody.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.onclick = async (e) => {
+        const act = btn.dataset.action; const id = btn.dataset.id;
+        if(act === 'edit'){ const user = users.find(x=>String(x.id)===String(id)); openModal(user); }
+        if(act === 'delete'){ if(!confirm('Xóa user? Hành động không thể hoàn tác.')) return; await apiCall('users-delete', { id }); }
+        if(act === 'role'){ if(!confirm('Chuyển role của user?')) return; const user = users.find(x=>String(x.id)===String(id)); const newRole = (user && String(user.role).toLowerCase() === 'admin') ? 'user' : 'admin'; await apiCall('users-update', { id, role: newRole }); }
+        if(act === 'lock'){ if(!confirm('Thao tác khóa/mở khóa?')) return; const user = users.find(x=>String(x.id)===String(id)); const currentlyLocked = (user && user.lock_until && Date.now() < Number(user.lock_until)); const lockUntil = currentlyLocked ? 0 : (Date.now() + 20*365*24*60*60*1000); await apiCall('users-update', { id, lock_until: String(lockUntil) }); }
+      };
+    }); }
 
-      fcanview_all.checked = false;
-      Array.from(fcanview_select.options).forEach(o=> o.selected = false);
-      if(item && item.can_view){ const s = item.can_view; if(String(s).trim().toLowerCase() === 'all') fcanview_all.checked = true; else { const arr = parseCanViewString(s); arr.forEach(id => { const opt = fcanview_select.querySelector(`option[value="${id}"]`); if(opt) opt.selected = true; }); } }
+    async function apiCall(route, params){ try{
+        const body = new URLSearchParams({ route, token, ...params });
+        const res = await fetch(API, { method:'POST', body });
+        const json = await res.json();
+        if(json && (json.status === 'success' || json.success)){ showToast(json.message || 'Thành công'); await fetchUsers(); closeModal(); } else { showToast((json && json.message) || 'Lỗi khi gọi API'); }
+      }catch(e){ console.error(e); showToast('Lỗi kết nối'); }
+    }
 
-      if(!isAdmin){ fusername.setAttribute('disabled','disabled'); fusername.classList.add('readonly'); femail.setAttribute('disabled','disabled'); femail.classList.add('readonly'); fpassword.setAttribute('disabled','disabled'); fpassword.classList.add('readonly'); frole.setAttribute('disabled','disabled'); frole.classList.add('readonly'); factive.setAttribute('disabled','disabled'); fcanview_all.setAttribute('disabled','disabled'); Array.from(fcanview_select.options).forEach(o=> o.setAttribute('disabled','disabled')); saveBtn.style.display = 'none'; } else { fusername.removeAttribute('disabled'); fusername.classList.remove('readonly'); femail.removeAttribute('disabled'); femail.classList.remove('readonly'); fpassword.removeAttribute('disabled'); fpassword.classList.remove('readonly'); frole.removeAttribute('disabled'); frole.classList.remove('readonly'); factive.removeAttribute('disabled'); fcanview_all.removeAttribute('disabled'); Array.from(fcanview_select.options).forEach(o=> o.removeAttribute('disabled')); saveBtn.style.display = ''; }
+    // modal open/close
+    function openModal(user=null){ editingId = user && user.id ? user.id : null; usernameInput.value = user?.username || ''; emailInput.value = user?.email || ''; passwordInput.value=''; roleInput.value = user?.role || 'user'; activeInput.value = (user && (String(user.active) === '1' || String(user.active).toLowerCase()==='true')) ? '1' : '0';
+      // pre-select can_view
+      Array.from(canViewSelect.options).forEach(o=> o.selected = false);
+      if(user && user.can_view){ if(String(user.can_view).toLowerCase()==='all') { const opt = Array.from(canViewSelect.options).find(o=>o.value==='all'); if(opt) opt.selected = true; } else { const arr = String(user.can_view).split(',').map(x=>x.trim()); arr.forEach(v=>{ const opt = Array.from(canViewSelect.options).find(o=>o.value===v); if(opt) opt.selected = true; }); } }
+      backdrop.style.display = 'flex'; backdrop.setAttribute('aria-hidden','false'); backdrop.querySelector('.modal').classList.add('show');
+    }
+    function closeModal(){ backdrop.style.display = 'none'; backdrop.setAttribute('aria-hidden','true'); backdrop.querySelector('.modal').classList.remove('show'); editingId = null; }
 
-      popup.style.display = 'flex'; popup.setAttribute('aria-hidden','false'); }
+    saveBtn.onclick = async ()=>{
+      const data = { username: usernameInput.value.trim(), email: emailInput.value.trim(), role: roleInput.value, active: activeInput.value };
+      if(passwordInput.value) data.password = passwordInput.value;
+      const sel = Array.from(canViewSelect.selectedOptions).map(o=>o.value);
+      if(sel.length){ data.can_view = sel.includes('all') ? 'all' : sel.join(','); }
+      if(editingId) data.id = editingId;
+      const route = editingId ? 'users-update' : 'users-add';
+      if(!data.username || !data.email){ showToast('Username & email không được rỗng'); return; }
+      await apiCall(route, data);
+    };
+    cancelBtn.onclick = closeModal;
 
-    cancelBtn.onclick = ()=> { popup.style.display='none'; popup.setAttribute('aria-hidden','true'); };
+    // open add
+    openAdd.onclick = ()=> openModal(null);
+    fab.onclick = ()=> openModal(null);
 
-    saveBtn.onclick = async ()=>{ const isAdmin = String(currentRole).toLowerCase() === 'admin'; if(!isAdmin){ showToast('Chỉ admin mới có thể lưu thay đổi'); return; } const id = fid.value; const route = id ? 'users-update' : 'users-add'; const username = fusername.value.trim(); const email = femail.value.trim(); const password = fpassword.value.trim(); const role = frole.value; const active = factive.checked ? 1 : 0; if(!username || !email){ showToast('Username và email không được để trống'); return; } let can_view_val = ''; if(fcanview_all.checked) can_view_val = 'all'; else { const sel = Array.from(fcanview_select.selectedOptions).map(o=>o.value).filter(v=>v); can_view_val = sel.join(','); } const payload = new URLSearchParams(); payload.append('route', route); payload.append('token', token); if(id) payload.append('id', id); payload.append('username', username); payload.append('email', email); payload.append('role', role); payload.append('active', String(active)); if(password) payload.append('password', password); payload.append('can_view', can_view_val); try{ const res = await fetch(API, { method:'POST', body: payload }); const json = await res.json(); if(json && (json.status === 'success' || json.id)){ showToast(json.message || 'Lưu thành công'); popup.style.display='none'; await load(); } else { showToast(json && json.message ? json.message : 'Lỗi khi lưu'); } }catch(err){ console.error(err); showToast('Lỗi lưu dữ liệu'); } };
+    reload.onclick = ()=> fetchUsers();
 
-    async function toggleLock(id, currentlyLocked){ const isAdmin = String(currentRole).toLowerCase() === 'admin'; if(!isAdmin){ showToast('Chỉ admin mới thao tác được'); return; } const willLock = !currentlyLocked; if(willLock && !confirm('Khóa tài khoản này trong 20 năm?')) return; const lockUntil = willLock ? (Date.now() + 20 * 365 * 24 * 60 * 60 * 1000) : 0; const payload = new URLSearchParams(); payload.append('route','users-update'); payload.append('token', token); payload.append('id', id); payload.append('lock_until', String(lockUntil)); try{ const res = await fetch(API, { method:'POST', body: payload }); const json = await res.json(); showToast(json.message || (willLock ? 'Đã khóa' : 'Đã mở khóa')); await load(); }catch(err){ console.error(err); showToast('Lỗi khi khóa/mở khóa'); } }
+    // quick filter
+    q.addEventListener('input', debounce(()=>{ const v = q.value.trim().toLowerCase(); const filtered = users.filter(u => (u.username||'').toLowerCase().includes(v) || (u.email||'').toLowerCase().includes(v) || (String(u.created_at||u.created||'')).toLowerCase().includes(v)); renderTable(filtered); }, 200));
 
-    async function toggleRole(id, currentRole){ const isAdmin = String(currentRole).toLowerCase() === 'admin'; if(!isAdmin){ showToast('Chỉ admin mới thao tác được'); return; } const target = (String(currentRole).toLowerCase() === 'admin') ? 'user' : 'admin'; if(!confirm(`Chuyển role của user này thành "${target}"?`)) return; const payload = new URLSearchParams(); payload.append('route','users-update'); payload.append('token', token); payload.append('id', id); payload.append('role', target); try{ const res = await fetch(API, { method:'POST', body: payload }); const json = await res.json(); showToast(json.message || 'Đã cập nhật role'); await load(); }catch(err){ console.error(err); showToast('Lỗi khi cập nhật role'); } }
+    // keyboard shortcuts
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ closeModal(); } if(e.ctrlKey && e.key === 'n'){ e.preventDefault(); openModal(null); } });
 
-    async function deleteUser(id){ const isAdmin = String(currentRole).toLowerCase() === 'admin'; if(!isAdmin){ showToast('Chỉ admin mới thao tác được'); return; } try{ const payload = new URLSearchParams({ route:'users-delete', id, token }); const res = await fetch(API, { method:'POST', body: payload }); const json = await res.json(); if(json && (json.status === 'success' || json.success)){ showToast(json.message || 'Đã xóa'); await load(); } else showToast(json && json.message ? json.message : 'Lỗi khi xóa'); }catch(err){ console.error(err); showToast('Lỗi khi xóa user'); } }
+    // close modal when clicking backdrop
+    backdrop.addEventListener('click', (e)=>{ if(e.target === backdrop) closeModal(); });
 
-    btnReload.onclick = () => load();
-    btnAdd.onclick = () => { if(String(currentRole).toLowerCase() !== 'admin'){ showToast('Chỉ admin mới tạo user mới'); return; } openEditForm({}); };
-
-    qInput.oninput = ()=> { const q = qInput.value.trim().toLowerCase(); document.querySelectorAll('#tb tr').forEach(tr=>{ tr.style.display = (tr.innerText.toLowerCase().includes(q)) ? '' : 'none'; }); };
-
-    document.addEventListener('keydown', (e) => { if(e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'u'){ e.preventDefault(); Array.from(fcanview_select.options).forEach(opt => opt.selected = false); fcanview_all.checked = false; showToast('Đã bỏ chọn tất cả user'); } });
-
-    load();
+    // initial load
+    fetchUsers();
   </script>
 </body>
 </html>

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QR Studio — Tạo QR Code</title>
+  <meta name="description" content="Trang web tạo QR code: nhập text/URL, chỉnh màu, thêm logo, tải PNG/SVG, lưu cấu hình." />
+  <style>
+    :root{
+      --bg:#eef2ff; --card:#ffffff; --text:#0f172a; --muted:#6b7280; --accent:#4f46e5;
+      --glass: rgba(255,255,255,0.7);
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:linear-gradient(180deg,var(--bg),#f8fafc); color:var(--text)}
+    header{padding:20px 24px;display:flex;align-items:center;gap:16px;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px}
+    h1{margin:0;font-size:18px}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    main{max-width:1100px;margin:18px auto;padding:18px}
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:18px}
+
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 8px 30px rgba(12,18,36,0.06)}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:8px}
+    textarea,input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf3;font-size:14px}
+    .controls{display:flex;gap:8px;margin-top:10px}
+    button{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(79,70,229,0.12)}
+    .small{font-size:13px;color:var(--muted)}
+
+    .previewWrap{text-align:center;padding:18px}
+    #qrPreview{display:inline-block;border-radius:12px;padding:12px;background:linear-gradient(180deg,#fff, #fafbff)}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center}
+
+    .formRow{display:flex;gap:8px}
+    .col{flex:1}
+    .rightCol{display:flex;flex-direction:column;gap:12px}
+
+    .options{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .colorRow{display:flex;gap:8px;align-items:center}
+
+    footer{max-width:1100px;margin:20px auto;padding:12px;color:var(--muted);font-size:13px}
+
+    @media (max-width:980px){.grid{grid-template-columns:1fr;}.rightCol{order:-1}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">QR</div>
+      <div>
+        <h1>QR Studio</h1>
+        <p class="lead">Tạo, tuỳ chỉnh, &amp; tải QR code (PNG / SVG) — nhanh, responsive.</p>
+      </div>
+    </div>
+    <div class="small">Mẫu website — miễn phí</div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <label for="textInput">Nội dung (text / URL)</label>
+        <textarea id="textInput" rows="4" placeholder="Nhập URL hoặc văn bản...">https://example.com</textarea>
+
+        <div style="margin-top:12px" class="formRow">
+          <div class="col">
+            <label>Kích thước (px)</label>
+            <input id="sizeInput" type="number" value="300" min="100" max="2000" />
+          </div>
+          <div style="width:120px">
+            <label>Biên (modules)</label>
+            <input id="marginInput" type="number" value="10" min="0" max="40" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="options">
+          <div>
+            <label>Kiểu chấm</label>
+            <select id="dotStyle">
+              <option value="square">Vuông (mặc định)</option>
+              <option value="rounded">Bo góc</option>
+              <option value="circle">Tròn</option>
+            </select>
+          </div>
+          <div>
+            <label>Mức lỗi (error correction)</label>
+            <select id="ecLevel">
+              <option value="L">L - 7%</option>
+              <option value="M">M - 15%</option>
+              <option value="Q">Q - 25%</option>
+              <option value="H" selected>H - 30%</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Màu chấm</label>
+            <div class="colorRow"><input id="dotColor" type="color" value="#111827" /><div class="small">#111827</div></div>
+          </div>
+          <div>
+            <label>Màu nền</label>
+            <div class="colorRow"><input id="bgColor" type="color" value="#ffffff" /><div class="small">#ffffff</div></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="formRow">
+          <div class="col">
+            <label>Logo (tùy chọn) — đặt giữa QR</label>
+            <input id="logoFile" type="file" accept="image/*" />
+            <div class="small" style="margin-top:6px">Kích thước logo < 200KB khuyến nghị. Hỗ trợ PNG/JPG/SVG.</div>
+          </div>
+          <div style="width:140px">
+            <label>Tỷ lệ logo (%)</label>
+            <input id="logoSize" type="number" value="18" min="6" max="45" />
+          </div>
+        </div>
+
+        <div class="controls" style="margin-top:14px">
+          <button id="generateBtn">Tạo QR</button>
+          <button id="saveConfig" class="ghost">Lưu cấu hình</button>
+          <button id="resetBtn" class="ghost">Đặt lại</button>
+        </div>
+
+        <div style="margin-top:12px" class="small">Tip: Bạn có thể kéo file logo vào ô upload hoặc dán URL vào textarea.</div>
+      </section>
+
+      <aside class="rightCol">
+        <div class="card previewWrap">
+          <div id="qrPreview">
+            <!-- QR sẽ được chèn vào đây bởi JS -->
+            <div id="qrHolder" style="display:inline-block"></div>
+          </div>
+
+          <div class="meta">
+            <button id="downloadPng">Tải PNG</button>
+            <button id="downloadSvg" class="ghost">Tải SVG</button>
+            <button id="copyData" class="ghost">Sao chép DataURL</button>
+            <button id="exportPdf" class="ghost">Xuất PDF</button>
+          </div>
+
+          <div id="previewInfo" class="small" style="margin-top:8px;color:var(--muted)">Chưa tạo QR</div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3 style="margin:0 0 8px 0;font-size:15px">Tùy chọn nhanh</h3>
+          <div class="small">Một số mẫu sẵn:</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="ghost quick" data-url="https://example.com">Website</button>
+            <button class="ghost quick" data-url="WIFI:T:WPA;S:MySSID;P:mypass;;">WiFi</button>
+            <button class="ghost quick" data-url="mailto:hello@example.com">Email</button>
+            <button class="ghost quick" data-url="BEGIN:VCARD\nFN:Nguyen Van A\nTEL:+84900123456\nEMAIL:abc@example.com\nEND:VCARD">vCard</button>
+          </div>
+          <hr style="margin:12px 0;border:none;border-top:1px solid #f0f2f7" />
+          <div class="small">Lưu ý: QR có logo lớn có thể ảnh hưởng khả năng đọc. Tăng error-correction nếu cần.</div>
+        </div>
+      </aside>
+    </div>
+
+    <section style="margin-top:18px" class="card">
+      <h3 style="margin-top:0">Hướng dẫn ngắn</h3>
+      <ol class="small">
+        <li>Nhập nội dung vào ô, chỉnh kích thước, màu, logo nếu muốn.</li>
+        <li>Nhấn "Tạo QR" để xem trước.</li>
+        <li>Sử dụng "Tải PNG" hoặc "Tải SVG" để lấy file. Hoặc "Sao chép DataURL" để dán vào email/website.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>© QR Studio • Tạo bởi bạn — Mở file <strong>Website-Tao-QR-Full-Feature.html</strong> trong trình duyệt để chạy.</footer>
+
+  <!-- Thư viện QR Code Styling (tạo QR dễ tuỳ biến & download PNG/SVG) -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <!-- jsPDF để xuất PDF nhanh (chỉ PNG->PDF nhỏ gọn) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <script>
+    // Tất cả JS xử lý giao diện và QR
+    const textInput = document.getElementById('textInput');
+    const sizeInput = document.getElementById('sizeInput');
+    const marginInput = document.getElementById('marginInput');
+    const dotColor = document.getElementById('dotColor');
+    const bgColor = document.getElementById('bgColor');
+    const dotStyle = document.getElementById('dotStyle');
+    const ecLevel = document.getElementById('ecLevel');
+    const logoFile = document.getElementById('logoFile');
+    const logoSize = document.getElementById('logoSize');
+
+    const generateBtn = document.getElementById('generateBtn');
+    const downloadPng = document.getElementById('downloadPng');
+    const downloadSvg = document.getElementById('downloadSvg');
+    const copyData = document.getElementById('copyData');
+    const exportPdf = document.getElementById('exportPdf');
+    const qrHolder = document.getElementById('qrHolder');
+    const previewInfo = document.getElementById('previewInfo');
+    const saveConfig = document.getElementById('saveConfig');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const quickBtns = document.querySelectorAll('.quick');
+
+    // Tạo QRCodeStyling instance mặc định
+    let qr = null;
+    let currentLogoDataUrl = null;
+
+    function createQrInstance(opts){
+      // xoá preview cũ
+      qrHolder.innerHTML = '';
+      const q = new QRCodeStyling(Object.assign({
+        width: opts.size,
+        height: opts.size,
+        data: opts.data,
+        margin: opts.margin,
+        image: opts.image || undefined,
+        dotsOptions: {
+          type: opts.dotType,
+          color: opts.dotColor
+        },
+        backgroundOptions: {
+          color: opts.bgColor
+        },
+        imageOptions: {
+          crossOrigin: 'anonymous',
+          margin: 0,
+          imageSize: opts.logoPercent / 100
+        }
+      }, {}));
+      qr = q;
+      qr.append(qrHolder);
+    }
+
+    function getOptionsFromUI(){
+      return {
+        data: textInput.value || '',
+        size: parseInt(sizeInput.value,10) || 300,
+        margin: parseInt(marginInput.value,10) || 8,
+        dotType: (dotStyle.value === 'rounded') ? 'rounded' : (dotStyle.value === 'circle' ? 'dots' : 'square'),
+        dotColor: dotColor.value,
+        bgColor: bgColor.value,
+        ecLevel: ecLevel.value,
+        image: currentLogoDataUrl,
+        logoPercent: parseInt(logoSize.value,10) || 18
+      };
+    }
+
+    async function generate(){
+      const opts = getOptionsFromUI();
+      if(!opts.data.trim()){
+        previewInfo.textContent = 'Vui lòng nhập nội dung.';
+        return;
+      }
+      // tạo instance mới mỗi lần để cập nhật đầy đủ
+      createQrInstance(opts);
+      // update info
+      previewInfo.textContent = `Kích thước: ${opts.size}px • Biên: ${opts.margin} • Logo: ${opts.image ? 'Có' : 'Không'}`;
+    }
+
+    // Xử lý upload logo
+    logoFile.addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = function(ev){ currentLogoDataUrl = ev.target.result; };
+      reader.readAsDataURL(f);
+    });
+
+    // Quick buttons
+    quickBtns.forEach(b=> b.addEventListener('click', ()=>{ textInput.value = b.dataset.url; }));
+
+    generateBtn.addEventListener('click', generate);
+
+    // Download PNG / SVG
+    downloadPng.addEventListener('click', async ()=>{
+      if(!qr){ previewInfo.textContent = 'Chưa có QR. Nhấn "Tạo QR" trước.'; return; }
+      // qr.download chỉ hoạt động với tên + extension
+      try{
+        await qr.download({ name: 'qrcode', extension: 'png' });
+      }catch(e){
+        // fallback: getRawData and create blob link
+        try{
+          const blob = await qr.getRawData('png');
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = 'qrcode.png'; a.click(); URL.revokeObjectURL(url);
+        }catch(err){ console.error(err); alert('Không thể tải PNG: ' + err.message); }
+      }
+    });
+
+    downloadSvg.addEventListener('click', async ()=>{
+      if(!qr){ previewInfo.textContent = 'Chưa có QR. Nhấn "Tạo QR" trước.'; return; }
+      try{ await qr.download({ name: 'qrcode', extension: 'svg' }); }
+      catch(e){
+        try{ const blob = await qr.getRawData('svg'); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download='qrcode.svg'; a.click(); URL.revokeObjectURL(url); }
+        catch(err){ console.error(err); alert('Không thể tải SVG: ' + err.message); }
+      }
+    });
+
+    // Copy DataURL (PNG)
+    copyData.addEventListener('click', async ()=>{
+      if(!qr){ previewInfo.textContent = 'Chưa có QR. Nhấn "Tạo QR" trước.'; return; }
+      try{
+        const blob = await qr.getRawData('png');
+        const reader = new FileReader();
+        reader.onload = async function(e){
+          const dataUrl = e.target.result;
+          try{ await navigator.clipboard.writeText(dataUrl); copyData.textContent = 'Đã sao chép!'; setTimeout(()=> copyData.textContent = 'Sao chép DataURL',1200); }
+          catch(err){ alert('Trình duyệt không cho phép sao chép tự động.'); }
+        };
+        reader.readAsDataURL(blob);
+      }catch(e){ console.error(e); alert('Không thể lấy DataURL: '+e.message); }
+    });
+
+    // Xuất PDF (chỉ hỗ trợ chuyển PNG vào PDF nhỏ gọn)
+    exportPdf.addEventListener('click', async ()=>{
+      if(!qr){ previewInfo.textContent = 'Chưa có QR. Nhấn "Tạo QR" trước.'; return; }
+      try{
+        const blob = await qr.getRawData('png');
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8 = new Uint8Array(arrayBuffer);
+        const img = await blobToDataURL(blob);
+        // tạo PDF A4 dọc, chèn ảnh ở giữa
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const imgW = Math.min(360, pageW - 80);
+        const imgH = imgW;
+        const x = (pageW - imgW) / 2;
+        const y = (pageH - imgH) / 2;
+        doc.addImage(img, 'PNG', x, y, imgW, imgH);
+        doc.save('qrcode.pdf');
+      }catch(e){ console.error(e); alert('Không thể xuất PDF: '+e.message); }
+    });
+
+    function blobToDataURL(blob){ return new Promise((resolve,reject)=>{ const reader = new FileReader(); reader.onload = ()=> resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); }); }
+
+    // Lưu cấu hình vào localStorage
+    saveConfig.addEventListener('click', ()=>{
+      const cfg = {
+        text: textInput.value,
+        size: sizeInput.value,
+        margin: marginInput.value,
+        dotColor: dotColor.value,
+        bgColor: bgColor.value,
+        dotStyle: dotStyle.value,
+        ecLevel: ecLevel.value,
+        logoSize: logoSize.value
+      };
+      localStorage.setItem('qrstudio.cfg', JSON.stringify(cfg));
+      saveConfig.textContent = 'Đã lưu'; setTimeout(()=> saveConfig.textContent = 'Lưu cấu hình',1200);
+    });
+
+    // Reset
+    resetBtn.addEventListener('click', ()=>{ localStorage.removeItem('qrstudio.cfg'); location.reload(); });
+
+    // Load saved config
+    (function loadCfg(){
+      try{
+        const raw = localStorage.getItem('qrstudio.cfg'); if(!raw) return; const cfg = JSON.parse(raw);
+        textInput.value = cfg.text || textInput.value;
+        sizeInput.value = cfg.size || sizeInput.value;
+        marginInput.value = cfg.margin || marginInput.value;
+        dotColor.value = cfg.dotColor || dotColor.value;
+        bgColor.value = cfg.bgColor || bgColor.value;
+        dotStyle.value = cfg.dotStyle || dotStyle.value;
+        ecLevel.value = cfg.ecLevel || ecLevel.value;
+        logoSize.value = cfg.logoSize || logoSize.value;
+      }catch(e){ console.warn('Không thể load cfg',e); }
+    })();
+
+    // Auto-generate on first load
+    window.addEventListener('load', ()=>{ setTimeout(()=> generate(), 400); });
+
+  </script>
+</body>
+</html>

@@ -215,12 +215,28 @@ function initClearSearch() {
  *  REQUIRE LOGIN
  ****************************************************/
 function requireLogin() {
-  const publicPages = ["index.html", "login.html", "register.html"];
+  const publicPages = ["index.html", "login.html", "register.html", ""];
   const page = location.pathname.split("/").pop();
 
+  // Cho phép các trang public
   if (publicPages.includes(page)) return;
 
+  const raw = localStorage.getItem("loggedInUser");
 
+  // Chưa đăng nhập → out
+  if (!raw) {
+    window.location.replace("index.html");
+    return;
+  }
+
+  const parsed = parseLoggedInUser(raw);
+
+  // Có dữ liệu nhưng không có token → out
+  if (!parsed || !parsed.token) {
+    localStorage.removeItem("loggedInUser");
+    window.location.replace("index.html");
+    return;
+  }
 }
 
 /****************************************************

@@ -369,11 +369,12 @@ function showFlagThenGo(page, slug){
 
   const delayMs = 1100;
   setTimeout(()=> {
-    overlay.classList.remove('active');
-    overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow = '';
-    window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
-  }, delayMs);
+  overlayActive = false;
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
+}, delayMs);
+
 }
 
 document.addEventListener('keydown', function(e){

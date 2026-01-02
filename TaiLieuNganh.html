@@ -57,7 +57,7 @@
 
     #pageTitle {
       color: gold;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: 800;
       text-transform: uppercase;
     }
@@ -153,11 +153,6 @@
       transition:.3s;
     }
 
-    .item:hover{
-      transform:translateY(-6px) scale(1.02);
-      box-shadow:0 18px 35px rgba(0,0,0,0.18);
-      color:#fff;
-    }
 
     .item:hover::after{ opacity:1; }
 
@@ -204,7 +199,7 @@
 
     @media(max-width:768px){
       body{ width:100%; padding:0; }
-      #pageTitle{ font-size:20px;}
+      #pageTitle{ font-size:18px;}
       #list{ grid-template-columns:1fr; }
       /* trên mobile vẫn giữ 1 hàng, nhưng có thể giảm kích thước ảnh */
       .item-content img{ width:40px; height:40px; }
@@ -237,7 +232,7 @@
 /* =========================
    CẤU HÌNH: thay webAppUrl nếu cần
    ========================= */
-const webAppUrl = "https://script.google.com/macros/s/AKfycbwHc9P_C0PL7y1qiTVTxrqqwc50CqVoOWSTxCyEdu3dWIaUeP0ljTd4GSGXndaik0Gx/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbxgidwuQo9UTNHrb85ZFbY7YyKGWxR1HHLtLGpfbu4ILyMGHbSj7b0XrYSCsZEv8XjW/exec";
 
 /* dữ liệu toàn cục */
 let ALL_DOCUMENTS = [];

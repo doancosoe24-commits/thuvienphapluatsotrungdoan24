@@ -419,6 +419,13 @@ async function fetchCategory(){
 }
 
 fetchCategory();
+  window.addEventListener('pageshow', function (e) {
+  overlayActive = false;
+  overlay.classList.remove('active');
+  overlay.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+});
+
 </script>
 
 </body>

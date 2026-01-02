@@ -42,25 +42,25 @@
 
     /* ---------- HEADER TITLE ---------- */
     .icon-title{
-  display: flex;
-  align-items: center;
-  width: 100%;
+      display: flex;
+      align-items: center;
+      width: 100%;
       background:#156082 ;
       border-radius: 15px;
-       border: 3.5px solid rgba(12, 12, 12, 0.95);
-       padding: 12px;
+      border: 3.5px solid rgba(12, 12, 12, 0.95);
+      padding: 0px;
     }
-  .icon-title img{
-   width: 50px;
-   margin:0 20px ;
-  }
+    .icon-title img{
+      width: 50px;
+      margin:0 15px ;
+    }
 
-#pageTitle {
-  color: gold;
-  font-size: 24px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
+    #pageTitle {
+      color: gold;
+      font-size: 24px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
 
     /* ---------- BACK ---------- */
     .back-link{
@@ -102,21 +102,48 @@
       transition:.3s;
       position:relative;
       overflow:hidden;
-       border-radius: 15px;
-       border: 3.5px solid rgba(12, 12, 12, 0.95);
+      border-radius: 15px;
+      border: 3.5px solid rgba(12, 12, 12, 0.95);
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
-.item-content{
-  display: flex;
-  align-items: center;
-}
-.item-content img{
-  margin:0 15px ;
-  width: 50px;
-}
-.item-content p{
-  margin: 0 auto;
-  text-align: center;
-}
+
+    /* đảm bảo phần item-content luôn trên 1 hàng và không xuống dòng */
+    .item-content{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      width:100%;
+      /* không cho xuống dòng */
+      white-space:nowrap;
+      /* cho phép nội dung p co dãn nhưng vẫn cắt khi quá dài */
+      overflow:hidden;
+    }
+    /* ảnh không co dãn */
+    .item-content img{
+      flex: 0 0 auto;
+      margin:0 0;
+      width: 50px;
+      height:50px;
+      object-fit:contain;
+    }
+    /* tiêu đề nằm trên cùng 1 hàng, cắt khi quá dài */
+    .item-content p{
+      margin:0;
+      /* cho phép chiếm khoảng còn lại và bị ẩn khi quá dài */
+      flex:1 1 auto;
+      min-width:0; /* quan trọng để text-overflow hoạt động trong flex */
+      text-align:left;
+      font-size:12px;
+      font-weight:700;
+      line-height:1.4;
+      color:var(--gold);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
     .item::after{
       content:"";
       position:absolute;
@@ -136,9 +163,7 @@
 
     .item p{
       margin:0;
-      font-size:17px;
-      font-weight:700;
-      line-height:1.4;
+      /* font-size, weight đã đặt ở .item-content p để giữ 1 hàng */
     }
 
     /* ---------- LOADING ---------- */
@@ -181,6 +206,8 @@
       body{ width:100%; padding:0; }
       #pageTitle{ font-size:20px;}
       #list{ grid-template-columns:1fr; }
+      /* trên mobile vẫn giữ 1 hàng, nhưng có thể giảm kích thước ảnh */
+      .item-content img{ width:40px; height:40px; }
     }
   </style>
 </head>

@@ -49,33 +49,42 @@
       background:#ccae6e;
       color:#fff;
     }
-    .icon-title{
+.icon-title{
   display: flex;
   align-items: center;
   width: 100%;
-        background: #156082;
-      border-radius: 15px;
-       border: 3.5px solid rgba(12, 12, 12, 0.95);
-       padding: 12px 0;
-    }
-  .icon-title img{
-   width: 80px;
-   margin:0 20px ;
-  }
+  background: #156082;
+  border-radius: 15px;
+  border: 3.5px solid rgba(12, 12, 12, 0.95);
+  padding: 12px 0; /* thêm padding ngang */
+  box-sizing: border-box;
+  overflow: hidden;
+}
 
-#pageTitle {
+.icon-title img{
+  width: 80px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+#pageTitle{
   color: gold;
   font-size: 22px;
   font-weight: 800;
   text-transform: uppercase;
   margin: 0;
+  flex: 1;
+  min-width: 0; /* 🔥 FIX TRÀN QUAN TRỌNG */
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
+
 .item-content{
   display: flex;
   align-items: center;
 }
 .item-content img{
-  margin:0 25px ;
+  margin:0 10px ;
   width: 50px;
 }
 .item-content p{

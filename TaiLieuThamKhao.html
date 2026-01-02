@@ -70,11 +70,10 @@
     }
   .icon-title img{
    width: 50px;
-   margin:0 20px ;
+   margin:0 10px ;
   }
     /* ---------- TITLE ---------- */
     #pageTitle{
-      text-align:center;
       color:gold;
       font-size:22px;
       font-weight:800;
@@ -108,16 +107,38 @@
        margin-top: 10px;
     }
 .item-content{
-  display: flex;
-  align-items: center;
-}
-.item-content img{
-  margin:0 15px ;
-  width: 50px;
-}
-.item-content p{
-  margin: 0 auto;
-}
+      display:flex;
+      align-items:center;
+      gap:12px;
+      width:100%;
+      /* không cho xuống dòng */
+      white-space:nowrap;
+      /* cho phép nội dung p co dãn nhưng vẫn cắt khi quá dài */
+      overflow:hidden;
+    }
+    /* ảnh không co dãn */
+    .item-content img{
+      flex: 0 0 auto;
+      margin:0 10px;
+      width: 50px;
+      height:50px;
+      object-fit:contain;
+    }
+    /* tiêu đề nằm trên cùng 1 hàng, cắt khi quá dài */
+    .item-content p{
+      margin:0;
+      /* cho phép chiếm khoảng còn lại và bị ẩn khi quá dài */
+      flex:1 1 auto;
+      min-width:0; /* quan trọng để text-overflow hoạt động trong flex */
+      text-align:left;
+      font-size:12px;
+      font-weight:700;
+      line-height:1.4;
+      color:var(--gold);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
     .item:hover{
       transform:translateY(-6px) scale(1.02);
       box-shadow:0 18px 35px rgba(0,0,0,0.18);
@@ -126,9 +147,10 @@
 
     .item p{
       margin:0;
-      font-size:17px;
+      font-size:12px;
       font-weight:700;
       line-height:1.4;
+      text-transform: uppercase;
     }
 
     /* ---------- LOADING (GIỐNG CODE MẪU) ---------- */

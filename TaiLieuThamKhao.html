@@ -47,50 +47,77 @@
       gap:6px;
       padding:8px 14px;
       border-radius:999px;
-      background:#fff;
+      background:#156082 ;
       box-shadow:var(--shadow);
-      color:var(--primary);
+      color:white;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
       margin-bottom:20px;
     }
     .back-link:hover{
-      background:var(--primary);
+      background:#156082 ;
       color:#fff;
     }
-
+  .icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+      background:#156082 ;
+      border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
+       padding: 12px 0;
+    }
+  .icon-title img{
+   width: 50px;
+   margin:0 20px ;
+  }
     /* ---------- TITLE ---------- */
     #pageTitle{
       text-align:center;
-      color:var(--primary);
-      font-size:24px;
+      color:gold;
+      font-size:22px;
       font-weight:800;
       letter-spacing:1px;
       margin:10px 0 30px;
       text-transform:uppercase;
+      margin: 0 auto;
+      margin: 0;
     }
 
     /* ---------- LIST ---------- */
     #list{
       display:grid;
       grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-      gap:22px;
+      gap:10px;
+      margin-top: 10px;
     }
 
     .item_list{ width:100%; }
 
     .item{
-      background:linear-gradient(135deg,var(--primary),#003a8c);
+      background:#156082;
       border-radius:var(--radius);
-      padding:26px 18px;
+      padding:6px 0;
       color:var(--gold);
       text-align:center;
       cursor:pointer;
       box-shadow:var(--shadow);
       transition:.3s;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
+       margin-top: 10px;
     }
-
+.item-content{
+  display: flex;
+  align-items: center;
+}
+.item-content img{
+  margin:0 15px ;
+  width: 50px;
+}
+.item-content p{
+  margin: 0 auto;
+}
     .item:hover{
       transform:translateY(-6px) scale(1.02);
       box-shadow:0 18px 35px rgba(0,0,0,0.18);
@@ -148,7 +175,10 @@
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle"></h2>
+   <div class="icon-title">
+    <img src="./img/5.png" alt="">
+    <h2 id="pageTitle">Tài liệu tham khảo</h2>
+  </div>
 
   <div id="loadingBox">
     <div class="loader"></div>
@@ -220,8 +250,11 @@ function renderList(data){
     const div = document.createElement("div");
     div.className = "item_list";
     div.innerHTML = `
-      <div class="item" data-title="${escapeHtml(i.title)}">
+      <div class="item" data-title="${escapeHtml(i.title)}">\
+          <div class="item-content">
+          <img src="./img/6.png" alt="">
         <p>${escapeHtml(i.title)}</p>
+        </div>
       </div>
     `;
     list.appendChild(div);

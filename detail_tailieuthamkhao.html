@@ -43,18 +43,15 @@ h2{
   gap:6px;
   padding:8px 14px;
   border-radius:999px;
-  background:#fff;
+  background:#156082;
   box-shadow:var(--shadow);
-  color:var(--primary);
+  color:white;
   font-weight:600;
   cursor:pointer;
   transition:.25s;
   margin:10px 0 16px;
 }
-.back-link:hover{
-  background:var(--primary);
-  color:#fff;
-}
+
 
 /* ---------- LOADING (ĐỒNG BỘ CODE 1) ---------- */
 #loadingBox{
@@ -95,20 +92,20 @@ h2{
 .tab-btn{
   font-size:14px;
   font-weight:600;
-  background:#004aad;
+  background:#156082;
   cursor:pointer;
   padding:10px 10px;
   border-radius:5px;
   color:white;
   transition:0.25s;
 }
-.tab-btn.active{ background:#004aad; }
+.tab-btn.active{ background:#156082; }
 
 .tab-underline{
   position:absolute;
   bottom:-2px;
   height:4px;
-  background:#004aad;
+  background:#156082;
   width:100%;
   border-radius:10px;
   transition:0.3s;
@@ -137,7 +134,7 @@ h2{
 
 @media(max-width:768px){
   body{ width:100%; }
-  h2{ text-align:start; padding:0 10px; }
+  h2{ text-align:center; padding:0 10px; }
 }
 </style>
 </head>
@@ -243,7 +240,7 @@ if(slugFromURL){
   fetch(`${webAppUrl}?ref=${encodeURIComponent(window.location.origin)}`)
     .then(res=>res.json())
     .then(res=>{
-      const rawList = res.TaiLieuThamKhao || [];
+      const rawList = res.data.TaiLieuThamKhao || [];
       const matched = rawList.find(row =>
         normalizeNameForComparison(row.name) === slugFromURL.toUpperCase()
       );

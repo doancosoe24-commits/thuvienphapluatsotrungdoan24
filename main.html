@@ -1,13 +1,14 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Thư Viện Số Trung Đoàn 24</title>
   <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <link rel="stylesheet" href="css/style.css">
-
   <style>
+    * { box-sizing: border-box; }
+
     /* --- Giữ nguyên style cũ --- */
     html, body { height: 100%; margin: 0; }
     body {
@@ -46,27 +47,32 @@
     }
 
     .item {
-      background: #004aad;
+      background: #156082;
       width: 100%;
       display: flex;
       align-items: center;
       gap: 10px;
       color: white;
-      padding: 10px 0;
+      padding: 12px 0;
       margin: 15px 0;
       cursor: pointer;
       opacity: 0;
       transform: translateX(-50px);
       animation: slideIn 0.6s forwards;
+      border-radius: 15px;
+      border: 3.5px solid rgba(12, 12, 12, 0.95);
+      overflow: hidden;
     }
 
-    .flag-vn {
-      width: 84px;
-      margin-right: 12px;
+    /* Ảnh item: đảm bảo không tràn và đẹp */
+    .item img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 10px;
       flex-shrink: 0;
-      opacity: 0;
-      transform: translateX(-50px);
-      animation: slideIn 0.6s forwards;
+      margin-left: 12px;
+      display:block;
     }
 
     .flag-vn svg {
@@ -93,18 +99,20 @@
       font-weight: 700;
       letter-spacing: 0.6px;
       text-transform: uppercase;
-      padding: 10px;
+      padding: 6px 4px;
       flex: 1;
       text-align: center;
       white-space: normal;
       word-break: break-word;
+      font-size: 22px;
     }
 
     @media (max-width:768px){
       body { width:100%; }
       .flag-vn{ width:54px; flex-shrink: 0; }
       .arrow{ width:60px; height:40px; flex-shrink: 0; }
-      .item p { font-size:10px; }
+      .item p { font-size:14px; text-align: start;margin-left: 15px;}
+      .item img { width:72px; height:72px; margin-left:8px; }
     }
 
     /* --- Thêm style overlay (ít ảnh hưởng đến giao diện cũ) --- */
@@ -232,9 +240,9 @@
   <div id="confetti" class="confetti" aria-hidden="true"></div>
 
 <script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbzvjVVkV4dHAlhuT42mnw4f8pl9BDILKrL0SqF8dBw5LjhMbpBulNTV6DMWNhdbQ2zS/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbxgidwuQo9UTNHrb85ZFbY7YyKGWxR1HHLtLGpfbu4ILyMGHbSj7b0XrYSCsZEv8XjW/exec";
 
-// Escape HTML để an toàn
+/* ---------- Helpers ---------- */
 function escapeHtml(str){
   if(!str) return "";
   return String(str)
@@ -248,45 +256,80 @@ function escapeHtml(str){
 function toSlug(text){
   if(!text) return "";
   text = text.replace(/Đ/g, "D").replace(/đ/g, "d");
-  let str = text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  let str = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   str = str.split(/\s+/).map(word => {
-    return word
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .replace(/^./, c => c.toUpperCase());
+    return word.replace(/[^a-zA-Z0-9]/g, "").replace(/^./, c => c.toUpperCase());
   }).join("");
   return str;
 }
 
-// Tạo item Category với delay animation
+/**
+ * convertDriveToLh3(url, size)
+ * - Nếu url là Google Drive "file/d/ID" hoặc contains ?id=ID -> trả link lh3 trực tiếp
+ * - size: optional, ví dụ "w200-h200" hoặc "w100-h100". Nếu không truyền -> no sizing suffix.
+ * - Nếu không phải Drive -> trả nguyên url
+ */
+function convertDriveToLh3(url, size = "w200-h200"){
+  if(!url) return "";
+  try{
+    const s = url.toString().trim();
+    // If already lh3 direct, return (avoid double)
+    if(s.indexOf("lh3.googleusercontent.com") !== -1){
+      // optionally append size if missing and size provided
+      if(size && s.indexOf("=w") === -1) return `${s}=${size}`;
+      return s;
+    }
+    // extract /d/ID/
+    let m = s.match(/\/d\/([a-zA-Z0-9_\-]+)/);
+    if(m && m[1]){
+      return `https://lh3.googleusercontent.com/d/${m[1]}${size ? '=' + size : ''}`;
+    }
+    // extract id=?id=ID
+    m = s.match(/[?&]id=([a-zA-Z0-9_\-]+)/);
+    if(m && m[1]){
+      return `https://lh3.googleusercontent.com/d/${m[1]}${size ? '=' + size : ''}`;
+    }
+    // if it's already direct uc link, try to convert by extracting id
+    m = s.match(/\/uc\?export=view&id=([a-zA-Z0-9_\-]+)/);
+    if(m && m[1]){
+      return `https://lh3.googleusercontent.com/d/${m[1]}${size ? '=' + size : ''}`;
+    }
+    // otherwise return original (other hosts)
+    return s;
+  }catch(e){
+    return url;
+  }
+}
+
+/* ---------- Create item html (uses drive->lh3 conversion) ---------- */
 function createItemHTML(item, index){
   const slug = toSlug(item.title);
   const page = slug + ".html";
-  const delay = index * 0.15; // delay từng item
-  // chỉ đổi onclick để gọi hiệu ứng trước khi chuyển trang
+  const delay = index * 0.15;
+
+  // compute icon src
+  let iconSrc = "";
+  try {
+    if(item && item.icon){
+      iconSrc = convertDriveToLh3(item.icon, 'w200-h200'); // using w200-h200 by default
+    }
+  } catch(e) { iconSrc = ""; }
+
+  const fallback = './img/Picture1.png';
+  const finalSrc = iconSrc ? iconSrc : fallback;
+  const safeTitle = escapeHtml(item.title || "");
+
+  // role=button + tabindex for accessibility; keyboard handler added globally
   return `
-    <div class="item" onclick="showFlagThenGo('${page}', '${slug}')" style="animation-delay:${delay}s">
-      <div class="arrow" style="animation-delay:${delay + 0.05}s"></div>
-      <p>${escapeHtml(item.title)}</p>
-      <div class="flag-vn" style="animation-delay:${delay + 0.1}s">
-        <svg viewBox="0 0 512 341">
-          <rect width="512" height="341" fill="#DA251D"/>
-          <polygon fill="#FFD200"
-            points="256 80 276 142 341 142 289 181 309 243 
-                    256 204 203 243 223 181 170 142 236 142"/>
-        </svg>
-      </div>
+    <div class="item" onclick="showFlagThenGo('${page}', '${slug}')" style="animation-delay:${delay}s" role="button" tabindex="0" aria-label="Mở ${safeTitle}">
+      <img style="width:60px; height:60px;" src="${finalSrc}" alt="${safeTitle}" loading="lazy" decoding="async"
+           onerror="this.onerror=null;this.src='${fallback}';" />
+      <p>${safeTitle}</p>
     </div>
   `;
 }
 
-// Fallback: nếu cần chuyển thẳng (không dùng hiệu ứng)
-function goToPage(page, slug){
-  window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
-}
-
-/* ---------- Hiệu ứng overlay + chuyển trang ---------- */
+/* ---------- Overlay & confetti (giữ nguyên logic) ---------- */
 let overlayActive = false;
 const overlay = document.getElementById('flagOverlay');
 const flagCenter = document.getElementById('flagCenter');
@@ -310,44 +353,29 @@ function spawnConfetti(count = 18){
     el.style.transform = `translateY(-20vh) rotate(${rand(-60,60)}deg)`;
     el.style.animationDelay = (rand(0,0.25)) + 's';
     confettiRoot.appendChild(el);
-    // remove later
     setTimeout(()=> { if(el && el.parentNode) el.parentNode.removeChild(el); }, 2200);
   }
 }
 
-// Hiển thị overlay, sau đó chuyển trang
 function showFlagThenGo(page, slug){
   if(overlayActive) return;
   overlayActive = true;
-
-  // show overlay
   overlay.classList.add('active');
   overlay.setAttribute('aria-hidden','false');
-
-  // lock body scroll
   document.body.style.overflow = 'hidden';
 
-  // animate title appear slightly later
-  setTimeout(()=> {
-    flagTitle.classList.add('show'); // optional class, we use CSS based on overlay.active
-  }, 180);
-
-  // spawn confetti
+  setTimeout(()=> { flagTitle.classList.add('show'); }, 180);
   spawnConfetti(24);
 
-  // delay trước khi chuyển trang (tùy chỉnh nếu muốn lâu hơn)
   const delayMs = 1100;
   setTimeout(()=> {
-    // small fade then redirect
     overlay.classList.remove('active');
     overlay.setAttribute('aria-hidden','true');
     document.body.style.overflow = '';
-    // redirect
     window.location.href = `${page}?slug=${encodeURIComponent(slug)}`;
   }, delayMs);
 }
 
-// Hủy overlay bằng ESC hoặc click ngoài (nếu người dùng muốn)
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape' && overlayActive){
     overlay.classList.remove('active');
@@ -355,9 +383,14 @@ document.addEventListener('keydown', function(e){
     overlayActive = false;
     document.body.style.overflow = '';
   }
+
+  // keyboard: Enter or Space on focused .item triggers click
+  if((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.classList.contains('item')){
+    e.preventDefault();
+    document.activeElement.click();
+  }
 });
 
-// Click ngoài vùng trung tâm sẽ đóng overlay (không chuyển)
 overlay.addEventListener('click', function(evt){
   if(evt.target === overlay){
     overlay.classList.remove('active');
@@ -367,7 +400,7 @@ overlay.addEventListener('click', function(evt){
   }
 });
 
-// Fetch Category từ Google Sheets (giữ nguyên logic)
+/* ---------- Fetch category and render ---------- */
 async function fetchCategory(){
   try {
     const res = await fetch(webAppUrl);
@@ -385,7 +418,6 @@ async function fetchCategory(){
   }
 }
 
-// Gọi fetch Category
 fetchCategory();
 </script>
 

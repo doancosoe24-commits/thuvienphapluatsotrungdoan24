@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-    <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+  <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư Viện Pháp Luật Số - Tài Liệu Ngành</title>
 
@@ -46,48 +46,65 @@
       gap:6px;
       padding:8px 14px;
       border-radius:999px;
-      background:#fff;
+      background:#156082;
       box-shadow:var(--shadow);
-      color:var(--primary);
+      color:white;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
       margin-bottom:20px;
     }
-    .back-link:hover{
-      background:var(--primary);
-      color:#fff;
+
+    .icon-title{
+      display:flex;
+      align-items:center;
+      background:#156082;
+      border-radius:15px;
+      border:3.5px solid rgba(12,12,12,0.95);
+      padding:12px 0;
+    }
+
+    .icon-title img{
+      width:60px;
+      margin:0 20px;
     }
 
     #pageTitle{
-      text-align:center;
-      color:var(--gold);
+      color:gold;
       text-transform:uppercase;
       font-size:22px;
       font-weight:800;
-      margin:10px 0 28px;
+      margin:0;
     }
 
     .item_list{
       display:flex;
       align-items:center;
-      margin-bottom:18px;
+      margin:10px 0;
     }
 
     .item{
-      background:linear-gradient(135deg,var(--primary),#003a8c);
+      background:#156082;
       flex:1;
-      padding:16px 0;
-      color:var(--gold);
+      padding:6px 0;
+      color:white;
       box-shadow:var(--shadow);
       cursor:pointer;
       transition:.3s;
-      text-align:center;
       border-radius:var(--radius);
     }
 
-    .item p{
-      margin:0;
+    .item-content{
+      display:flex;
+      align-items:center;
+    }
+
+    .item-content img{
+      margin:0 25px;
+      width:50px;
+    }
+
+    .item-content p{
       font-size:16px;
       font-weight:700;
     }
@@ -95,7 +112,6 @@
     .item:hover{
       transform:translateY(-4px);
       box-shadow:0 16px 32px rgba(0,0,0,0.18);
-      color:#fff;
     }
 
     #loadingBox{
@@ -105,7 +121,6 @@
       align-items:center;
       padding:60px 0;
       color:var(--primary);
-      font-size:16px;
       font-weight:600;
     }
 
@@ -123,24 +138,21 @@
       to{ transform:rotate(360deg); }
     }
 
-    #loadingBox.error{
-      color:#dc2626;
-    }
-
     @media(max-width:768px){
       body{ width:100%; }
-      .item p{ font-size:14px; }
     }
   </style>
 </head>
+
 <body>
-
 <div id="header"></div>
-
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle"></h2>
+  <div class="icon-title">
+    <img src="./img/logo2.png" alt="">
+    <h2 id="pageTitle">Truyền Thống Trung Đoàn 24</h2>
+  </div>
 
   <div id="loadingBox">
     <div class="loader"></div>
@@ -151,126 +163,83 @@
 </main>
 
 <div id="footer"></div>
-
 <script src="main.js"></script>
 <script>
 const webAppUrl = "https://script.google.com/macros/s/AKfycbzvjVVkV4dHAlhuT42mnw4f8pl9BDILKrL0SqF8dBw5LjhMbpBulNTV6DMWNhdbQ2zS/exec";
-
 let ALL_DOCUMENTS = [];
-let ALL_CATEGORIES = [];
 
-/* ---------- HELPERS ---------- */
+/* ===== Helpers ===== */
 function escapeHtml(str){
-  if(!str) return "";
-  return String(str)
+  return String(str || "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#39;");
+    .replace(/>/g,"&gt;");
 }
 
 function toSlug(text){
-  if(!text) return "";
   text = text.replace(/Đ/g,"D").replace(/đ/g,"d");
-  let str = text.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  return str.split(/\s+/).map(w =>
-    w.replace(/[^a-zA-Z0-9]/g,"").replace(/^./, c=>c.toUpperCase())
-  ).join("");
+  return text.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9 ]/g,"")
+    .trim()
+    .replace(/\s+/g,"-")
+    .toLowerCase();
 }
 
-function getQueryParam(name){
-  return new URLSearchParams(window.location.search).get(name);
-}
-
-function updatePageTitleFromSlug(slug){
-  if(!slug) return;
-  const cat = ALL_CATEGORIES.find(c=>c.slug===slug);
-  document.getElementById("pageTitle").innerText = cat ? cat.title : slug;
-}
-
-function showError(msg){
-  const box = document.getElementById("loadingBox");
-  box.classList.add("error");
-  box.innerHTML = msg;
-}
-
-/* ---------- LOAD ---------- */
+/* ===== Load Data ===== */
 async function loadPage(){
   try{
     const res = await fetch(webAppUrl).then(r=>r.json());
     ALL_DOCUMENTS = res.data.TruyenThongDakTo || [];
-    ALL_CATEGORIES = res.data.Category || [];
-
-    if(!ALL_DOCUMENTS.length){
-      showError("Không tìm thấy tài liệu nào.");
-      return;
-    }
-
     renderList(ALL_DOCUMENTS);
-
-    const slugFromURL = getQueryParam("slug");
-    if(slugFromURL) updatePageTitleFromSlug(slugFromURL);
-
-  }catch(err){
-    console.error("❌ Lỗi loadPage:", err);
-    showError("Không thể tải dữ liệu.");
+  }catch(e){
+    document.getElementById("loadingBox").innerText = "Không thể tải dữ liệu";
   }
 }
 
-/* ---------- RENDER ---------- */
+/* ===== Render ===== */
 function renderList(data){
   const list = document.getElementById("list");
   const loading = document.getElementById("loadingBox");
 
-  const uniqueMap = new Map();
-  console.log("📌 DATA NHẬN VỀ:", data);
+  list.innerHTML = "";
 
   data.forEach(i=>{
     if(!i.title) return;
-    const key = i.title.trim().toLowerCase();
-    if(!uniqueMap.has(key)) uniqueMap.set(key,i);
-  });
 
-  list.innerHTML="";
-  const frag=document.createDocumentFragment();
+    const div = document.createElement("div");
+    div.className = "item_list";
 
-  uniqueMap.forEach(i=>{
-    const div=document.createElement("div");
-    div.className="item_list";
-
-    // thêm data-active lấy từ thuộc tính i.active (nếu không có mặc định '0')
-    const activeVal = (i.active === 1 || i.active === '1') ? '1' : (i.active ? String(i.active) : '0');
-
-    div.innerHTML=`
-      <div class="item" data-title="${escapeHtml(i.title)}" data-active="${escapeHtml(activeVal)}">
-        <p>${escapeHtml(i.title)}</p>
+    div.innerHTML = `
+      <div class="item" data-title="${escapeHtml(i.title)}">
+        <div class="item-content">
+          <img src="./img/6.png">
+          <p>${escapeHtml(i.title)}</p>
+        </div>
       </div>
     `;
-    frag.appendChild(div);
+
+    list.appendChild(div);
   });
 
-  list.appendChild(frag);
   loading.style.display="none";
   list.style.display="block";
 
-  // click handler: nếu active === '1' thì chuyển sang lichsutrungdoan24.html, ngược lại KHÔNG làm gì
-  list.onclick=e=>{
-    const item=e.target.closest(".item");
-    if(item){
-      const slug=toSlug(item.dataset.title);
-      const active = item.dataset.active;
+  /* ===== Click xử lý điều hướng ===== */
+  list.onclick = e => {
+    const item = e.target.closest(".item");
+    if(!item) return;
 
-      if(active === '1'){
-        // nếu active = 1 -> chuyển tới lichsutrungdoan24.html
-        window.location.href = "lichsutrungdoan24.html";
-      }
-      else{
+    const title = item.dataset.title.trim();
+
+    // Trang riêng cho Lịch Sử Trung Đoàn 24
+    if(title.toLowerCase() === "lịch sử trung đoàn 24"){
+      window.location.href = "lichsutrungdoan24.html";
+    }
+    // Các mục còn lại
+    else{
+      const slug = toSlug(title);
       window.location.href = `TaiLieuNganh_detail.html?slug=${slug}`;
-      }
-
-      // nếu muốn chuyển tới trang chi tiết cho các trường hợp khác,
-      // hãy bỏ comment dòng bên dưới. Hiện tại theo yêu cầu: "con lại thì không" => không điều hướng.
     }
   };
 }

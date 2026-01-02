@@ -10,9 +10,9 @@
     html, body {
       margin:0;
       height:100%;
-      font-family: Arial, sans-serif;
       background:#f7f9fb;
       color:#333;
+      font-family: "Segoe UI", Arial, sans-serif;
     }
 
     body {
@@ -27,18 +27,20 @@
     .item_list {
       display:flex;
       align-items:center;
-      margin-bottom:18px;
+      margin-bottom:10px;
+      margin-top: 10px;
     }
 
     .item {
-      background:#004aad;
+        background: #156082;
       flex:1;
-      padding:15px 0;
+      padding:6px 0;
       color:#ccae6e;
       box-shadow:0 3px 6px rgba(0,0,0,0.15);
       cursor:pointer;
       transition:0.3s;
-      text-align:center;
+      border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
     }
 
     .item p { margin:0; font-size:16px; }
@@ -47,7 +49,38 @@
       background:#ccae6e;
       color:#fff;
     }
+    .icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+        background: #156082;
+      border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
+       padding: 12px 0;
+    }
+  .icon-title img{
+   width: 80px;
+   margin:0 20px ;
+  }
 
+#pageTitle {
+  color: gold;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+}
+.item-content{
+  display: flex;
+  align-items: center;
+}
+.item-content img{
+  margin:0 25px ;
+  width: 50px;
+}
+.item-content p{
+  margin: 0 auto;
+}
     /* Back link (styled) */
     .back-link{
       display:inline-flex;
@@ -55,18 +88,14 @@
       gap:6px;
       padding:8px 14px;
       border-radius:999px;
-      background:#fff;
+      background:#156082;
       box-shadow:0 10px 25px rgba(0,0,0,0.08);
-      color:#004aad;
+      color:white;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
       margin-bottom:20px;
       text-decoration:none;
-    }
-    .back-link:hover{
-      background:#004aad;
-      color:#fff;
     }
 
     #loadingBox{
@@ -107,7 +136,10 @@
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle" style="text-align:center; color:#ccae6e; text-transform:uppercase;"></h2>
+   <div class="icon-title">
+    <img src="./img/1.png" alt="">
+    <h2 id="pageTitle">Học Tập Và Làm Theo Tư Tưởng Đạo Đức Phong Cách Hồ Chí Minh</h2>
+  </div>
 
   <div id="loadingBox">
       <div class="loader" aria-hidden="true"></div>
@@ -216,7 +248,10 @@ function renderList(data){
     div.className = "item_list";
     div.innerHTML = `
       <div class="item" data-title="${escapeHtml(i.title)}">
+        <div class="item-content">
+          <img src="./img/6.png" alt="">
         <p>${escapeHtml(i.title)}</p>
+        </div>
       </div>
     `;
     frag.appendChild(div);

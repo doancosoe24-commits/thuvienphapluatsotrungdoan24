@@ -80,7 +80,7 @@ async function initUserBox() {
 
   if (!raw) {
     userBox.innerHTML = `
-      <a href="login.html" style="color:#004aad;font-weight:600">
+      <a href="index.html" style="color:#156082;font-weight:600">
         Đăng nhập
       </a>`;
     return;
@@ -220,9 +220,7 @@ function requireLogin() {
 
   if (publicPages.includes(page)) return;
 
-  if (!localStorage.getItem("loggedInUser")) {
-    location.href = "index.html";
-  }
+
 }
 
 /****************************************************

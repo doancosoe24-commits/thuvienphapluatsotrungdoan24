@@ -36,18 +36,28 @@ body{
 
 main{
   flex:1;
-
 }
-
+    .icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+      background:#156082 ;
+      border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
+       padding: 12px 0;
+    }
+  .icon-title img{
+   width: 50px;
+   margin:0 20px ;
+  }
 /* TITLE */
 #pageTitle{
   text-align:center;
   color:#fff;
-  background:var(--primary);
   font-size:20px;
   font-weight:800;
   letter-spacing:1px;
-  margin:0 0 30px;
+  margin:0;
   padding:10px;
   border-radius:10px;
 }
@@ -55,16 +65,17 @@ main{
 
 /* RESULTS */
 #results{
+  margin-top: 10px;
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:22px;
+  gap:10px;
 }
 
 .item{
-  background:linear-gradient(135deg,var(--primary),#003a8c);
+  background:#156082;
   border-radius:var(--radius);
   padding:22px 18px;
-  color:var(--gold);
+  color:white;
   cursor:pointer;
   box-shadow:var(--shadow);
   transition:.3s;
@@ -124,10 +135,10 @@ main{
 <body>
 <div id="header"></div>
 <main>
-  <h2 id="pageTitle">
-    TỪ KHÓA: <span class="keyword" id="searchKey"></span>
-  </h2>
-
+ <div class="icon-title">
+    <img src="./img/6.png" alt="">
+    <h2 id="pageTitle">TỪ KHÓA: <span class="keyword" id="searchKey"></span></h2>
+  </div>
   <!-- LOADING -->
   <div id="loadingBox">
     <div class="loader"></div>

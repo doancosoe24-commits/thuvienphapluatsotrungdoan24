@@ -47,27 +47,42 @@ main{
   gap:6px;
   padding:8px 14px;
   border-radius:999px;
-  background:#fff;
-  box-shadow:var(--shadow);
-  color:var(--primary);
+  background:#156082;
+  box-shadow:#156082;
+  color:white;
   font-weight:600;
   cursor:pointer;
   transition:.25s;
   margin-bottom:20px;
 }
 .back-link:hover{
-  background:var(--primary);
+  background:#156082;
   color:#fff;
 }
+.icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+      background:#156082 ;
+      border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
+       padding: 12px;
+         margin-bottom: 10px;
+    }
+  .icon-title img{
+   width: 50px;
+   margin:0 20px ;
+  }
 
 /* TITLE */
 #pageTitle{
   text-align:center;
-  color:var(--primary);
+  color:gold;
   font-size:24px;
   font-weight:800;
   letter-spacing:1px;
-  margin:10px 0 30px;
+  margin: 0 auto;
+  margin: 0;
   text-transform:uppercase;
 }
 
@@ -94,7 +109,7 @@ main{
 }
 
 .filter-box button{
-  background:var(--primary);
+  background:#156082;
   color:#fff;
   border:none;
   font-weight:700;
@@ -109,10 +124,10 @@ main{
 }
 
 .item{
-  background:linear-gradient(135deg,var(--primary),#003a8c);
+  background:#156082;
   border-radius:var(--radius);
   padding:22px 18px;
-  color:var(--gold);
+  color:white;
   cursor:pointer;
   box-shadow:var(--shadow);
   transition:.3s;
@@ -172,11 +187,11 @@ main{
   border:none;
   border-radius:10px;
   cursor:pointer;
-  background:var(--gold);
+  background: #156082;
   color:#fff;
   font-weight:700;
 }
-.pagination button.active{background:var(--primary)}
+.pagination button.active{background: #156082;}
 .pagination button:hover{opacity:.85}
 
 /* RESPONSIVE */
@@ -193,7 +208,10 @@ main{
 <div id="header"></div>
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
-  <h2 id="pageTitle">THƯ VIỆN PHÁP LUẬT SỐ</h2>
+  <div class="icon-title">
+    <img src="./img/2.png" alt="">
+    <h2 id="pageTitle">Thư Viện Pháp Luật Số</h2>
+  </div>
 
   <div class="filter-box">
     <select id="filterCategory">

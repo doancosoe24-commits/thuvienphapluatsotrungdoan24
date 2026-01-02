@@ -37,7 +37,7 @@ body{background:var(--bg);min-height:100vh;color:#111}
 .user-sub{color:var(--muted);font-size:13px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin-top:4px}
 .preview-time{font-size:12px;color:var(--muted);margin-left:8px}
 .unread-badge{position:absolute;right:12px;top:14px;background:#ef4444;color:white;font-size:11px;padding:4px 8px;border-radius:999px;min-width:24px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
-.chat{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,0.95),#ffffff);border-radius:var(--radius);padding:0;box-shadow:0 10px 40px rgba(15,25,50,0.06);overflow:hidden}
+.chat{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,0.95),#ffffff);border-radius:var(--radius);padding:0;box-shadow:0 10px 40px rgba(15,25,50,0.06);overflow:hidden;position:relative}
 .chat-header{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #f0f3fa;flex-shrink:0;background:linear-gradient(180deg,#ffffff,#fbfdff)}
 .chat-identity{display:flex;align-items:center;gap:12px}
 .chat-title{font-weight:800;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -182,6 +182,81 @@ body{background:var(--bg);min-height:100vh;color:#111}
   height:18px;
 }
 }
+
+/* ===== Conversation Info Panel (NEW) ===== */
+.conv-info {
+  position: absolute;
+  top: 0;
+  right: -100%;
+  height: 100%;
+  width: 60%; /* desktop: 60% of chat area */
+  background: linear-gradient(180deg,#ffffff,#fbfbff);
+  box-shadow: -20px 0 40px rgba(10,20,40,0.12);
+  border-radius: 12px 0 0 12px;
+  transition: right .36s cubic-bezier(.2,.9,.25,1), transform .36s;
+  z-index: 1200;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* open state */
+.conv-info.open { right: 0; }
+
+/* header inside conv-info */
+.conv-info .info-header { display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #f0f3fa; }
+.conv-info .info-title { font-weight:800;font-size:16px; }
+.conv-info .info-close { margin-left:auto; }
+
+/* tabs */
+.conv-info .tabs { display:flex; gap:6px; padding:10px; border-bottom:1px solid #f0f3fa; }
+.conv-info .tab-btn { padding:8px 12px; border-radius:10px; border:1px solid transparent; cursor:pointer; background:transparent; font-weight:700; }
+.conv-info .tab-btn.active { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border-color: rgba(0,0,0,0.04); }
+
+/* content */
+.conv-info .info-body { flex:1; overflow:auto; padding:12px; display:flex; flex-direction:column; gap:12px; }
+
+/* gallery & lists */
+.info-gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.info-gallery img { width:100%; height:100px; object-fit:cover; border-radius:8px; cursor:pointer; }
+.info-file-list { display:flex; flex-direction:column; gap:8px; }
+.info-file-list .file-item { display:flex; align-items:center; gap:8px; padding:8px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,70,0.03); background:#fff; }
+.info-link-list { display:flex; flex-direction:column; gap:8px; }
+
+/* small screens: slide up from bottom, cover height 60% */
+@media(max-width:880px){
+  .conv-info { width:80%; height:100%; right:-100%; bottom:0; top:auto; border-radius:12px 12px 0 0; transform: translateY(0); transition: right .3s, bottom .3s, transform .36s; }
+  .conv-info.open { right: 0; bottom: 0; }
+  .info-gallery img { height:70px; }
+  .info-header { padding:10px; }
+}
+
+/* ===== NEW: Scroll-to-bottom / newest message button ===== */
+.newest-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 110px; /* above composer */
+  z-index: 1500;
+  display: inline-flex;
+  align-items: center;
+  gap:8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  color: white;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(20,30,70,0.15);
+  transform: translateY(0);
+  transition: transform .18s ease, opacity .18s;
+  opacity: 1;
+}
+.newest-btn.hidden { opacity: 0; transform: translateY(12px); pointer-events:none; }
+.newest-badge { background: rgba(255,255,255,0.12); padding:6px 8px; border-radius:999px; font-weight:700; font-size:13px; }
+@media(max-width:880px){
+  .newest-btn { right: 16px; bottom: calc(10% + 12px); } /* on mobile keep above conv-info if open */
+}
 </style>
 </head>
 <body>
@@ -220,11 +295,24 @@ body{background:var(--bg);min-height:100vh;color:#111}
       </div>
 
       <div class="controls">
-        <button class="icon-btn" id="btnProfile" title="Hồ sơ">⚙</button>
+        <button class="icon-btn" id="btnInfo" title="Thông tin hội thoại">ℹ️</button>
       </div>
     </div>
 
     <div class="msg-wrap" id="msgList"></div>
+
+    <!-- NEW: scroll-to-bottom button -->
+<button id="scrollToBottomBtn" class="newest-btn hidden" title="Đến tin mới nhất">
+  <span class="arrow-icon">
+    <!-- Double down arrow -->
+    <svg style="font-size: 40px;" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M7 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 13l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+  <span id="newCount" class="newest-badge" style="display:none">0</span>
+</button>
+
 
     <div class="composer">
       <div id="replyPreview" style="display:none" class="reply-preview">
@@ -282,6 +370,37 @@ body{background:var(--bg);min-height:100vh;color:#111}
         </button>
       </div>
     </div>
+
+    <!-- Conversation info panel -->
+    <aside class="conv-info" id="convInfo">
+      <div class="info-header">
+        <div>
+          <div class="info-title" id="infoTitle">Thông tin hội thoại</div>
+          <div style="font-size:13px;color:var(--muted)" id="infoSubtitle">—</div>
+        </div>
+        <div class="info-close">
+          <button class="icon-btn" id="closeInfoBtn" title="Đóng">✖</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Tabs">
+        <button class="tab-btn active" data-tab="images" id="tabImages">Ảnh</button>
+        <button class="tab-btn" data-tab="files" id="tabFiles">File</button>
+        <button class="tab-btn" data-tab="links" id="tabLinks">Link</button>
+      </div>
+
+      <div class="info-body" id="infoBody">
+        <div id="imagesTab" class="info-panel">
+          <div class="info-gallery" id="infoGallery">Đang tải ảnh...</div>
+        </div>
+        <div id="filesTab" class="info-panel" style="display:none">
+          <div class="info-file-list" id="infoFiles">Đang tải file...</div>
+        </div>
+        <div id="linksTab" class="info-panel" style="display:none">
+          <div class="info-link-list" id="infoLinks">Đang tải link...</div>
+        </div>
+      </div>
+    </aside>
   </main>
 </div>
 
@@ -321,6 +440,24 @@ const emojiPop = document.getElementById('emojiPop');
 const replyPreview = document.getElementById('replyPreview');
 const replyMeta = document.getElementById('replyMeta');
 const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+
+/* NEW: conv-info elements */
+const btnInfo = document.getElementById('btnInfo');
+const convInfo = document.getElementById('convInfo');
+const closeInfoBtn = document.getElementById('closeInfoBtn');
+const tabButtons = document.querySelectorAll('.tab-btn');
+const imagesTab = document.getElementById('imagesTab');
+const filesTab = document.getElementById('filesTab');
+const linksTab = document.getElementById('linksTab');
+const infoGallery = document.getElementById('infoGallery');
+const infoFiles = document.getElementById('infoFiles');
+const infoLinks = document.getElementById('infoLinks');
+const infoTitle = document.getElementById('infoTitle');
+const infoSubtitle = document.getElementById('infoSubtitle');
+
+/* NEW: scroll-to-bottom elements */
+const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+const newCountEl = document.getElementById('newCount');
 
 /* ====== AUTH / LOCAL USER (demo uses localStorage loggedInUser) ====== */
 let loggedInUser;
@@ -616,6 +753,142 @@ async function loadMessages(){
   }catch(e){ console.error('Lỗi tải tin nhắn:', e); }
 }
 
+/* ======= NEW: Load conversation info (images/files/links) ======= */
+async function loadConversationInfo() {
+  if(!selectedUserId) {
+    infoGallery.innerHTML = 'Chọn user để xem lịch sử';
+    infoFiles.innerHTML = '';
+    infoLinks.innerHTML = '';
+    return;
+  }
+
+  infoTitle.textContent = 'Thông tin: ' + (usersMap[selectedUserId] || selectedUserId);
+  infoSubtitle.textContent = 'Lịch sử chia sẻ giữa bạn và ' + (usersMap[selectedUserId] || selectedUserId);
+
+  // reset
+  infoGallery.innerHTML = 'Đang tải ảnh...';
+  infoFiles.innerHTML = 'Đang tải file...';
+  infoLinks.innerHTML = 'Đang tải link...';
+
+  try{
+    const { data, error } = await sbClient.from('messages')
+      .select('*')
+      .or(`and(sender.eq.${localUser.id},recipient.eq.${selectedUserId}),and(sender.eq.${selectedUserId},recipient.eq.${localUser.id})`)
+      .eq('is_deleted', false)
+      .order('created_at', { ascending: true });
+
+    if(error){
+      console.error('Lỗi lấy history:', error);
+      infoGallery.innerHTML = 'Lỗi tải ảnh';
+      infoFiles.innerHTML = 'Lỗi tải file';
+      infoLinks.innerHTML = 'Lỗi tải link';
+      return;
+    }
+
+    const images = [];
+    const files = [];
+    const linksSet = new Map(); // unique links
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    data.forEach(m => {
+      // files in meta
+      if(m.meta){
+        const arr = (m.type === 'files' || (m.meta.type === 'files')) ? (m.meta.files || []) : [m.meta];
+        arr.forEach(f => {
+          if(!f) return;
+          const isImage = (f.mime || '').startsWith('image/') || ['png','jpg','jpeg','gif','webp'].includes(extFromName(f.name||''));
+          const item = {
+            name: f.name || 'file',
+            url: f.url,
+            mime: f.mime || '',
+            size: f.size || 0,
+            path: f.path || null,
+            sender: m.sender,
+            created_at: m.created_at
+          };
+          if(isImage) images.push(item); else files.push(item);
+        });
+      }
+      // links in text
+      if(m.content){
+        const matches = m.content.match(urlRegex);
+        if(matches){
+          matches.forEach(link => {
+            if(!linksSet.has(link)) linksSet.set(link, { link, sender: m.sender, created_at: m.created_at, title: link });
+          });
+        }
+      }
+    });
+
+    // sort newest first
+    images.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+    files.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+    const links = Array.from(linksSet.values()).sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+
+    // render images
+    if(images.length === 0) infoGallery.innerHTML = '<div style="color:var(--muted)">Chưa có ảnh chia sẻ</div>';
+    else {
+      infoGallery.innerHTML = '';
+      images.forEach(img => {
+        const el = document.createElement('img');
+        el.src = img.url;
+        el.alt = img.name;
+        el.title = `${img.name} • ${img.sender === localUser.id ? 'Bạn' : (usersMap[img.sender]||img.sender)}`;
+        el.addEventListener('click', ()=> attemptDownloadOrFallback(img.url, img.name));
+        infoGallery.appendChild(el);
+      });
+    }
+
+    // render files
+    if(files.length === 0) infoFiles.innerHTML = '<div style="color:var(--muted)">Chưa có file chia sẻ</div>';
+    else {
+      infoFiles.innerHTML = '';
+      files.forEach(f => {
+        const row = document.createElement('div'); row.className = 'file-item';
+        const icon = createFileIconElement(extFromName(f.name), f.mime);
+        const meta = document.createElement('div'); meta.className = 'file-meta';
+        const name = document.createElement('div'); name.className = 'file-name'; name.textContent = f.name;
+        const sub = document.createElement('div'); sub.className = 'file-sub'; sub.textContent = `${f.sender === localUser.id ? 'Bạn' : (usersMap[f.sender]||f.sender)} · ${f.size?Math.round(f.size/1024)+' KB':''}`;
+        meta.appendChild(name); meta.appendChild(sub);
+        const act = document.createElement('div'); act.className = 'file-actions';
+        const dl = document.createElement('button'); dl.className='small-btn'; dl.textContent='↓';
+        dl.addEventListener('click', ()=> attemptDownloadOrFallback(f.url, f.name));
+        const sh = document.createElement('button'); sh.className='cancel-btn'; sh.textContent='Share';
+        sh.addEventListener('click', ()=> shareFile(f.url));
+        act.appendChild(dl); act.appendChild(sh);
+        row.appendChild(icon); row.appendChild(meta); row.appendChild(act);
+        infoFiles.appendChild(row);
+      });
+    }
+
+    // render links
+    if(links.length === 0) infoLinks.innerHTML = '<div style="color:var(--muted)">Chưa có link</div>';
+    else {
+      infoLinks.innerHTML = '';
+      links.forEach(l => {
+        const item = document.createElement('div'); item.style.display='flex'; item.style.alignItems='center'; item.style.justifyContent='space-between'; item.style.gap='8px'; item.style.padding='8px'; item.style.borderRadius='8px'; item.style.background='#fff'; item.style.boxShadow='0 6px 18px rgba(20,30,70,0.03)';
+        const left = document.createElement('div'); left.style.flex='1';
+        const a = document.createElement('a'); a.href = l.link; a.target='_blank'; a.rel='noopener'; a.textContent = l.link; a.style.wordBreak='break-all';
+        const meta = document.createElement('div'); meta.style.fontSize='12px'; meta.style.color='var(--muted)'; meta.textContent = `${l.sender === localUser.id ? 'Bạn' : (usersMap[l.sender]||l.sender)} • ${new Date(l.created_at).toLocaleString()}`;
+        left.appendChild(a); left.appendChild(meta);
+        const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
+        const openBtn = document.createElement('button'); openBtn.className='small-btn'; openBtn.textContent='Mở'; openBtn.addEventListener('click', ()=> tryOpenInNewTab(l.link));
+        const copyBtn = document.createElement('button'); copyBtn.className='cancel-btn'; copyBtn.textContent='Sao chép'; copyBtn.addEventListener('click', async ()=> { await navigator.clipboard.writeText(l.link); alert('Đã copy link'); });
+        right.appendChild(openBtn); right.appendChild(copyBtn);
+        item.appendChild(left); item.appendChild(right);
+        infoLinks.appendChild(item);
+      });
+    }
+
+  }catch(e){
+    console.error('Lỗi loadConversationInfo', e);
+    infoGallery.innerHTML = 'Lỗi tải ảnh';
+    infoFiles.innerHTML = 'Lỗi tải file';
+    infoLinks.innerHTML = 'Lỗi tải link';
+  }
+}
+
 /* ====== MIME helper & upload ====== */
 function guessMimeType(fileName, fallback='application/octet-stream'){ const ext = (fileName.split('.').pop() || '').toLowerCase(); const map = { 'pdf':'application/pdf','doc':'application/msword','docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','ppt':'application/vnd.ms-powerpoint','pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation','xls':'application/vnd.ms-excel','xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','png':'image/png','jpg':'image/jpeg','jpeg':'image/jpeg','gif':'image/gif','webp':'image/webp','txt':'text/plain','zip':'application/zip' }; return map[ext] || fallback; }
 
@@ -720,20 +993,75 @@ msgInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(
 /* ====== delete (mark as deleted) ====== */
 async function deleteMessage(id){
   if(!confirm('Xác nhận thu hồi tin nhắn này?')) return;
+
   try{
-    const now = new Date().toISOString();
-    const { data, error } = await sbClient.from('messages')
-      .update({ is_deleted: true, deleted_at: now, status: 'deleted' })
+    /* 1. Lấy message hiện tại */
+    const { data: msg, error: fetchErr } = await sbClient
+      .from('messages')
+      .select('id, meta, type')
       .eq('id', id)
-      .select()
       .single();
-    if(error){ console.error('Thu hồi thất bại', error); alert('Thu hồi thất bại'); return; }
-    if(data) {
-      // visually show placeholder
-      removeMessageFromDOM(id);
-      // Optionally show a system message that message was recalled
+
+    if(fetchErr){
+      console.error('Không lấy được tin nhắn', fetchErr);
+      alert('Không lấy được tin nhắn');
+      return;
     }
-  }catch(e){ console.error('Lỗi thu hồi:', e); }
+
+    /* 2. Thu thập path file cần xóa */
+    let pathsToDelete = [];
+
+    if(msg?.meta){
+      // nhiều file
+      if(msg.meta.type === 'files' && Array.isArray(msg.meta.files)){
+        msg.meta.files.forEach(f=>{
+          if(f.path) pathsToDelete.push(f.path);
+        });
+      }
+      // 1 file
+      else if(msg.meta.path){
+        pathsToDelete.push(msg.meta.path);
+      }
+    }
+
+    /* 3. Xóa file trong Storage (nếu có) */
+    if(pathsToDelete.length){
+      const { error: storageErr } = await sbClient
+        .storage
+        .from(STORAGE_BUCKET)
+        .remove(pathsToDelete);
+
+      if(storageErr){
+        console.error('Xóa file storage lỗi:', storageErr);
+        alert('Không xóa được file trong storage');
+        return;
+      }
+    }
+
+    /* 4. Mark message là deleted */
+    const now = new Date().toISOString();
+    const { error: delErr } = await sbClient
+      .from('messages')
+      .update({
+        is_deleted: true,
+        deleted_at: now,
+        status: 'deleted'
+      })
+      .eq('id', id);
+
+    if(delErr){
+      console.error('Cập nhật DB lỗi', delErr);
+      alert('Thu hồi thất bại');
+      return;
+    }
+
+    /* 5. Xóa khỏi UI */
+    removeMessageFromDOM(id);
+
+  }catch(e){
+    console.error('Lỗi thu hồi:', e);
+    alert('Có lỗi xảy ra');
+  }
 }
 
 /* ====== edit message -> set is_edited + edited_at ====== */
@@ -838,6 +1166,11 @@ function startRealtime(){
           }catch(e){ console.warn('Không thể set delivered', e); }
         }
       }
+
+      // if conv-info open for this user, reload it so new files appear
+      if(convInfo.classList.contains('open') && selectedUserId && (m.sender === selectedUserId || m.recipient === selectedUserId)){
+        loadConversationInfo();
+      }
     })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
       const m = payload.new;
@@ -848,11 +1181,18 @@ function startRealtime(){
         return;
       }
       updateMessageInDOM(m);
+      // reload conv info if open and relevant
+      if(convInfo.classList.contains('open') && selectedUserId && (m.sender === selectedUserId || m.recipient === selectedUserId)){
+        loadConversationInfo();
+      }
     })
     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, (payload) => {
       const old = payload.old;
       if(!old) return;
       removeMessageFromDOM(old.id);
+      if(convInfo.classList.contains('open') && selectedUserId && (old.sender === selectedUserId || old.recipient === selectedUserId)){
+        loadConversationInfo();
+      }
     })
     .subscribe(status => { console.log('realtime status', status); });
 }
@@ -876,6 +1216,139 @@ emojiBtn.addEventListener('click', (ev)=>{ const rect = emojiBtn.getBoundingClie
 
 /* share file helper (uses Web Share or clipboard) */
 async function shareFile(url){ try{ if(navigator.share){ await navigator.share({ title: 'File', url }); } else { await navigator.clipboard.writeText(url); alert('Link đã được copy vào clipboard.'); } }catch(e){ alert('Không thể share: '+ e.message); } }
+
+/* ====== CONV-INFO UI Handlers ====== */
+btnInfo.addEventListener('click', ()=> {
+  if(!selectedUserId){ alert('Chọn user trước khi mở thông tin hội thoại'); return; }
+  convInfo.classList.add('open');
+  loadConversationInfo();
+});
+closeInfoBtn.addEventListener('click', ()=> {
+  convInfo.classList.remove('open');
+});
+
+// tab switching
+tabButtons.forEach(b => {
+  b.addEventListener('click', ()=> {
+    tabButtons.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const tab = b.dataset.tab;
+    imagesTab.style.display = tab==='images' ? '' : 'none';
+    filesTab.style.display = tab==='files' ? '' : 'none';
+    linksTab.style.display = tab==='links' ? '' : 'none';
+  });
+});
+
+/* ===== NEW: Scroll-to-bottom button logic =====
+   - show button when user scrolls up (not at bottom)
+   - if new messages arrive while scrolled up: increment counter and show badge
+   - clicking button scrolls smoothly to bottom and resets counter
+   - uses MutationObserver to detect new DOM nodes (we avoid editing existing renderMessage)
+*/
+let isUserAtBottom = true;
+let lastScrollTop = 0;
+let unseenCount = 0;
+
+/* helper to show/hide button and update counter */
+function updateScrollButton(){
+  if(!scrollToBottomBtn) return;
+  if(!isUserAtBottom){
+    scrollToBottomBtn.classList.remove('hidden');
+    if(unseenCount > 0){
+      newCountEl.style.display = '';
+      newCountEl.textContent = unseenCount > 99 ? '99+' : String(unseenCount);
+    } else {
+      newCountEl.style.display = 'none';
+    }
+  } else {
+    scrollToBottomBtn.classList.add('hidden');
+    unseenCount = 0;
+    newCountEl.style.display = 'none';
+  }
+}
+
+/* detect user scrolling in msgList */
+msgList.addEventListener('scroll', ()=>{
+  const atBottomThreshold = 40; // px
+  const scTop = msgList.scrollTop;
+  const clientH = msgList.clientHeight;
+  const scrollHeight = msgList.scrollHeight;
+  const distanceFromBottom = scrollHeight - (scTop + clientH);
+  lastScrollTop = scTop;
+  if(distanceFromBottom <= atBottomThreshold){
+    isUserAtBottom = true;
+    unseenCount = 0;
+  } else {
+    isUserAtBottom = false;
+  }
+  updateScrollButton();
+});
+
+/* clicking button scrolls to bottom smoothly */
+scrollToBottomBtn.addEventListener('click', ()=>{
+  try {
+    msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' });
+  } catch (e) {
+    msgList.scrollTop = msgList.scrollHeight;
+  }
+  isUserAtBottom = true;
+  unseenCount = 0;
+  updateScrollButton();
+});
+
+/* MutationObserver to detect added messages and avoid forcing user view to bottom:
+   renderMessage currently sets scrollTop = scrollHeight; we restore user's previous scrollTop
+   when they were scrolled up. Also increment unseenCount so badge shows how many new messages arrived.
+*/
+const mo = new MutationObserver((mutationsList) => {
+  let added = 0;
+  for(const m of mutationsList){
+    if(m.addedNodes && m.addedNodes.length) added += m.addedNodes.length;
+  }
+  if(added === 0) return;
+  // If user is at bottom -> ensure we remain at bottom (allow renderMessage's default)
+  if(isUserAtBottom){
+    // ensure scrolled to bottom
+    try { msgList.scrollTop = msgList.scrollHeight; } catch(e){}
+    unseenCount = 0;
+    updateScrollButton();
+  } else {
+    // restore previous scrollTop (so renderMessage's auto-scroll doesn't disturb reading)
+    // small timeout to allow renderMessage to finish DOM updates
+    const prev = lastScrollTop || 0;
+    setTimeout(()=> {
+      try { msgList.scrollTop = prev; } catch(e){}
+    }, 8);
+    // update unseen counter
+    unseenCount += added;
+    updateScrollButton();
+  }
+});
+mo.observe(msgList, { childList: true, subtree: false });
+
+/* If user clicks inside message area (e.g., jumps to something), re-evaluate button */
+msgList.addEventListener('click', ()=>{
+  // small delay to allow potential scrollIntoView actions
+  setTimeout(()=> {
+    const atBottomThreshold = 40;
+    const scTop = msgList.scrollTop;
+    const clientH = msgList.clientHeight;
+    const distanceFromBottom = msgList.scrollHeight - (scTop + clientH);
+    isUserAtBottom = distanceFromBottom <= atBottomThreshold;
+    if(isUserAtBottom) unseenCount = 0;
+    updateScrollButton();
+  }, 120);
+});
+
+/* Keep button state updated on window resize (layout changes) */
+window.addEventListener('resize', ()=>{
+  const atBottomThreshold = 40;
+  const scTop = msgList.scrollTop;
+  const distanceFromBottom = msgList.scrollHeight - (scTop + msgList.clientHeight);
+  isUserAtBottom = distanceFromBottom <= atBottomThreshold;
+  if(isUserAtBottom) unseenCount = 0;
+  updateScrollButton();
+});
 
 /* ====== INIT ====== */
 (async function init(){

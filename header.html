@@ -30,15 +30,20 @@
 
     .search input{
         padding: 10px;
-        background: #004aad;
-        border: none;
-        border-radius: 5px;
+        background: #156082;
+        border-radius: 10px;
+        border: 3px solid rgba(12, 12, 12, 0.95);
         color: white;
+    }
+    .search input::placeholder{
+        color: white;
+        font-size: 12px;
     }
     .search button{
         padding: 10px;
         background:none;
-        border: none;
+        border-radius: 10px;
+        border: 3px solid rgba(12, 12, 12, 0.95);
         color: black;
     }
     .search button i{ font-size: 16px; }
@@ -76,7 +81,7 @@
         cursor: pointer;
     }
 
-    hr{ height: 4px; background: #004aad; }
+    hr{ height: 4px; background: #156082}
     #clearBtn{
         margin-right: 10px;
     }
@@ -98,7 +103,7 @@
 
     <!-- SEARCH -->
     <div class="search">
-        <input type="text" id="searchInput" placeholder="Tìm kiếm">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm...">
         <span id="clearBtn">&times;</span>
         <button id="searchBtn" type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
         <div class="results" id="results"></div>

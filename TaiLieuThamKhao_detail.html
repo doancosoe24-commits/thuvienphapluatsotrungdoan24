@@ -19,7 +19,7 @@
     html, body{
       margin:0;
       height:100%;
-      font-family:Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       background:#f7f9fb;
       color:#333;
     }
@@ -40,33 +40,50 @@
       gap:6px;
       padding:8px 14px;
       border-radius:999px;
-      background:#fff;
+      background:#156082;
       box-shadow:var(--shadow);
-      color:var(--primary);
+      color:white;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
       margin-bottom:18px;
     }
-    .back-link:hover{
-      background:var(--primary);
-      color:#fff;
-    }
+  .icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background:#156082;
+  border-radius: 15px;
+  border: 3.5px solid rgba(12, 12, 12, 0.95);
+  padding: 12px 0;
+
+  /* FIX */
+  box-sizing: border-box;
+}
+ .icon-title img{
+  margin: 0 20px;
+ }
 
     /* ---------- TITLE ---------- */
-    #pageTitle{
-      text-align:center;
-      color:var(--gold);
-      text-transform:uppercase;
-      font-weight:800;
-      margin-bottom:26px;
-    }
+ #pageTitle{
+  color: gold;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+
+  /* FIX TRÀN */
+  max-width: 100%;
+  word-break: break-word;
+  white-space: normal;
+  text-align: center;
+}
 
     /* ---------- LIST ---------- */
     .item_list{
       display:flex;
       align-items:center;
-      margin-bottom:18px;
+      margin-bottom:10px;
+      margin-top: 10px;
     }
 
     .arrow{
@@ -88,23 +105,29 @@
       display:flex;
       flex-direction:column;
       padding:15px 5px;
-      color:#ccae6e;
+      color:white;
       border-radius:5px;
       box-shadow:0 3px 6px rgba(0,0,0,0.15);
       cursor:pointer;
       transition:.3s;
       text-align:start;
     }
-
+.item-content{
+  display: flex;
+  align-items: center;
+}
+.item-content img{
+  margin:0 15px ;
+  width: 50px;
+}
+.item-content p{
+  margin: 0 auto;
+  text-align: center;
+}
     .item p{
       margin:0 0 6px 0;
       font-weight:700;
       font-size:16px;
-    }
-
-    .item:hover{
-      background:#ccae6e;
-      color:#fff;
     }
 
     /* ---------- LOADING (ĐỒNG BỘ) ---------- */
@@ -148,8 +171,10 @@
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle"></h2>
-
+      <div class="icon-title">
+    <img src="./img/3.png" alt="">
+    <h2 id="pageTitle">Tài liệu ngành</h2>
+  </div>
   <div id="loadingBox">
     <div class="loader"></div>
     Đang tải dữ liệu...
@@ -225,9 +250,11 @@ function renderList(data){
     const div=document.createElement("div");
     div.className="item_list";
     div.innerHTML=`
-      <div class="arrow"></div>
       <div class="item" data-name="${escapeHtml(i.name)}">
+            <div class="item-content">
+          <img src="./img/pdf.png" alt="">
         <p>${escapeHtml(i.name)}</p>
+        </div>
       </div>`;
     frag.appendChild(div);
   });

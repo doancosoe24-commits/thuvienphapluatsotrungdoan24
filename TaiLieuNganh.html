@@ -41,15 +41,26 @@
     }
 
     /* ---------- HEADER TITLE ---------- */
-    #pageTitle{
-      text-align:center;
-      color:var(--primary);
-      font-size:24px;
-      font-weight:800;
-      letter-spacing:1px;
-      margin:10px 0 30px;
-      text-transform:uppercase;
+    .icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+      background:#156082 ;
+      border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
+       padding: 12px;
     }
+  .icon-title img{
+   width: 50px;
+   margin:0 20px ;
+  }
+
+#pageTitle {
+  color: gold;
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
 
     /* ---------- BACK ---------- */
     .back-link{
@@ -58,16 +69,16 @@
       gap:6px;
       padding:8px 14px;
       border-radius:999px;
-      background:#fff;
+      background:#156082 ;
       box-shadow:var(--shadow);
-      color:var(--primary);
+      color:white;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
       margin-bottom:20px;
     }
     .back-link:hover{
-      background:var(--primary);
+      background:#156082 ;
       color:#fff;
     }
 
@@ -81,9 +92,9 @@
     .item_list{ width:100%; margin: 10px 0;}
 
     .item{
-      background:linear-gradient(135deg,var(--primary),#003a8c);
+      background:#156082 ;
       border-radius:var(--radius);
-      padding:26px 18px;
+      padding:6px 18px;
       color:var(--gold);
       text-align:center;
       cursor:pointer;
@@ -91,8 +102,21 @@
       transition:.3s;
       position:relative;
       overflow:hidden;
+       border-radius: 15px;
+       border: 3.5px solid rgba(12, 12, 12, 0.95);
     }
-
+.item-content{
+  display: flex;
+  align-items: center;
+}
+.item-content img{
+  margin:0 15px ;
+  width: 50px;
+}
+.item-content p{
+  margin: 0 auto;
+  text-align: center;
+}
     .item::after{
       content:"";
       position:absolute;
@@ -155,7 +179,7 @@
 
     @media(max-width:768px){
       body{ width:100%; padding:0; }
-      #pageTitle{ font-size:20px; }
+      #pageTitle{ font-size:20px;}
       #list{ grid-template-columns:1fr; }
     }
   </style>
@@ -167,8 +191,10 @@
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle"></h2>
-
+  <div class="icon-title">
+    <img src="./img/3.png" alt="">
+    <h2 id="pageTitle">Tài liệu ngành</h2>
+  </div>
   <div id="loadingBox">
     <div class="loader"></div>
     Đang tải dữ liệu...
@@ -342,7 +368,10 @@ function renderList(data){
     div.className = "item_list";
     div.innerHTML = `
       <div class="item" data-title="${escapeHtml(i.title)}">
-        <p>${escapeHtml(i.title)}</p>
+        <div class="item-content">
+          <img src="./img/6.png" alt="">
+          <p>${escapeHtml(i.title)}</p>
+        </div>
       </div>
     `;
     frag.appendChild(div);

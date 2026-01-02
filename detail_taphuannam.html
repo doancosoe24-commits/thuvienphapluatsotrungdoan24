@@ -35,16 +35,16 @@ h2 { text-align: center; color: #004aad; font-weight: 700; }
   gap:6px;
   padding:8px 14px;
   border-radius:999px;
-  background:#fff;
+  background:#156082 ;
   box-shadow:var(--shadow);
-  color:var(--primary);
+  color:white;
   font-weight:600;
   cursor:pointer;
   transition:.25s;
   margin:10px 0 20px;
 }
 .back-link:hover{
-  background:var(--primary);
+  background:#156082 ;
   color:#fff;
 }
 
@@ -84,19 +84,19 @@ h2 { text-align: center; color: #004aad; font-weight: 700; }
 .tab-btn {
   font-size: 14px;
   font-weight: 600;
-  background: #004aad;
+  background: #156082 ;
   cursor: pointer;
   padding: 10px 10px;
   border-radius: 5px;
   color: white;
   transition: 0.25s;
 }
-.tab-btn.active { background: #004aad; }
+.tab-btn.active { background: #156082 ; }
 .tab-underline {
   position: absolute;
   bottom: -2px;
   height: 4px;
-  background: #004aad;
+  background: #156082 ;
   width: 100%;
   border-radius: 10px;
   transition: 0.3s;
@@ -222,7 +222,7 @@ if(slugFromURL){
   fetch(`${webAppUrl}?ref=${encodeURIComponent(window.location.origin)}`)
     .then(res=>res.json())
     .then(res=>{
-      const rawList = res.TaiLieuTapHuan || [];
+      const rawList = res.data.TaiLieuTapHuan || [];
       const matched = rawList.find(r =>
         normalizeNameForComparison(r.name) === slugFromURL.toUpperCase()
       );

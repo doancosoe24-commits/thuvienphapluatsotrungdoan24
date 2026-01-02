@@ -22,6 +22,7 @@
       font-family: Arial, sans-serif;
       background:#f7f9fb;
       color:#333;
+      overflow: hidden;
     }
 
     body {
@@ -40,29 +41,54 @@
       gap:6px;
       padding:8px 14px;
       border-radius:999px;
-      background:#fff;
+      background:#156082;
       box-shadow:var(--shadow);
-      color:var(--primary);
+      color:white;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
       margin-bottom:20px;
     }
     .back-link:hover{
-      background:var(--primary);
+      background:#156082 ;
       color:#fff;
     }
+ .icon-title{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background:#156082;
+  border-radius: 15px;
+  border: 3.5px solid rgba(12, 12, 12, 0.95);
+  padding: 12px 0;
 
-    h2 {
-      text-align:center;
-      color:#ccae6e;
-      text-transform:uppercase;
-    }
+  /* FIX */
+  box-sizing: border-box;
+}
+ .icon-title img{
+  margin: 0 20px;
+ }
+
+    /* ---------- TITLE ---------- */
+ #pageTitle{
+  color: gold;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+
+  /* FIX TRÀN */
+  max-width: 100%;
+  word-break: break-word;
+  white-space: normal;
+  text-align: center;
+}
+
 
     .item_list {
       display:flex;
       align-items:center;
-      margin-bottom:18px;
+      margin-bottom:10px;
+      margin-top: 10px;
     }
 
     .arrow {
@@ -87,6 +113,7 @@
       box-shadow:0 3px 6px rgba(0,0,0,0.15);
       cursor:pointer;
       transition:0.25s;
+      text-transform: uppercase;
     }
 
     .item p {
@@ -94,7 +121,17 @@
       font-weight:700;
       font-size:16px;
     }
-
+.item-content{
+  display: flex;
+  align-items: center;
+}
+.item-content img{
+  margin:0 20px ;
+  width: 50px;
+}
+.item-content p{
+  margin: 0;
+}
     .item:hover {
       background:#ccae6e;
       color:#fff;
@@ -141,7 +178,10 @@
 <main>
   <span class="back-link" onclick="history.back()">← Quay lại</span>
 
-  <h2 id="pageTitle"></h2>
+    <div class="icon-title">
+    <img src="./img/6.png" alt="">
+    <h2 id="pageTitle"></h2>
+  </div>
 
   <div id="loadingBox">
     <div class="loader"></div>
@@ -159,12 +199,12 @@ const webAppUrl = "https://script.google.com/macros/s/AKfycbxe1dxDcrRp5yYz4xNFT4
 /* ===== SLUG CHUẨN ===== */
 function normalizeSlug(text){
   return String(text || "")
-    .replace(/Đ/g,"D").replace(/đ/g,"D")
+    .replace(/Đ/g,"D").replace(/đ/g,"d")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g,"")
-    .replace(/[^a-zA-Z0-9]/g,"")
-    .toUpperCase();
+    .replace(/[^a-zA-Z0-9]/g,"");
 }
+
 
 function escapeHtml(str){
   return String(str || "")
@@ -219,9 +259,11 @@ function renderList(data){
     const div = document.createElement("div");
     div.className = "item_list";
     div.innerHTML = `
-      <div class="arrow"></div>
       <div class="item" data-name="${escapeHtml(i.name)}">
+           <div class="item-content">
+          <img src="./img/pdf.png" alt="">
         <p>${escapeHtml(i.name)}</p>
+        </div>
       </div>
     `;
     frag.appendChild(div);

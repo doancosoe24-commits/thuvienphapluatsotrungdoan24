@@ -127,7 +127,7 @@
     .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
 
     /* toast & loader */
-    .toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:1400;box-shadow:var(--shadow-lg)}
+    .toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;Display:none;z-index:1400;box-shadow:var(--shadow-lg)}
     .toast.show{display:block}
     .loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);z-index:1500}
     .loader.show{display:flex}
@@ -216,7 +216,7 @@
 <script>
 /* ===================== CONFIG ===================== */
 /* Thay API nếu cần */
-const API = "https://script.google.com/macros/s/AKfycbxe1dxDcrRp5yYz4xNFT4iFqI14XcOzkou8hFOaV0yCgcvCsMjMpYcoyTXAEX4wRAqA/exec";
+const API = "https://script.google.com/macros/s/AKfycbw-mOdTDAnwAjJpOWFJe3cY6kCS1f280_C_sGA6VeG5_jciH-3LRMrlN3RYgJp2qeGG/exec";
 
 /* ===================== ELEMENTS ===================== */
 const tbody = document.getElementById('tbody');
@@ -266,9 +266,25 @@ function showLoader(on = true){
 function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(d){
   if(!d) return '';
-  const date = new Date(d);
-  if(isNaN(date)) return esc(d);
-  return date.toLocaleDateString('vi-VN');
+  // Accept ISO date or timestamp or plain string; use Asia/Ho_Chi_Minh
+  try{
+    const date = new Date(d);
+    if(isNaN(date)) return esc(d);
+    return date.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+  }catch(e){
+    return esc(d);
+  }
+}
+function toISODateForInput(d){
+  if(!d) return '';
+  try{
+    const date = new Date(d);
+    if(isNaN(date)) return '';
+    // convert to local yyyy-mm-dd
+    const tz = 'Asia/Ho_Chi_Minh';
+    // simplified: use local timezone of runtime (should be fine)
+    return date.toISOString().slice(0,10);
+  }catch(e){ return ''; }
 }
 function slugify(str){
   if(!str) return '';
@@ -289,9 +305,12 @@ function getSession(){
   showLoader(true);
 
   try{
+    // try check-manager (keeps compatibility with earlier backend)
     const res = await fetch(`${API}?route=check-manager&token=${encodeURIComponent(s.token)}`);
     const j = await res.json();
-    if(!j || !j.isManager){ alert('Không có quyền truy cập'); location.href = 'index.html'; return; }
+    if(!j || !j.isManager){
+      alert('Không có quyền truy cập'); location.href = 'index.html'; return;
+    }
     ROLE = j.role || '';
     roleLower = String(ROLE).toLowerCase();
     const user = j.user || {};
@@ -319,28 +338,62 @@ async function loadData(){
   cardsRoot.hidden = true;
 
   try{
-    const res = await fetch(API);
-    const j = await res.json();
-    const arr = j?.data?.ThuVienPhapLuatSo || [];
-    DATA = arr.slice();
+    // try an explicit route first (if backend exposes a list route)
+    let res, j;
+    try {
+      res = await fetch(`${API}?route=law-list-thuvien`);
+      j = await res.json();
+    } catch(e) {
+      // fallback to GET root
+      res = await fetch(API);
+      j = await res.json();
+    }
 
-    if(!arr.length){
+    // Normalize different possible shapes
+    // Possible shapes:
+    // { data: { ThuVienPhapLuatSo: [...] } }
+    // { data: [...] }
+    // { ThuVienPhapLuatSo: [...] }
+    // [...]
+    let arr = [];
+    if(Array.isArray(j)) arr = j;
+    else if(j && j.data){
+      if(Array.isArray(j.data.ThuVienPhapLuatSo)) arr = j.data.ThuVienPhapLuatSo;
+      else if(Array.isArray(j.data)) arr = j.data;
+      else {
+        // try find property with array of objects
+        for(const k of Object.keys(j.data)){
+          if(Array.isArray(j.data[k])) { arr = j.data[k]; break; }
+        }
+      }
+    } else if(j && Array.isArray(j.ThuVienPhapLuatSo)){
+      arr = j.ThuVienPhapLuatSo;
+    } else {
+      // try look for nested array
+      for(const k of Object.keys(j || {})){
+        if(Array.isArray(j[k])) { arr = j[k]; break; }
+      }
+    }
+
+    DATA = Array.isArray(arr) ? arr.slice() : [];
+
+    if(!DATA.length){
       tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>`;
       showLoader(false);
       return;
     }
 
     // render desktop table
-    tbody.innerHTML = arr.map(item => {
-      const id = esc(item.id);
-      const t = esc(item.title);
-      const s = esc(item.sohieu);
-      const nb = esc(item.noibanhanh);
-      const nk = esc(item.nguoiky);
+    tbody.innerHTML = DATA.map(item => {
+      const id = esc(item.id ?? '');
+      const t = esc(item.title ?? '');
+      const s = esc(item.sohieu ?? '');
+      const nb = esc(item.noibanhanh ?? '');
+      const nk = esc(item.nguoiky ?? '');
       const nbDate = fmtDate(item.ngaybanhanh);
       const heDate = fmtDate(item.ngayhieuluc);
-      const type = esc(item.loaivanban);
-      const slug = esc(item.slug);
+      const type = esc(item.loaivanban ?? '');
+      const slug = esc(item.slug ?? '');
       const urlCell = item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener" style="color:var(--accent-dark)">Link</a>` : '';
 
       const actions = roleLower === 'admin'
@@ -357,8 +410,14 @@ async function loadData(){
 
     // render mobile cards
     cardsRoot.hidden = false;
-    cardsRoot.innerHTML = arr.map(it => {
-      const id = esc(it.id), t = esc(it.title), s = esc(it.sohieu), nk = esc(it.nguoiky), nb = fmtDate(it.ngaybanhanh), he = fmtDate(it.ngayhieuluc), type = esc(it.loaivanban);
+    cardsRoot.innerHTML = DATA.map(it => {
+      const id = esc(it.id ?? '');
+      const t = esc(it.title ?? '');
+      const s = esc(it.sohieu ?? '');
+      const nk = esc(it.nguoiky ?? '');
+      const nb = fmtDate(it.ngaybanhanh);
+      const he = fmtDate(it.ngayhieuluc);
+      const type = esc(it.loaivanban ?? '');
       const actionsMobile = roleLower === 'admin'
         ? `<div class="actions-mobile">
              <button class="btn small" onclick="openEdit('${id}')">Sửa</button>
@@ -420,8 +479,8 @@ function openModal(data = null){
     sohieuI.value = data.sohieu || '';
     noibanhanhI.value = data.noibanhanh || '';
     nguoikyI.value = data.nguoiky || '';
-    ngaybanhanhI.value = data.ngaybanhanh ? (new Date(data.ngaybanhanh)).toISOString().slice(0,10) : '';
-    ngayhieulucI.value = data.ngayhieuluc ? (new Date(data.ngayhieuluc)).toISOString().slice(0,10) : '';
+    ngaybanhanhI.value = data.ngaybanhanh ? toISODateForInput(data.ngaybanhanh) : '';
+    ngayhieulucI.value = data.ngayhieuluc ? toISODateForInput(data.ngayhieuluc) : '';
     loaivanbanI.value = data.loaivanban || '';
     slugI.value = data.slug || '';
     urlI.value = data.url || '';
@@ -465,7 +524,11 @@ async function saveItem(){
     url: urlI.value.trim()
   };
   const idv = fid.value;
-  const route = idv ? 'law-update' : 'law-add';
+  // Use routes that backend may expect; these match previous frontend naming
+  const routeAdd = 'law-add-cr';
+  const routeUpdate = 'law-update-edit';
+  const route = idv ? routeUpdate : routeAdd;
+
   const body = new URLSearchParams();
   body.append('token', token);
   if(idv) body.append('id', idv);
@@ -475,9 +538,11 @@ async function saveItem(){
   try{
     const res = await fetch(`${API}?route=${route}`, { method:'POST', body });
     const j = await res.json();
-    showToast(j?.message || 'Đã lưu');
-    closeModal();
-    await loadData();
+    showToast(j?.message || (j?.status === 'success' ? 'Đã lưu' : 'Lỗi'));
+    if(j?.status === 'success') {
+      closeModal();
+      await loadData();
+    }
   }catch(e){
     console.error('saveItem', e);
     showToast('Lỗi khi lưu');
@@ -492,7 +557,8 @@ async function deleteItem(id){
   if(!token){ showToast('Token mất'); localStorage.removeItem('loggedInUser'); setTimeout(()=> location.href='login.html', 800); return; }
   showLoader(true);
   try{
-    const res = await fetch(`${API}?route=law-delete`, { method:'POST', body: new URLSearchParams({ token, id }) });
+    // route used by previous frontend
+    const res = await fetch(`${API}?route=law-delete-remove`, { method:'POST', body: new URLSearchParams({ token, id }) });
     const j = await res.json();
     showToast(j?.message || 'Đã xóa');
     await loadData();

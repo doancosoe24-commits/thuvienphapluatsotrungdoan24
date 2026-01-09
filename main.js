@@ -73,7 +73,19 @@ async function initUserBox() {
 
   const raw = localStorage.getItem("loggedInUser");
 
-  // chưa đăng nhập
+  // auto logout sau 3 giờ
+ const MAX_TIME = 3 * 60 * 60 * 1000; // 3 giờ
+const parseds = parseLoggedInUser(raw);
+
+if (parseds?.rawObj?.loginTime) {
+  const now = Date.now();
+  if (now - parseds.rawObj.loginTime > MAX_TIME) {
+    localStorage.removeItem("loggedInUser");
+    location.href = "login.html";
+    return;
+  }
+}
+
   if (!raw) {
     userBox.innerHTML = `
       <a href="login.html" style="color:#004aad;font-weight:600">
@@ -85,43 +97,16 @@ async function initUserBox() {
   const parsed = parseLoggedInUser(raw);
   const username = parsed.username || "User";
 
-  /* ===============================
-     CHECK HẾT HẠN ĐĂNG NHẬP (3 GIỜ)
-  =============================== */
-  const MAX_TIME = 3 * 60 * 60 * 1000; // 3 giờ
-  const loginTime = parsed?.rawObj?.loginTime;
-
-  if (!loginTime || Date.now() - loginTime > MAX_TIME) {
-    localStorage.removeItem("loggedInUser");
-    userBox.innerHTML = `
-      <a href="login.html" style="color:#004aad;font-weight:600">
-        Đăng nhập
-      </a>`;
-    return;
-  }
-
-  // user thường (không có token)
   if (!parsed.token) {
     renderUserBox(username, false);
     return;
   }
 
-  /* ===============================
-     CHECK QUYỀN MANAGER
-  =============================== */
   try {
     const url =
       `${API_URL}?route=check-manager&token=${encodeURIComponent(parsed.token)}`;
-
     const resp = await fetch(url, { cache: "no-store" });
     const data = await resp.json();
-
-    // token hết hạn từ server
-    if (data?.expired === true) {
-      localStorage.removeItem("loggedInUser");
-      location.href = "login.html";
-      return;
-    }
 
     const isManager = data?.isManager === true;
     const apiUser = data?.user || {};
@@ -134,6 +119,7 @@ async function initUserBox() {
     renderUserBox(username, false);
   }
 }
+
 
 
 /****************************************************

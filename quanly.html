@@ -314,7 +314,7 @@ function bindUI(){
 
   // utility buttons
   document.getElementById('refreshBtn').addEventListener('click', ()=>{ iframe.contentWindow ? iframe.contentWindow.location.reload() : iframe.contentWindow = iframe.contentWindow; });
-  document.getElementById('newItemBtn').addEventListener('click', ()=>{ alert('Chức năng thêm tài liệu — mở trang quản lý tài liệu.'); iframe.src = 'quanly_thuvienphapluatso.html'; });
+  document.getElementById('newItemBtn').addEventListener('click', ()=>{ alert('Chức năng thêm tài liệu — mở trang quản lý tài liệu.'); iframe.src = 'quanly_tailieunganh.html'; });
 }
 
 function logout(){ localStorage.removeItem('loggedInUser'); window.location.href='index.html'; }

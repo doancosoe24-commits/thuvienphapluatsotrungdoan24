@@ -38,7 +38,15 @@ a{color:var(--accent-2)}
 .logo{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.12);display:grid;place-items:center;font-weight:800}
 .brand h1{margin:0;font-size:18px;letter-spacing:0.3px}
 .brand p{margin:0;font-size:13px;opacity:.95}
-.user-meta{background:rgba(255,255,255,0.12);padding:8px 12px;border-radius:999px;font-weight:600;display:flex;gap:8px;align-items:center;font-size:13px}
+/* user meta */
+.user-meta{
+  background:rgba(255,255,255,0.12);
+  padding:8px 12px;border-radius:999px;font-weight:600;display:flex;gap:8px;align-items:center;font-size:13px;
+  min-width:0; max-width:320px; overflow-x:hidden;
+}
+.user-name-box{ max-height:48px; overflow-y:auto; overflow-x:hidden; white-space:normal; word-break:break-word; }
+.user-name-box .name{font-weight:700}
+.user-name-box .role{font-size:12px;opacity:.9;color:rgba(255,255,255,0.9)}
 
 /* main card */
 .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--shadow-sm)}
@@ -57,11 +65,64 @@ a{color:var(--accent-2)}
 
 /* table */
 .table-wrap{overflow:auto;border-radius:10px}
-table{width:100%;border-collapse:collapse;min-width:1000px}
-thead th{padding:12px 14px;font-size:12px;color:var(--muted);text-transform:uppercase;text-align:left;white-space:nowrap}
-tbody td{padding:12px 14px;border-bottom:1px solid rgba(7,16,36,0.04);font-size:14px}
+
+/* Không ép bảng rộng, cố định layout để cột tên không kéo dài */
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:0;
+  table-layout:fixed;
+  word-break:break-word;
+}
+thead th{
+  padding:12px 14px;font-size:12px;color:var(--muted);text-transform:uppercase;text-align:left;white-space:nowrap;
+}
+tbody td{
+  padding:12px 14px;border-bottom:1px solid rgba(7,16,36,0.04);font-size:14px;white-space:normal;word-break:break-word;
+}
 tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,108,255,0.02))}
-.action-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:none;color:#fff;cursor:pointer;font-size:13px}
+
+/* category badge (hiển thị trực tiếp, không cần click) */
+.cat-badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#f1f7ff,#eef6ff);
+  color:var(--muted);
+  font-weight:600;
+  font-size:13px;
+  border:1px solid rgba(11,108,255,0.06);
+}
+
+/* Tên file: không wrap, ẩn/truncate (ellipsis), title chứa full name */
+.name-cell{
+  width:340px;
+  max-width:340px;
+  min-width:0;
+  vertical-align:top;
+  overflow:visible;
+}
+.name-cell .cell-inner{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:block;
+  padding-right:6px;
+}
+
+/* action buttons: màu sắc rõ ràng */
+.action-btn{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:none;color:#fff;cursor:pointer;font-size:13px;
+  transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+.action-btn:active{ transform:translateY(1px) }
+.action-btn.edit{ background: linear-gradient(90deg,#06b6d4,#0891b2); box-shadow: 0 6px 16px rgba(6,182,212,0.12); }
+.action-btn.perm{ background: linear-gradient(90deg,#0b6cff,#0a58d9); box-shadow: 0 6px 16px rgba(11,108,255,0.12); }
+.action-btn.del{ background: linear-gradient(90deg,#ef4444,#dc2626); box-shadow: 0 6px 16px rgba(239,68,68,0.12); }
+.action-btn.view{ background: linear-gradient(90deg,#9ca3ff,#7c83ff); box-shadow: 0 6px 16px rgba(124,131,255,0.08); }
+
+/* nút nhỏ khi hiển thị nhiều trên 1 ô */
+.action-btn.small{ padding:6px 8px; font-size:12px }
 
 /* badges */
 .badge{padding:6px 8px;border-radius:8px;font-size:12px;color:#fff;display:inline-block}
@@ -90,10 +151,9 @@ tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,1
   tbody td:nth-child(1):before{content:"ID"}
   tbody td:nth-child(2):before{content:"Danh mục"}
   tbody td:nth-child(3):before{content:"Tên file"}
-  tbody td:nth-child(4):before{content:"Slug"}
-  tbody td:nth-child(5):before{content:"URL"}
-  tbody td:nth-child(6):before{content:"Quyền xem"}
-  tbody td:nth-child(7):before{content:"Hành động"}
+  tbody td:nth-child(4):before{content:"URL"}
+  tbody td:nth-child(5):before{content:"Quyền xem"}
+  tbody td:nth-child(6):before{content:"Hành động"}
 
   .cards{display:flex;flex-direction:column;gap:12px}
   .card-item{background:linear-gradient(180deg,#fff,#fbfdff);padding:12px;border-radius:10px;box-shadow:var(--shadow-sm)}
@@ -112,13 +172,12 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
 
 /* visually hidden for search accessibility */
 .sr-only{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-.show-cat-btn{padding:6px 10px;border:1px dashed rgba(7,16,36,0.06);border-radius:8px;background:transparent;cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
   <div class="container">
     <header class="header" role="banner" aria-label="Header quản trị">
-           <div class="brand">
+      <div class="brand">
         <div class="info"><h1>Tài Liệu Ngành</h1><p class="muted">Bảng quản lý</p></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
@@ -131,7 +190,7 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
       <div class="toolbar">
         <div class="search" role="search" aria-label="Tìm kiếm">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#667085" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="#667085" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="q" placeholder="Tìm theo danh mục / tên file / slug..." aria-label="Tìm văn bản">
+          <input id="q" placeholder="Tìm theo danh mục / tên file / url / quyền..." aria-label="Tìm văn bản">
           <button id="clearSearch" class="btn ghost" title="Xóa">✕</button>
         </div>
 
@@ -145,17 +204,16 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
         <table role="table" aria-label="Bảng tài liệu">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Danh mục</th>
-              <th>Tên file</th>
-              <th>Slug</th>
-              <th>URL</th>
-              <th>Quyền xem</th>
-              <th></th>
+              <th style="width:80px">ID</th>
+              <th style="width:180px">Danh mục</th>
+              <th style="width:340px">Tên file</th>
+              <th style="width:120px">URL</th>
+              <th style="width:140px">Quyền xem</th>
+              <th style="width:220px"></th>
             </tr>
           </thead>
           <tbody id="tb">
-            <tr><td colspan="7" style="text-align:center;padding:18px">Chưa tải dữ liệu...</td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:18px">Chưa tải dữ liệu...</td></tr>
           </tbody>
         </table>
       </div>
@@ -178,7 +236,7 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
       </div>
 
       <div class="row"><label class="muted">Tên file (name)</label><input id="fname_inp" placeholder="Tên file (vd: huongdan.pdf)"></div>
-      <div class="row"><label class="muted">Slug</label><input id="fslug_inp" placeholder="Slug (ví dụ TaiLieuNganh)"></div>
+      <div class="row"><label class="muted">Slug</label><input id="fslug_inp" placeholder="Slug (không hiển thị ở bảng, dùng cho URL nội bộ)"></div>
       <div class="row"><label class="muted">URL</label><input id="furl_inp" placeholder="Link hoặc đường dẫn nội bộ"></div>
 
       <hr style="border:none;border-top:1px solid rgba(7,16,36,0.04);margin:12px 0">
@@ -259,7 +317,7 @@ function showLoader(on=true){
   loader.style.display = on ? 'flex' : 'none';
   loader.setAttribute('aria-hidden', !on);
 }
-function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return String(s||'').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
 function parseJwtPayload(t){
   try{
     if(!t || t.indexOf('.')<0) return null;
@@ -293,8 +351,14 @@ function initAuthAndUI(){
     if(!r && tok){ const payload = parseJwtPayload(tok); if(payload) r = payload.role || ''; }
     role = r || '';
     roleLower = String(role).toLowerCase();
-    metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(session.user?.username||session.user?.email||'Admin')}</div><div class="muted">Role: ${esc(role||'')}</div></div>`;
+
+    const displayName = esc(session.user?.username || session.user?.email || 'Admin');
+    metaEl.innerHTML = `<div class="user-name-box"><div class="name">${displayName}</div><div class="role">Role: ${esc(role||'')}</div></div>`;
+
     if(!role || (roleLower !== 'admin' && roleLower !== 'editor')){ alert('Bạn không có quyền truy cập trang này'); localStorage.removeItem('loggedInUser'); location.href='/login.html'; return; }
+
+    if(roleLower !== 'admin' && roleLower !== 'editor'){ btnAdd.style.display = 'none'; }
+
   }catch(e){
     console.error(e); localStorage.removeItem('loggedInUser'); alert('Token không hợp lệ'); location.href='/login.html';
   }
@@ -334,7 +398,6 @@ function populateUserSelect(){
 
 /* ========== populate categories into select ========== */
 function populateCategories(){
-  // giữ option mặc định
   fcategory_select.innerHTML = '<option value="">-- Chọn danh mục --</option>';
   ALL_TITLES.forEach(t => {
     const opt = document.createElement('option');
@@ -346,7 +409,7 @@ function populateCategories(){
 
 /* ========== LOAD DOCUMENTS ========= */
 async function loadDocs(){
-  tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">Đang tải...</td></tr>`;
+  tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">Đang tải...</td></tr>`;
   cardsRoot.innerHTML = '';
   cardsRoot.hidden = true;
   showLoader(true);
@@ -354,60 +417,94 @@ async function loadDocs(){
     const body = new URLSearchParams({ route:'tailieu-list', token: session.token });
     const res = await fetch(API, { method:'POST', body });
     const j = await res.json();
-    if(!j || j.status !== 'success'){ tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">${esc(j && j.message ? j.message : 'Không thể lấy dữ liệu')}</td></tr>`; showLoader(false); return; }
-    const items = j.data || [];
-    DATA = items.slice();
+    if(!j || j.status !== 'success'){ tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">${esc(j && j.message ? j.message : 'Không thể lấy dữ liệu')}</td></tr>`; showLoader(false); return; }
+    let items = j.data || [];
 
-    // titles list
-    ALL_TITLES = Array.from(new Set(items.map(it => (it.title||'').trim()).filter(Boolean)));
+    items = items.filter(it => it && it.title && String(it.title).trim());
+
+    const uid = String(session.user?.id || session.user?.email || session.user?.username || '').trim();
+
+    const visible = items.filter(it => {
+      if(roleLower === 'admin') return true;
+      const qArr = parseQuyen(it.quyen || '');
+      if(qArr.includes('all')) return true;
+      return qArr.includes(uid);
+    });
+
+    DATA = visible.slice();
+
+    ALL_TITLES = Array.from(new Set(visible.map(it => (it.title||'').trim()).filter(Boolean)));
     populateCategories();
 
-    if(items.length === 0){ tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>`; showLoader(false); return; }
+    if(visible.length === 0){ tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">Không có tài liệu ngành được phép xem.</td></tr>`; showLoader(false); return; }
 
-    tb.innerHTML = items.map(it=>{
+    tb.innerHTML = visible.map(it=>{
       const id = esc(it.id||'');
       const title = esc(it.title||'');
       const name = esc(it.name||'');
-      const slug = esc(it.slug||'');
-      const urlCell = it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener">Link</a>` : '';
+      const urlCell = it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener">Link</a>` : '-';
       const quyenText = resolveQuyenText(it.quyen||'');
       const djson = esc(JSON.stringify(it||{}));
-      // Danh mục là nút action; kèm 1 span sr-only để cho việc tìm kiếm (không hiển thị)
+
+      const qArr = parseQuyen(it.quyen || '');
+      const uidNow = String(session.user?.id || session.user?.email || session.user?.username || '').trim();
+      const canEditorModify = (roleLower === 'admin') || (roleLower === 'editor' && (qArr.includes('all') || qArr.includes(uidNow)));
+
+      const actionsForAdmin = `<button class="action-btn edit" data-act="edit" data-json='${djson}'>✏ Sửa</button>
+                               <button class="action-btn perm" data-act="perm" data-json='${djson}'>⚙ Quyền</button>
+                               <button class="action-btn del" data-act="del" data-id="${id}">🗑 Xóa</button>`;
+      const actionsForEditorAllowed = `<button class="action-btn edit" data-act="edit" data-json='${djson}'>✏ Sửa</button>
+                                      <button class="action-btn del" data-act="del" data-id="${id}">🗑 Xóa</button>`;
+      const actionsForViewer = `<button class="action-btn view" data-act="edit" data-json='${djson}'>👁️ Xem</button>`;
+
+      let actionsHtml = '';
+      if(roleLower === 'admin') actionsHtml = actionsForAdmin;
+      else if(roleLower === 'editor') actionsHtml = canEditorModify ? actionsForEditorAllowed : actionsForViewer;
+      else actionsHtml = actionsForViewer;
+
+      // note: removed slug column (no longer rendered)
       return `<tr data-id="${id}">
         <td style="max-width:120px;word-break:break-word">${id}</td>
-        <td>
-          <button type="button" class="show-cat-btn" data-title="${title}">Danh mục</button>
-          <span class="sr-only">${title}</span>
-        </td>
-        <td>${name}</td>
-        <td>${slug}</td>
-        <td>${urlCell}</td>
+        <td><span class="cat-badge">${title}</span><span class="sr-only">${title}</span></td>
+        <td class="name-cell"><div class="cell-inner" title="${name}">${name}</div></td>
+        <td style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${urlCell}</td>
         <td title="${esc(it.quyen||'')}" style="white-space:nowrap">${quyenText}</td>
-        <td>
-          <button class="action-btn" data-act="edit" data-json='${djson}'>✏ Sửa</button>
-          <button class="action-btn" data-act="perm" data-json='${djson}'>⚙ Quyền</button>
-          ${roleLower === 'admin' ? `<button class="action-btn" data-act="del" data-id="${id}">🗑 Xóa</button>` : ''}
+        <td style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          ${actionsHtml}
         </td>
       </tr>`;
     }).join('');
 
-    // mobile cards
+    // mobile cards (slug removed)
     cardsRoot.hidden = false;
-    cardsRoot.innerHTML = items.map(it => {
+    cardsRoot.innerHTML = visible.map(it => {
       const title = esc(it.title||'');
       const name = esc(it.name||'');
-      const slug = esc(it.slug||'');
+      const urlCell = it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener">Link</a>` : '-';
       const quyenText = resolveQuyenText(it.quyen||'');
       const id = esc(it.id||'');
-      const actions = roleLower === 'admin' ? `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Sửa</button><button class="btn danger" onclick="deleteDoc('${id}')">Xóa</button></div>` : `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Xem</button></div>`;
-      return `<div class="card-item" role="article"><div style="display:flex;justify-content:space-between;align-items:center"><strong><button class="show-cat-btn" data-title="${title}">Danh mục</button></strong><div class="muted">${slug}</div></div><div class="meta muted" style="margin-top:8px">Tên file văn bản: ${name} • Quyền: ${quyenText}</div>${actions}</div>`;
+      const qArr = parseQuyen(it.quyen || '');
+      const uidNow = String(session.user?.id || session.user?.email || session.user?.username || '').trim();
+      const canEditorModify = (roleLower === 'admin') || (roleLower === 'editor' && (qArr.includes('all') || qArr.includes(uidNow)));
+
+      const actions = roleLower === 'admin' ? `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Sửa</button><button class="btn danger" onclick="deleteDoc('${id}')">Xóa</button></div>`
+                    : (roleLower === 'editor' && canEditorModify) ? `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Sửa</button><button class="btn danger" onclick="deleteDoc('${id}')">Xóa</button></div>`
+                    : `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Xem</button></div>`;
+
+      return `<div class="card-item" role="article">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <strong><span class="cat-badge">${title}</span></strong>
+                  <div class="muted">${urlCell}</div>
+                </div>
+                <div class="meta muted" style="margin-top:8px">Tên file văn bản: ${name} • Quyền: ${quyenText}</div>
+                ${actions}
+              </div>`;
     }).join('');
 
     attachRowListeners();
-    attachShowCatListeners();
   }catch(e){
     console.error('loadDocs', e);
-    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">Lỗi tải dữ liệu</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:18px">Lỗi tải dữ liệu</td></tr>`;
     showToast('Lỗi khi tải dữ liệu');
   }finally{
     showLoader(false);
@@ -416,43 +513,47 @@ async function loadDocs(){
 
 /* ========== attach row listeners for edit/delete/perm ========== */
 function attachRowListeners(){
+  const uid = String(session.user?.id || session.user?.email || session.user?.username || '').trim();
+
   document.querySelectorAll('button[data-act]').forEach(b=>{
     const act = b.getAttribute('data-act');
     b.onclick = ()=>{
       if(act === 'edit' || act === 'perm'){
         try{
           const data = JSON.parse(b.getAttribute('data-json'));
-          openEditForm(data);
+          const qArr = parseQuyen(data.quyen || '');
+          const canModify = (roleLower === 'admin') || (roleLower === 'editor' && (qArr.includes('all') || qArr.includes(uid)));
+          if(act === 'perm' && roleLower !== 'admin'){
+            alert('Chỉ admin mới có thể thay đổi quyền.');
+            return;
+          }
+          const readOnly = !canModify;
+          openEditForm(data, readOnly);
         }catch(e){
-          openEditForm({ id: b.dataset.id });
+          const readOnlyFallback = roleLower !== 'admin';
+          openEditForm({ id: b.dataset.id }, readOnlyFallback);
         }
       } else if(act === 'del'){
         const id = b.dataset.id;
+        const item = DATA.find(x=>String(x.id)===String(id));
+        const qArr = parseQuyen(item?.quyen || '');
+        const canDelete = (roleLower === 'admin') || (roleLower === 'editor' && (qArr.includes('all') || qArr.includes(uid)));
+        if(!canDelete){
+          alert('Bạn không có quyền xóa mục này.');
+          return;
+        }
         if(confirm('Bạn chắc chắn muốn xóa?')) deleteDoc(id);
       }
     };
   });
 }
 
-/* ========== attach listeners for "Danh mục" buttons ========== */
-function attachShowCatListeners(){
-  document.querySelectorAll('.show-cat-btn').forEach(btn=>{
-    btn.onclick = (e)=>{
-      const name = btn.getAttribute('data-title') || '';
-      if(name) showToast(name, 2800);
-      else showToast('Chưa có tên danh mục', 1800);
-    };
-  });
-}
-
 /* ========== popup open/close ========== */
-function openEditForm(item = {}){
-  document.getElementById('ftitle').textContent = item && item.id ? 'Sửa tài liệu' : 'Thêm tài liệu';
+function openEditForm(item = {}, readOnly = false){
+  document.getElementById('ftitle').textContent = item && item.id ? (readOnly ? 'Xem tài liệu' : 'Sửa tài liệu') : 'Thêm tài liệu';
   fid.value = item.id || '';
-  // chú ý: giờ chỉ chọn từ select
   if(item && item.title){
     const t = String(item.title);
-    // nếu danh mục hiện không tồn tại trong ALL_TITLES, thêm tạm vào select (để không bị rỗng khi edit)
     if(t && !ALL_TITLES.includes(t)){
       ALL_TITLES.unshift(t);
       populateCategories();
@@ -477,6 +578,10 @@ function openEditForm(item = {}){
       });
     }
   }
+
+  Array.from(document.querySelectorAll('.form input, .form select')).forEach(el => el.disabled = !!readOnly);
+  if(readOnly) saveBtn.style.display = 'none'; else saveBtn.style.display = '';
+
   popup.style.display = 'flex';
   popup.setAttribute('aria-hidden','false');
   setTimeout(()=> document.querySelector('.form').classList.add('show'), 20);
@@ -486,11 +591,20 @@ function closePopup(){
   setTimeout(()=> { popup.style.display = 'none'; popup.setAttribute('aria-hidden','true'); }, 160);
 }
 cancelBtn.onclick = closePopup;
-function openEditFromCard(id){ const it = DATA.find(x=>String(x.id)===String(id)); if(it) openEditForm(it); else openEditForm({ id }); }
+function openEditFromCard(id){
+  const it = DATA.find(x=>String(x.id)===String(id));
+  if(it){
+    const qArr = parseQuyen(it.quyen || '');
+    const uid = String(session.user?.id || session.user?.email || session.user?.username || '').trim();
+    const canModify = (roleLower === 'admin') || (roleLower === 'editor' && (qArr.includes('all') || qArr.includes(uid)));
+    openEditForm(it, !canModify);
+  } else {
+    openEditForm({ id }, roleLower !== 'admin');
+  }
+}
 
-/* ========== helper buttons for multiselect ========== */
+/* multiselect helpers */
 selectAllBtn.addEventListener('click', ()=> {
-  // chọn tất cả option
   Array.from(fquyen_select.options).forEach(o => o.selected = true);
   fquyen_all.checked = false;
   showToast('Đã chọn tất cả user');
@@ -500,8 +614,6 @@ clearSelectBtn.addEventListener('click', ()=> {
   fquyen_all.checked = false;
   showToast('Đã bỏ chọn tất cả user');
 });
-
-/* khi tick "Tất cả" -> bỏ chọn từng option */
 fquyen_all.addEventListener('change', ()=> {
   if(fquyen_all.checked){
     Array.from(fquyen_select.options).forEach(o => o.selected = false);
@@ -509,7 +621,7 @@ fquyen_all.addEventListener('change', ()=> {
   }
 });
 
-/* ========== save document (add/update) ========== */
+/* save document */
 async function saveDocument(){
   const id = fid.value;
   const route = id ? 'tailieu-update' : 'tailieu-add';
@@ -520,7 +632,6 @@ async function saveDocument(){
     quyen = sel.join(',');
   }
 
-  // lấy title từ select (bắt buộc)
   const selectedTitle = (fcategory_select.value || '').trim();
 
   const payload = {
@@ -546,8 +657,17 @@ async function saveDocument(){
 }
 saveBtn.addEventListener('click', saveDocument);
 
-/* ========== delete ========== */
+/* delete */
 async function deleteDoc(id){
+  const item = DATA.find(x=>String(x.id)===String(id));
+  const uid = String(session.user?.id || session.user?.email || session.user?.username || '').trim();
+  const qArr = parseQuyen(item?.quyen || '');
+  const canDelete = (roleLower === 'admin') || (roleLower === 'editor' && (qArr.includes('all') || qArr.includes(uid)));
+  if(!canDelete){
+    showToast('Bạn không có quyền xóa mục này');
+    return;
+  }
+
   showLoader(true);
   try{
     const res = await fetch(API + '?route=tailieu-delete', { method:'POST', body: new URLSearchParams({ token: session.token, id }) });
@@ -560,16 +680,15 @@ async function deleteDoc(id){
   }finally{ showLoader(false); }
 }
 
-/* ========== UI events (buttons) ========== */
-btnAdd.addEventListener('click', ()=> openEditForm()); // mở modal
+/* UI events */
+btnAdd.addEventListener('click', ()=> openEditForm());
 btnReload.addEventListener('click', async ()=> { await loadUsers(); await loadDocs(); });
 logoutBtn.addEventListener('click', ()=> { localStorage.removeItem('loggedInUser'); location.href = '/login.html'; });
 clearSearch.addEventListener('click', ()=> { qInput.value=''; qInput.dispatchEvent(new Event('input')); });
 
 qInput.addEventListener('input', ()=> {
   const v = qInput.value.trim().toLowerCase();
-  Array.from(tb.querySelectorAll('tr')).forEach(tr => { 
-    // tìm text trong toàn row (đã có sr-only chứa tiêu đề)
+  Array.from(tb.querySelectorAll('tr')).forEach(tr => {
     tr.style.display = tr.textContent.toLowerCase().includes(v) ? '' : 'none';
   });
   Array.from(cardsRoot.children).forEach(c => { c.style.display = c.textContent.toLowerCase().includes(v) ? '' : 'none'; });
@@ -583,7 +702,7 @@ function updateResponsive(){ if(window.innerWidth <= 820){ document.querySelecto
 window.addEventListener('resize', updateResponsive);
 updateResponsive();
 
-/* ========== INITIALIZATION ENTRYPOINT ========== */
+/* init */
 async function bootstrap(){
   try{
     const raw = localStorage.getItem('loggedInUser');
@@ -594,8 +713,13 @@ async function bootstrap(){
     if(!r && tok){ const payload = parseJwtPayload(tok); if(payload) r = payload.role || ''; }
     role = r || '';
     roleLower = String(role).toLowerCase();
-    metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(session.user?.username||session.user?.email||'Admin')}</div><div class="muted">Role: ${esc(role||'')}</div></div>`;
+
+    const displayName = esc(session.user?.username || session.user?.email || 'Admin');
+    metaEl.innerHTML = `<div class="user-name-box"><div class="name">${displayName}</div><div class="role">Role: ${esc(role||'')}</div></div>`;
+
     if(!role || (roleLower !== 'admin' && roleLower !== 'editor')){ alert('Bạn không có quyền truy cập trang này'); localStorage.removeItem('loggedInUser'); location.href='/login.html'; return; }
+
+    if(roleLower !== 'admin' && roleLower !== 'editor'){ btnAdd.style.display = 'none'; }
 
     showLoader(true);
     await loadUsers();
@@ -607,6 +731,7 @@ async function bootstrap(){
     showLoader(false);
   }
 }
+initAuthAndUI();
 bootstrap();
 </script>
 </body>

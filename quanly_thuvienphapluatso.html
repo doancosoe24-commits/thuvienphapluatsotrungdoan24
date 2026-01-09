@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Admin • Thư viện pháp luật — Quản lý</title>
   <link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -25,36 +25,32 @@
       --maxw:1200px;
       --ease: cubic-bezier(.2,.9,.25,1);
     }
+
     /* Reset + base */
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;background:linear-gradient(180deg,#f8fbff,var(--bg));font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);-webkit-font-smoothing:antialiased}
     a{color:inherit}
     button{font-family:inherit}
 
-    /* Layout container */
-    .wrap{max-width:var(--maxw);margin:22px auto;padding:18px}
+    /* Respect safe area on mobile */
+    .wrap{max-width:var(--maxw);margin:22px auto;padding:18px; padding-left:calc(18px + env(safe-area-inset-left)); padding-right:calc(18px + env(safe-area-inset-right));}
 
     /* Header */
     .header{
       background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
       border-radius:16px;
-      padding:18px;
+      padding:16px;
       color:#fff;
       box-shadow:var(--shadow-lg);
       display:flex;
       gap:12px;
       align-items:center;
       justify-content:space-between;
+      position:sticky;top:12px;z-index:200;backdrop-filter:blur(6px);
     }
-    .brand{
-      display:flex;gap:12px;align-items:center;
-    }
-    .brand .logo{
-      width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;
-      box-shadow: inset 0 -6px 12px rgba(0,0,0,0.06);
-    }
-    .brand .info{line-height:1}
-    .brand h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .logo{width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow: inset 0 -6px 12px rgba(0,0,0,0.06)}
+    .brand h1{margin:0;font-size:18px;letter-spacing:0.2px}
     .brand p{margin:0;font-size:13px;opacity:0.95}
 
     .user-actions{display:flex;gap:12px;align-items:center}
@@ -63,25 +59,11 @@
     .header .btn-flat{background:transparent;border:1px solid rgba(255,255,255,0.12);padding:8px 12px;border-radius:10px;color:#fff;cursor:pointer}
 
     /* Main card area */
-    .card{
-      margin-top:14px;
-      background:var(--card);
-      border-radius:14px;
-      padding:16px;
-      box-shadow:var(--shadow-sm);
-      overflow:hidden;
-    }
+    .card{margin-top:14px;background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow-sm);overflow:hidden}
 
     /* Toolbar */
     .toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .search{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      background:linear-gradient(180deg,#fbfdff,#f6f9ff);
-      padding:8px;border-radius:12px;border:1px solid rgba(7,16,36,0.04);box-shadow:0 6px 16px rgba(7,16,36,0.03);
-      flex:1;min-width:200px;
-    }
+    .search{display:flex;gap:8px;align-items:center;background:linear-gradient(180deg,#fbfdff,#f6f9ff);padding:8px;border-radius:12px;border:1px solid rgba(7,16,36,0.04);box-shadow:0 6px 16px rgba(7,16,36,0.03);flex:1;min-width:200px}
     .search input{border:0;background:transparent;outline:none;padding:8px;font-size:15px;width:100%}
     .controls{display:flex;gap:8px;align-items:center}
     .btn{border:0;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;transition:transform .14s var(--ease), box-shadow .14s var(--ease)}
@@ -93,7 +75,7 @@
 
     /* Table (desktop) */
     .table-wrap{margin-top:12px;border-radius:12px;overflow:auto}
-    table{width:100%;border-collapse:collapse;min-width:980px}
+    table{width:100%;border-collapse:collapse;min-width:860px}
     thead th{font-size:12px;color:var(--muted);text-transform:uppercase;padding:12px 14px;text-align:left;white-space:nowrap}
     tbody td{padding:12px 14px;border-bottom:1px solid rgba(7,16,36,0.04);vertical-align:middle}
     tbody tr{transition:background .18s var(--ease)}
@@ -102,32 +84,45 @@
     .col-actions{display:flex;gap:8px}
     .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(7,16,36,0.04);font-size:13px}
 
+    /* Form grid: default 2 columns, but controls for spanning */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-grid .full{grid-column:1 / -1}
+    .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;overflow: hidden}
+    label{font-size:13px;color:var(--muted)}
+    input[type=text], input[type=date], textarea, select{padding:10px;border-radius:10px;border:1px solid rgba(7,16,36,0.06);font-size:14px;width:100%}
+    textarea{min-height:100px;resize:vertical}
+
     /* Mobile cards */
     .cards{display:none}
     @media (max-width:900px){
       .table-wrap{display:none}
-      .cards{display:block;margin-top:12px;display:flex;flex-direction:column;gap:12px}
+      .cards{display:flex;margin-top:12px;flex-direction:column;gap:12px}
       .card-item{background:linear-gradient(180deg,#fff,#fbfdff);padding:12px;border-radius:12px;box-shadow:var(--shadow-sm)}
       .card-item .row{display:flex;justify-content:space-between;align-items:center}
       .card-item .meta{color:var(--muted);font-size:13px;margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
       .card-item .meta .m{background:rgba(7,16,36,0.04);padding:6px 8px;border-radius:8px;font-size:13px}
       .card-item .actions-mobile{display:flex;gap:8px;margin-top:10px}
       .btn.small{padding:8px 10px;font-size:14px;border-radius:10px}
+      .wrap{margin:12px auto;padding:12px}
     }
 
-    /* Modal */
-    .modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,16,36,0.45);z-index:1200;padding:18px}
-    .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:18px;box-shadow:var(--shadow-lg);transform:translateY(8px);opacity:0;transition:all .18s var(--ease)}
+    /* Modal - improved for mobile keyboard (bottom-sheet on small screens) */
+    .modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,16,36,0.45);z-index:1200;padding:18px;}
+    .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:18px;box-shadow:var(--shadow-lg);transform:translateY(8px);opacity:0;transition:all .18s var(--ease);max-height:90vh;overflow:auto;-webkit-overflow-scrolling:touch}
     .modal.show{transform:none;opacity:1}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;overflow: hidden;}
-    label{font-size:13px;color:var(--muted)}
-    input[type=text], input[type=date], textarea, select{padding:10px;border-radius:10px;border:1px solid rgba(7,16,36,0.06);font-size:14px}
-    textarea{min-height:100px;resize:vertical}
     .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
 
+    /* When viewport is narrow make modal a bottom sheet and force single-column inputs */
+    @media (max-width:600px){
+      .modal-wrap{align-items:flex-end;padding-bottom:calc(env(safe-area-inset-bottom) + 12px)}
+      .modal{border-radius:14px 14px 8px 8px;max-width:100%;width:100%;margin:0 6px;padding:14px;}
+      .form-grid{grid-template-columns:1fr}
+      .form-grid .full{grid-column:1 / -1}
+      .modal-foot{justify-content:space-between;gap:8px;position:sticky;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0),var(--card));padding-top:8px;margin-top:8px}
+    }
+
     /* toast & loader */
-    .toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;Display:none;z-index:1400;box-shadow:var(--shadow-lg)}
+    .toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:1400;box-shadow:var(--shadow-lg)}
     .toast.show{display:block}
     .loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);z-index:1500}
     .loader.show{display:flex}
@@ -141,6 +136,10 @@
 <body>
   <div class="wrap">
     <header class="header" role="banner" aria-label="Header quản trị">
+      <div class="brand">
+        <div class="logo">TL</div>
+        <div class="info"><h1>Thư viện pháp luật</h1><p class="muted">Bảng quản lý</p></div>
+      </div>
 
       <div class="user-actions" role="navigation" aria-label="Người dùng">
         <div class="user-meta" id="meta" aria-hidden="true">Đang tải...</div>
@@ -188,22 +187,55 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <h3 id="modalTitle">Thêm / Sửa văn bản</h3>
       <div class="form-grid" style="margin-top:12px">
-        <div style="grid-column:1/3">
-          <div class="form-row"><label>Tiêu đề</label><input id="title" type="text" placeholder="Tiêu đề văn bản"></div>
+        <div class="form-row full">
+          <label for="title">Tiêu đề</label>
+          <input id="title" type="text" placeholder="Tiêu đề văn bản">
         </div>
-        <div class="form-row"><label>Số hiệu</label><input id="sohieu" type="text" placeholder="Số hiệu"></div>
-        <div class="form-row"><label>Nơi ban hành</label><input id="noibanhanh" type="text" placeholder="Nơi ban hành"></div>
-        <div class="form-row"><label>Người ký</label><input id="nguoiky" type="text" placeholder="Người ký"></div>
-        <div class="form-row"><label>Ngày ban hành</label><input id="ngaybanhanh" type="date"></div>
-        <div class="form-row"><label>Ngày hiệu lực</label><input id="ngayhieuluc" type="date"></div>
-        <div class="form-row"><label>Loại</label><input id="loaivanban" type="text" placeholder="VD: Nghị định, Thông tư"></div>
-        <div class="form-row"><label>Slug</label><input id="slug" type="text" placeholder="slug-tu-tieu-de"></div>
-        <div class="form-row" style="grid-column:1/3"><label>URL (tùy chọn)</label><input id="url" type="text" placeholder="https://..."></div>
+
+        <div class="form-row">
+          <label for="sohieu">Số hiệu</label>
+          <input id="sohieu" type="text" placeholder="Số hiệu">
+        </div>
+
+        <div class="form-row">
+          <label for="noibanhanh">Nơi ban hành</label>
+          <input id="noibanhanh" type="text" placeholder="Nơi ban hành">
+        </div>
+
+        <div class="form-row">
+          <label for="nguoiky">Người ký</label>
+          <input id="nguoiky" type="text" placeholder="Người ký">
+        </div>
+
+        <div class="form-row">
+          <label for="ngaybanhanh">Ngày ban hành</label>
+          <input id="ngaybanhanh" type="date">
+        </div>
+
+        <div class="form-row">
+          <label for="ngayhieuluc">Ngày hiệu lực</label>
+          <input id="ngayhieuluc" type="date">
+        </div>
+
+        <div class="form-row">
+          <label for="loaivanban">Loại</label>
+          <input id="loaivanban" type="text" placeholder="VD: Nghị định, Thông tư">
+        </div>
+
+        <div class="form-row">
+          <label for="slug">Slug</label>
+          <input id="slug" type="text" placeholder="slug-tu-tieu-de">
+        </div>
+
+        <div class="form-row full">
+          <label for="url">URL (tùy chọn)</label>
+          <input id="url" type="text" placeholder="https://...">
+        </div>
       </div>
 
       <div class="modal-foot">
-        <button class="btn ghost" id="cancelBtn">Hủy</button>
-        <button class="btn primary" id="saveBtn">Lưu</button>
+        <button class="btn ghost" id="cancelBtn" aria-label="Hủy">Hủy</button>
+        <button class="btn primary" id="saveBtn" aria-label="Lưu">Lưu</button>
       </div>
       <input type="hidden" id="fid">
     </div>
@@ -215,7 +247,6 @@
 
 <script>
 /* ===================== CONFIG ===================== */
-/* Thay API nếu cần */
 const API = "https://script.google.com/macros/s/AKfycbw-mOdTDAnwAjJpOWFJe3cY6kCS1f280_C_sGA6VeG5_jciH-3LRMrlN3RYgJp2qeGG/exec";
 
 /* ===================== ELEMENTS ===================== */
@@ -252,6 +283,7 @@ let usersession = null;
 let ROLE = '';
 let roleLower = '';
 let DATA = [];
+let prevBodyOverflow = '';
 
 /* ===================== HELPERS ===================== */
 function showToast(msg, timeout = 2400){
@@ -263,40 +295,16 @@ function showLoader(on = true){
   loader.style.display = on ? 'flex' : 'none';
   loader.setAttribute('aria-hidden', on ? 'false' : 'true');
 }
-function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return String(s||'').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c)); }
 function fmtDate(d){
   if(!d) return '';
-  // Accept ISO date or timestamp or plain string; use Asia/Ho_Chi_Minh
-  try{
-    const date = new Date(d);
-    if(isNaN(date)) return esc(d);
-    return date.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-  }catch(e){
-    return esc(d);
-  }
+  try{ const date = new Date(d); if(isNaN(date)) return esc(d); return date.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }); }catch(e){ return esc(d); }
 }
-function toISODateForInput(d){
-  if(!d) return '';
-  try{
-    const date = new Date(d);
-    if(isNaN(date)) return '';
-    // convert to local yyyy-mm-dd
-    const tz = 'Asia/Ho_Chi_Minh';
-    // simplified: use local timezone of runtime (should be fine)
-    return date.toISOString().slice(0,10);
-  }catch(e){ return ''; }
-}
-function slugify(str){
-  if(!str) return '';
-  let s = String(str).replace(/Đ/g,'D').replace(/đ/g,'d');
-  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9\s-]/g,'').trim().replace(/\s+/g,'-').toLowerCase();
-  return s;
-}
+function toISODateForInput(d){ if(!d) return ''; try{ const date = new Date(d); if(isNaN(date)) return ''; return date.toISOString().slice(0,10); }catch(e){ return ''; } }
+function slugify(str){ if(!str) return ''; let s = String(str).replace(/Đ/g,'D').replace(/đ/g,'d'); s = s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9\s-]/g,'').trim().replace(/\s+/g,'-').toLowerCase(); return s; }
 
 /* ===================== AUTH CHECK ===================== */
-function getSession(){
-  try{ return JSON.parse(localStorage.getItem('loggedInUser') || 'null'); }catch(e){ return null; }
-}
+function getSession(){ try{ return JSON.parse(localStorage.getItem('loggedInUser') || 'null'); }catch(e){ return null; } }
 
 (async function init(){
   const s = getSession();
@@ -305,85 +313,42 @@ function getSession(){
   showLoader(true);
 
   try{
-    // try check-manager (keeps compatibility with earlier backend)
     const res = await fetch(`${API}?route=check-manager&token=${encodeURIComponent(s.token)}`);
     const j = await res.json();
-    if(!j || !j.isManager){
-      alert('Không có quyền truy cập'); location.href = 'index.html'; return;
-    }
-    ROLE = j.role || '';
-    roleLower = String(ROLE).toLowerCase();
-    const user = j.user || {};
-    metaEl.innerHTML = `<div style="text-align:right"><div style="font-weight:700">${esc(user.username||user.email||'Admin')}</div><div class="muted">Quyền: <span class="chip">${esc(ROLE)}</span></div></div>`;
+    if(!j || !j.isManager){ alert('Không có quyền truy cập'); location.href = 'index.html'; return; }
+    ROLE = j.role || ''; roleLower = String(ROLE).toLowerCase(); const user = j.user || {};
+    metaEl.innerHTML = `<div style=\"text-align:right\"><div style=\"font-weight:700\">${esc(user.username||user.email||'Admin')}</div><div class=\"muted\">Quyền: <span class=\"chip\">${esc(ROLE)}</span></div></div>`;
 
-    // hide add if not admin
     if(roleLower !== 'admin') addBtn.style.display = 'none';
-
     await loadData();
-  }catch(e){
-    console.error(e);
-    showToast('Lỗi xác thực — vui lòng đăng nhập lại');
-    localStorage.removeItem('loggedInUser');
-    setTimeout(()=> location.href='login.html',800);
-  }finally{
-    showLoader(false);
-  }
+  }catch(e){ console.error(e); showToast('Lỗi xác thực — vui lòng đăng nhập lại'); localStorage.removeItem('loggedInUser'); setTimeout(()=> location.href='login.html',800); }
+  finally{ showLoader(false); }
 })();
 
 /* ===================== LOAD DATA ===================== */
 async function loadData(){
   showLoader(true);
-  tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px">Đang tải…</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan=\"11\" style=\"text-align:center;padding:18px\">Đang tải…</td></tr>`;
   cardsRoot.innerHTML = '';
   cardsRoot.hidden = true;
 
   try{
-    // try an explicit route first (if backend exposes a list route)
     let res, j;
-    try {
-      res = await fetch(`${API}?route=law-list-thuvien`);
-      j = await res.json();
-    } catch(e) {
-      // fallback to GET root
-      res = await fetch(API);
-      j = await res.json();
-    }
+    try { res = await fetch(`${API}?route=law-list-thuvien`); j = await res.json(); } catch(e) { res = await fetch(API); j = await res.json(); }
 
-    // Normalize different possible shapes
-    // Possible shapes:
-    // { data: { ThuVienPhapLuatSo: [...] } }
-    // { data: [...] }
-    // { ThuVienPhapLuatSo: [...] }
-    // [...]
     let arr = [];
     if(Array.isArray(j)) arr = j;
     else if(j && j.data){
       if(Array.isArray(j.data.ThuVienPhapLuatSo)) arr = j.data.ThuVienPhapLuatSo;
       else if(Array.isArray(j.data)) arr = j.data;
-      else {
-        // try find property with array of objects
-        for(const k of Object.keys(j.data)){
-          if(Array.isArray(j.data[k])) { arr = j.data[k]; break; }
-        }
-      }
-    } else if(j && Array.isArray(j.ThuVienPhapLuatSo)){
-      arr = j.ThuVienPhapLuatSo;
-    } else {
-      // try look for nested array
-      for(const k of Object.keys(j || {})){
-        if(Array.isArray(j[k])) { arr = j[k]; break; }
-      }
-    }
+      else { for(const k of Object.keys(j.data)){ if(Array.isArray(j.data[k])) { arr = j.data[k]; break; } } }
+    } else if(j && Array.isArray(j.ThuVienPhapLuatSo)){ arr = j.ThuVienPhapLuatSo; }
+    else { for(const k of Object.keys(j || {})){ if(Array.isArray(j[k])) { arr = j[k]; break; } } }
 
     DATA = Array.isArray(arr) ? arr.slice() : [];
 
-    if(!DATA.length){
-      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>`;
-      showLoader(false);
-      return;
-    }
+    if(!DATA.length){ tbody.innerHTML = `<tr><td colspan=\"11\" style=\"text-align:center;padding:18px\">Không có dữ liệu</td></tr>`; showLoader(false); return; }
 
-    // render desktop table
     tbody.innerHTML = DATA.map(item => {
       const id = esc(item.id ?? '');
       const t = esc(item.title ?? '');
@@ -394,21 +359,15 @@ async function loadData(){
       const heDate = fmtDate(item.ngayhieuluc);
       const type = esc(item.loaivanban ?? '');
       const slug = esc(item.slug ?? '');
-      const urlCell = item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener" style="color:var(--accent-dark)">Link</a>` : '';
+      const urlCell = item.url ? `<a href=\"${esc(item.url)}\" target=\"_blank\" rel=\"noopener\" style=\"color:var(--accent-dark)\">Link</a>` : '';
 
       const actions = roleLower === 'admin'
-        ? `<div class="col-actions" role="group">
-             <button class="btn ghost" onclick="openEdit('${id}')">Sửa</button>
-             <button class="btn danger" onclick="deleteItem('${id}')">Xóa</button>
-           </div>`
-        : `<div class="col-actions"><button class="btn ghost" onclick="viewItem('${id}')">Xem</button></div>`;
+        ? `<div class=\"col-actions\" role=\"group\"><button class=\"btn ghost\" onclick=\"openEdit('${id}')\">Sửa</button><button class=\"btn danger\" onclick=\"deleteItem('${id}')\">Xóa</button></div>`
+        : `<div class=\"col-actions\"><button class=\"btn ghost\" onclick=\"viewItem('${id}')\">Xem</button></div>`;
 
-      return `<tr>
-        <td>${id}</td><td>${t}</td><td>${s}</td><td>${nb}</td><td>${nk}</td><td>${nbDate}</td><td>${heDate}</td><td>${type}</td><td>${slug}</td><td>${urlCell}</td><td>${actions}</td>
-      </tr>`;
+      return `<tr><td>${id}</td><td>${t}</td><td>${s}</td><td>${nb}</td><td>${nk}</td><td>${nbDate}</td><td>${heDate}</td><td>${type}</td><td>${slug}</td><td>${urlCell}</td><td>${actions}</td></tr>`;
     }).join('');
 
-    // render mobile cards
     cardsRoot.hidden = false;
     cardsRoot.innerHTML = DATA.map(it => {
       const id = esc(it.id ?? '');
@@ -419,27 +378,13 @@ async function loadData(){
       const he = fmtDate(it.ngayhieuluc);
       const type = esc(it.loaivanban ?? '');
       const actionsMobile = roleLower === 'admin'
-        ? `<div class="actions-mobile">
-             <button class="btn small" onclick="openEdit('${id}')">Sửa</button>
-             <button class="btn danger small" onclick="deleteItem('${id}')">Xóa</button>
-           </div>`
-        : `<div class="actions-mobile"><button class="btn small" onclick="viewItem('${id}')">Xem</button></div>`;
-      return `<div class="card-item" role="article" aria-label="${t}">
-        <div class="row"><div><strong>${t}</strong><div class="muted" style="margin-top:6px">${s ? 'Số hiệu: '+s : ''}</div></div><div class="chip">${type||'—'}</div></div>
-        <div class="meta">
-          <div class="m">Người ký: ${nk||'—'}</div><div class="m">Ban hành: ${nb||'—'}</div><div class="m">Hiệu lực: ${he||'—'}</div>
-        </div>
-        ${actionsMobile}
-      </div>`;
+        ? `<div class=\"actions-mobile\"><button class=\"btn small\" onclick=\"openEdit('${id}')\">Sửa</button><button class=\"btn danger small\" onclick=\"deleteItem('${id}')\">Xóa</button></div>`
+        : `<div class=\"actions-mobile\"><button class=\"btn small\" onclick=\"viewItem('${id}')\">Xem</button></div>`;
+      return `<div class=\"card-item\" role=\"article\" aria-label=\"${t}\"><div class=\"row\"><div><strong>${t}</strong><div class=\"muted\" style=\"margin-top:6px\">${s ? 'Số hiệu: '+s : ''}</div></div><div class=\"chip\">${type||'—'}</div></div><div class=\"meta\"><div class=\"m\">Người ký: ${nk||'—'}</div><div class=\"m\">Ban hành: ${nb||'—'}</div><div class=\"m\">Hiệu lực: ${he||'—'}</div></div>${actionsMobile}</div>`;
     }).join('');
 
-  }catch(e){
-    console.error('loadData', e);
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px">Lỗi khi tải dữ liệu</td></tr>`;
-    showToast('Lỗi khi tải dữ liệu');
-  }finally{
-    showLoader(false);
-  }
+  }catch(e){ console.error('loadData', e); tbody.innerHTML = `<tr><td colspan=\"11\" style=\"text-align:center;padding:18px\">Lỗi khi tải dữ liệu</td></tr>`; showToast('Lỗi khi tải dữ liệu'); }
+  finally{ showLoader(false); }
 }
 
 /* ===================== SEARCH ===================== */
@@ -448,11 +393,7 @@ qInput.addEventListener('input', ()=> {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(()=> {
     const v = qInput.value.trim().toLowerCase();
-    if(!v){ // show all
-      Array.from(tbody.rows).forEach(r => r.style.display = '');
-      Array.from(cardsRoot.children).forEach(c => c.style.display = '');
-      return;
-    }
+    if(!v){ Array.from(tbody.rows).forEach(r => r.style.display = ''); Array.from(cardsRoot.children).forEach(c => c.style.display = ''); return; }
     Array.from(tbody.rows).forEach(r => r.style.display = r.textContent.toLowerCase().includes(v) ? '' : 'none');
     Array.from(cardsRoot.children).forEach(c => c.style.display = c.textContent.toLowerCase().includes(v) ? '' : 'none');
   }, 180);
@@ -460,16 +401,28 @@ qInput.addEventListener('input', ()=> {
 clearSearchBtn.addEventListener('click', ()=>{ qInput.value=''; qInput.dispatchEvent(new Event('input')); });
 
 reloadBtn.addEventListener('click', loadData);
-document.getElementById('logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('loggedInUser'); location.href='login.html'; });
+logoutBtn.addEventListener('click', ()=>{ localStorage.removeItem('loggedInUser'); location.href='login.html'; });
 
 /* ===================== MODAL ACTIONS ===================== */
 addBtn.addEventListener('click', ()=> openModal());
 cancelBtn.addEventListener('click', closeModal);
 
+function trapFocus(modal){
+  const focusable = modal.querySelectorAll('a[href],button,textarea,input,select');
+  if(!focusable.length) return;
+  const first = focusable[0]; const last = focusable[focusable.length-1];
+  function handle(e){ if(e.key !== 'Tab') return; if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); } else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); } }
+  modal.addEventListener('keydown', handle);
+  return ()=> modal.removeEventListener('keydown', handle);
+}
+let releaseTrap = null;
+
 function openModal(data = null){
   if(roleLower !== 'admin'){ showToast('Chỉ admin được thao tác'); return; }
   modalWrap.style.display = 'flex';
   modalWrap.setAttribute('aria-hidden','false');
+  prevBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden'; // prevent background scroll
   const modal = modalWrap.querySelector('.modal');
   setTimeout(()=> modal.classList.add('show'), 20);
 
@@ -489,22 +442,39 @@ function openModal(data = null){
     titleI.value = sohieuI.value = noibanhanhI.value = nguoikyI.value = ngaybanhanhI.value = ngayhieulucI.value = loaivanbanI.value = slugI.value = urlI.value = '';
   }
 
-  setTimeout(()=> titleI.focus(), 160);
+  // focus + ensure visible on mobile keyboards
+  setTimeout(()=> { titleI.focus(); titleI.scrollIntoView({behavior:'smooth', block:'center'}); }, 160);
+
+  // trap tab focus inside modal
+  releaseTrap = trapFocus(modal);
 }
 function closeModal(){
-  modalWrap.querySelector('.modal').classList.remove('show');
-  setTimeout(()=> { modalWrap.style.display = 'none'; modalWrap.setAttribute('aria-hidden','true'); }, 180);
+  const modal = modalWrap.querySelector('.modal');
+  modal.classList.remove('show');
+  setTimeout(()=> { modalWrap.style.display = 'none'; modalWrap.setAttribute('aria-hidden','true'); document.body.style.overflow = prevBodyOverflow || ''; if(releaseTrap) releaseTrap(); }, 180);
 }
 
 modalWrap.addEventListener('click', (e)=> { if(e.target === modalWrap) closeModal(); });
 document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeModal(); });
 
-/* ===================== CRUD ===================== */
+/* Improve behavior on mobile keyboards: when any input inside modal gains focus, make sure it's visible */
+const modalInputs = [titleI, sohieuI, noibanhanhI, nguoikyI, ngaybanhanhI, ngayhieulucI, loaivanbanI, slugI, urlI];
+modalInputs.forEach(inp => inp.addEventListener('focus', (ev) => { try{ ev.target.scrollIntoView({behavior:'smooth', block:'center'}); }catch(e){} }));
+
+// If visualViewport exists, adjust modal scroll position when viewport resizes (keyboard shows/hides)
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', ()=>{
+    const m = modalWrap.querySelector('.modal');
+    if(!m || modalWrap.style.display === 'none') return;
+    setTimeout(()=> m.scrollIntoView({behavior:'instant', block:'center'}), 50);
+  });
+}
+
+/* ===================== CRUD (save/delete) ===================== */
 function openEdit(id){
   if(roleLower !== 'admin'){ showToast('Bạn không có quyền'); return; }
   const it = DATA.find(x => String(x.id) === String(id));
-  if(it) openModal(it);
-  else showToast('Không tìm thấy bản ghi');
+  if(it) openModal(it); else showToast('Không tìm thấy bản ghi');
 }
 
 async function saveItem(){
@@ -524,7 +494,6 @@ async function saveItem(){
     url: urlI.value.trim()
   };
   const idv = fid.value;
-  // Use routes that backend may expect; these match previous frontend naming
   const routeAdd = 'law-add-cr';
   const routeUpdate = 'law-update-edit';
   const route = idv ? routeUpdate : routeAdd;
@@ -539,14 +508,9 @@ async function saveItem(){
     const res = await fetch(`${API}?route=${route}`, { method:'POST', body });
     const j = await res.json();
     showToast(j?.message || (j?.status === 'success' ? 'Đã lưu' : 'Lỗi'));
-    if(j?.status === 'success') {
-      closeModal();
-      await loadData();
-    }
-  }catch(e){
-    console.error('saveItem', e);
-    showToast('Lỗi khi lưu');
-  }finally{ showLoader(false); }
+    if(j?.status === 'success') { closeModal(); await loadData(); }
+  }catch(e){ console.error('saveItem', e); showToast('Lỗi khi lưu'); }
+  finally{ showLoader(false); }
 }
 saveBtn.addEventListener('click', saveItem);
 
@@ -557,35 +521,24 @@ async function deleteItem(id){
   if(!token){ showToast('Token mất'); localStorage.removeItem('loggedInUser'); setTimeout(()=> location.href='login.html', 800); return; }
   showLoader(true);
   try{
-    // route used by previous frontend
     const res = await fetch(`${API}?route=law-delete-remove`, { method:'POST', body: new URLSearchParams({ token, id }) });
     const j = await res.json();
     showToast(j?.message || 'Đã xóa');
     await loadData();
-  }catch(e){
-    console.error('deleteItem', e);
-    showToast('Lỗi xóa');
-  }finally{ showLoader(false); }
+  }catch(e){ console.error('deleteItem', e); showToast('Lỗi xóa'); }
+  finally{ showLoader(false); }
 }
 
 function viewItem(id){
   const it = DATA.find(x => String(x.id) === String(id));
-  if(it){
-    const slug = it.slug || slugify(it.title || '');
-    if(slug) window.location.href = `detail.html?slug=${encodeURIComponent(slug)}`;
-    else window.location.href = `detail.html?id=${encodeURIComponent(id)}`;
-  } else window.location.href = `detail.html?id=${encodeURIComponent(id)}`;
+  if(it){ const slug = it.slug || slugify(it.title || ''); if(slug) window.location.href = `detail.html?slug=${encodeURIComponent(slug)}`; else window.location.href = `detail.html?id=${encodeURIComponent(id)}`; }
+  else window.location.href = `detail.html?id=${encodeURIComponent(id)}`;
 }
 
 /* ===================== INIT UI (mobile/desktop toggle) ===================== */
 function updateResponsive(){
-  if(window.innerWidth <= 900){
-    document.querySelector('.table-wrap').style.display = 'none';
-    cardsRoot.style.display = 'block';
-  } else {
-    document.querySelector('.table-wrap').style.display = '';
-    cardsRoot.style.display = '';
-  }
+  if(window.innerWidth <= 900){ document.querySelector('.table-wrap').style.display = 'none'; cardsRoot.style.display = 'block'; }
+  else { document.querySelector('.table-wrap').style.display = ''; cardsRoot.style.display = ''; }
 }
 window.addEventListener('resize', updateResponsive);
 updateResponsive();

@@ -88,7 +88,7 @@ tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,1
   tbody td{display:block;padding:6px 0;border-bottom:none}
   tbody td:before{display:inline-block;width:120px;font-weight:700;color:var(--muted);margin-right:6px}
   tbody td:nth-child(1):before{content:"ID"}
-  tbody td:nth-child(2):before{content:"Tiêu đề"}
+  tbody td:nth-child(2):before{content:"Danh mục"}
   tbody td:nth-child(3):before{content:"Tên file"}
   tbody td:nth-child(4):before{content:"Slug"}
   tbody td:nth-child(5):before{content:"URL"}
@@ -101,7 +101,7 @@ tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,1
 }
 
 /* toast & loader */
-.toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:1400}
+.toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);background:#071024;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:1400;max-width:90%;word-break:break-word}
 .toast.show{display:block}
 .loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);z-index:1500}
 .loader.show{display:flex}
@@ -109,6 +109,10 @@ tbody tr:hover{background:linear-gradient(90deg, rgba(6,182,212,0.02), rgba(11,1
 
 /* small focus */
 input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.08); outline-offset:2px; border-radius:8px; }
+
+/* visually hidden for search accessibility */
+.sr-only{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+.show-cat-btn{padding:6px 10px;border:1px dashed rgba(7,16,36,0.06);border-radius:8px;background:transparent;cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
@@ -124,7 +128,7 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
       <div class="toolbar">
         <div class="search" role="search" aria-label="Tìm kiếm">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#667085" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="#667085" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="q" placeholder="Tìm theo tiêu đề / tên file / slug..." aria-label="Tìm văn bản">
+          <input id="q" placeholder="Tìm theo danh mục / tên file / slug..." aria-label="Tìm văn bản">
           <button id="clearSearch" class="btn ghost" title="Xóa">✕</button>
         </div>
 
@@ -139,7 +143,7 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
           <thead>
             <tr>
               <th>ID</th>
-              <th>Tiêu đề</th>
+              <th>Danh mục</th>
               <th>Tên file</th>
               <th>Slug</th>
               <th>URL</th>
@@ -164,9 +168,10 @@ input:focus, button:focus, select:focus { outline: 3px solid rgba(11,108,255,0.0
       <input id="fid" type="hidden" />
 
       <div class="row">
-        <label class="muted">Tiêu đề (chọn hoặc gõ mới)</label>
-        <input id="ftitle_inp" list="titles_datalist" placeholder="Ví dụ: Hướng dẫn nghiệp vụ" autocomplete="off" />
-        <datalist id="titles_datalist"></datalist>
+        <label class="muted">Danh mục (chọn từ danh sách)</label>
+        <select id="fcategory_select" aria-label="Chọn danh mục">
+          <option value="">-- Chọn danh mục --</option>
+        </select>
       </div>
 
       <div class="row"><label class="muted">Tên file (name)</label><input id="fname_inp" placeholder="Tên file (vd: huongdan.pdf)"></div>
@@ -222,8 +227,7 @@ const clearSearch = document.getElementById('clearSearch');
 const qInput = document.getElementById('q');
 
 const fid = document.getElementById('fid');
-const ftitle_inp = document.getElementById('ftitle_inp');
-const titles_datalist = document.getElementById('titles_datalist');
+const fcategory_select = document.getElementById('fcategory_select');
 const fname_inp = document.getElementById('fname_inp');
 const fslug_inp = document.getElementById('fslug_inp');
 const furl_inp = document.getElementById('furl_inp');
@@ -325,6 +329,18 @@ function populateUserSelect(){
   });
 }
 
+/* ========== populate categories into select ========== */
+function populateCategories(){
+  // giữ option mặc định
+  fcategory_select.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+  ALL_TITLES.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    fcategory_select.appendChild(opt);
+  });
+}
+
 /* ========== LOAD DOCUMENTS ========= */
 async function loadDocs(){
   tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">Đang tải...</td></tr>`;
@@ -339,9 +355,9 @@ async function loadDocs(){
     const items = j.data || [];
     DATA = items.slice();
 
-    // titles datalist
+    // titles list
     ALL_TITLES = Array.from(new Set(items.map(it => (it.title||'').trim()).filter(Boolean)));
-    titles_datalist.innerHTML = ALL_TITLES.map(t => `<option value="${esc(t)}"></option>`).join('');
+    populateCategories();
 
     if(items.length === 0){ tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">Không có dữ liệu</td></tr>`; showLoader(false); return; }
 
@@ -353,9 +369,13 @@ async function loadDocs(){
       const urlCell = it.url ? `<a href="${esc(it.url)}" target="_blank" rel="noopener">Link</a>` : '';
       const quyenText = resolveQuyenText(it.quyen||'');
       const djson = esc(JSON.stringify(it||{}));
+      // Danh mục là nút action; kèm 1 span sr-only để cho việc tìm kiếm (không hiển thị)
       return `<tr data-id="${id}">
         <td style="max-width:120px;word-break:break-word">${id}</td>
-        <td>${title}</td>
+        <td>
+          <button type="button" class="show-cat-btn" data-title="${title}">Danh mục</button>
+          <span class="sr-only">${title}</span>
+        </td>
         <td>${name}</td>
         <td>${slug}</td>
         <td>${urlCell}</td>
@@ -377,10 +397,11 @@ async function loadDocs(){
       const quyenText = resolveQuyenText(it.quyen||'');
       const id = esc(it.id||'');
       const actions = roleLower === 'admin' ? `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Sửa</button><button class="btn danger" onclick="deleteDoc('${id}')">Xóa</button></div>` : `<div style="display:flex;gap:8px"><button class="btn ghost" onclick="openEditFromCard('${id}')">Xem</button></div>`;
-      return `<div class="card-item" role="article"><div style="display:flex;justify-content:space-between;align-items:center"><strong>${title}</strong><div class="muted">${slug}</div></div><div class="meta muted" style="margin-top:8px">File: ${name} • Quyền: ${quyenText}</div>${actions}</div>`;
+      return `<div class="card-item" role="article"><div style="display:flex;justify-content:space-between;align-items:center"><strong><button class="show-cat-btn" data-title="${title}">Danh mục</button></strong><div class="muted">${slug}</div></div><div class="meta muted" style="margin-top:8px">Tên file văn bản: ${name} • Quyền: ${quyenText}</div>${actions}</div>`;
     }).join('');
 
     attachRowListeners();
+    attachShowCatListeners();
   }catch(e){
     console.error('loadDocs', e);
     tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:18px">Lỗi tải dữ liệu</td></tr>`;
@@ -390,7 +411,7 @@ async function loadDocs(){
   }
 }
 
-/* ========== attach row listeners ========== */
+/* ========== attach row listeners for edit/delete/perm ========== */
 function attachRowListeners(){
   document.querySelectorAll('button[data-act]').forEach(b=>{
     const act = b.getAttribute('data-act');
@@ -410,11 +431,33 @@ function attachRowListeners(){
   });
 }
 
+/* ========== attach listeners for "Danh mục" buttons ========== */
+function attachShowCatListeners(){
+  document.querySelectorAll('.show-cat-btn').forEach(btn=>{
+    btn.onclick = (e)=>{
+      const name = btn.getAttribute('data-title') || '';
+      if(name) showToast(name, 2800);
+      else showToast('Chưa có tên danh mục', 1800);
+    };
+  });
+}
+
 /* ========== popup open/close ========== */
 function openEditForm(item = {}){
   document.getElementById('ftitle').textContent = item && item.id ? 'Sửa tài liệu' : 'Thêm tài liệu';
   fid.value = item.id || '';
-  ftitle_inp.value = item.title || '';
+  // chú ý: giờ chỉ chọn từ select
+  if(item && item.title){
+    const t = String(item.title);
+    // nếu danh mục hiện không tồn tại trong ALL_TITLES, thêm tạm vào select (để không bị rỗng khi edit)
+    if(t && !ALL_TITLES.includes(t)){
+      ALL_TITLES.unshift(t);
+      populateCategories();
+    }
+    fcategory_select.value = t;
+  } else {
+    fcategory_select.value = '';
+  }
   fname_inp.value = item.name || '';
   fslug_inp.value = item.slug || (item.title ? slugify(item.title) : '');
   furl_inp.value = item.url || '';
@@ -473,16 +516,20 @@ async function saveDocument(){
     const sel = Array.from(fquyen_select.selectedOptions).map(o=>o.value).filter(Boolean);
     quyen = sel.join(',');
   }
+
+  // lấy title từ select (bắt buộc)
+  const selectedTitle = (fcategory_select.value || '').trim();
+
   const payload = {
     token: session.token,
     id,
-    title: ftitle_inp.value.trim(),
+    title: selectedTitle,
     name: fname_inp.value.trim(),
-    slug: fslug_inp.value.trim() || slugify(ftitle_inp.value),
+    slug: fslug_inp.value.trim() || slugify(selectedTitle),
     url: furl_inp.value.trim(),
     quyen
   };
-  if(!payload.title){ showToast('Tiêu đề không được để trống'); return; }
+  if(!payload.title){ showToast('Vui lòng chọn danh mục (không được để trống)'); return; }
   showLoader(true);
   try{
     const res = await fetch(API + '?route=' + route, { method:'POST', body: new URLSearchParams(payload) });
@@ -518,7 +565,10 @@ clearSearch.addEventListener('click', ()=> { qInput.value=''; qInput.dispatchEve
 
 qInput.addEventListener('input', ()=> {
   const v = qInput.value.trim().toLowerCase();
-  Array.from(tb.querySelectorAll('tr')).forEach(tr => { tr.style.display = tr.textContent.toLowerCase().includes(v) ? '' : 'none'; });
+  Array.from(tb.querySelectorAll('tr')).forEach(tr => { 
+    // tìm text trong toàn row (đã có sr-only chứa tiêu đề)
+    tr.style.display = tr.textContent.toLowerCase().includes(v) ? '' : 'none';
+  });
   Array.from(cardsRoot.children).forEach(c => { c.style.display = c.textContent.toLowerCase().includes(v) ? '' : 'none'; });
 });
 

@@ -78,11 +78,15 @@
 }
 
 /* Ảnh item đầu và cuối to hơn */
-.item:first-child img,
+.item:nth-child(1) img,
+.item:nth-child(2) img{
+  width: 90px;
+  height:90px;
+  margin-left: 2px;
+}
 .item:last-child img{
-  width:84px;
-  height:84px;
-  margin-left: 3px;
+  width: 80px;
+  height: 80px;
 }
 
     .flag-vn svg {

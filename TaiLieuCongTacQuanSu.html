@@ -125,20 +125,23 @@
       object-fit:contain;
     }
     /* tiêu đề nằm trên cùng 1 hàng, cắt khi quá dài */
-    .item-content p{
-      margin:0;
-      /* cho phép chiếm khoảng còn lại và bị ẩn khi quá dài */
-      flex:1 1 auto;
-      min-width:0; /* quan trọng để text-overflow hoạt động trong flex */
-      text-align:left;
-      font-size:12px;
-      font-weight:700;
-      line-height:1.4;
-      color:var(--gold);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+   .item-content p{
+  margin:0;
+
+  flex:1 1 auto;
+  min-width:0;
+
+  text-align:left;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.4;
+  color:var(--gold);
+
+  white-space:normal;     /* ✅ cho xuống dòng */
+  overflow:visible;       /* ✅ không cắt */
+  word-break:break-word;  /* ✅ không tràn màn hình */
+}
+
 
 
     .item p{
@@ -318,6 +321,7 @@ loadPage();
 
 </body>
 </html>
+
 
 
 

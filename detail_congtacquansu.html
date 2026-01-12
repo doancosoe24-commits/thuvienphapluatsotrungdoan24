@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="./img/logo.png" type="image/x-icon">
+<title>Chi tiết tài liệu</title>
+
+<style>
+html, body{
+    height:100%;
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f7f9fb;
+    color:#333;
+}
+body{
+    display:flex;
+    flex-direction:column;
+    width:70%;
+    margin:0 auto;
+}
+main{ flex:1; }
+h2{
+    text-align:center;
+    color:#004aad;
+    text-transform:uppercase;
+    font-weight:700;
+}
+/* Back link */
+.back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    border-radius:999px;
+    background:#156082;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+    margin-bottom:20px;
+}
+/* Tabs */
+.tabs-container{
+    position:relative;
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    border-bottom:2px solid #d0d6e0;
+    padding-bottom:8px;
+}
+.tab-btn{
+    font-size:14px;
+    font-weight:600;
+    background:#004aad;
+    cursor:pointer;
+    padding:10px 14px;
+    border-radius:6px;
+    color:white;
+    transition:.25s;
+}
+.tab-btn.active{ background:#156082; }
+.tab-underline{
+    position:absolute;
+    bottom:-2px;
+    height:4px;
+    background:#156082;
+    border-radius:10px;
+    width:100px;
+    transition:.3s;
+}
+/* PDF box */
+.tab-detail{
+    padding:20px;
+    background:#156082;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    min-height:500px;
+    position:relative;
+}
+/* Watermark */
+.watermark{
+    position:absolute;
+    top:40%;
+    left:50%;
+    font-size:30px;
+    color:rgba(200,0,0,0.15);
+    transform:translate(-50%, -50%) rotate(-15deg);
+    pointer-events:none;
+    user-select:none;
+}
+@media(max-width:768px){
+    body{ width:100%; }
+    h2{ text-align:center; padding:0 10px; }
+}
+</style>
+</head>
+<body>
+
+<main>
+    <div id="header"></div>
+
+    <span class="back-link" onclick="history.back()">← Quay lại</span>
+
+    <h2 id="docTitle"></h2>
+
+    <div class="tabs-container">
+        <div class="tab-btn active" data-tab="source">Văn bản PDF</div>
+        <div class="tab-underline"></div>
+    </div>
+
+    <div class="tab-detail" id="tabContent"></div>
+</main>
+
+<div id="footer"></div>
+<script src="main.js"></script>
+<script>
+/* ---------------------------------------------------
+   CONFIG
+-----------------------------------------------------*/
+const webAppUrl =
+  "https://script.google.com/macros/s/AKfycby9DKr5S_cebJ1Ejx1_GXtVmU4pd9LHeQAzMN73Va8aMY5_91L7bM2Fcif7FzaXHI0L/exec";
+
+/* Lấy slug param (bắt dạng ví dụ: truyen-thong) */
+const slugURL = (new URLSearchParams(window.location.search).get("slug") || "").trim().toLowerCase();
+
+const tabContent = document.getElementById("tabContent");
+const docTitle  = document.getElementById("docTitle");
+const tabs = document.querySelectorAll(".tab-btn");
+const underline = document.querySelector(".tab-underline");
+
+let CURRENT_DATA = null;
+
+/* ---------------------------------------------------
+   HÀM TẠO SLUG (kebab-case, lowercase)
+   Ví dụ: "Truyền Thông Đặc Tổ" -> "truyen-thong-dac-to"
+-----------------------------------------------------*/
+  function toSlug(text){
+      text = String(text || "");
+      text = text.replace(/Đ/g,"D").replace(/đ/g,"d");
+      return text.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-zA-Z0-9 ]/g,"")
+        .trim()
+        .replace(/\s+/g,"-")
+        .toLowerCase();
+    }
+
+/* ---------------------------------------------------
+   LẤY ID GOOGLE DRIVE
+-----------------------------------------------------*/
+function getDriveID(link){
+    if(!link) return "";
+    const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : link;
+}
+
+/* ---------------------------------------------------
+   UNDERLINE TAB
+-----------------------------------------------------*/
+function updateUnderline(tab){
+    underline.style.width = tab.offsetWidth + "px";
+    underline.style.transform = `translateX(${tab.offsetLeft}px)`;
+}
+updateUnderline(document.querySelector(".tab-btn.active"));
+
+/* ---------------------------------------------------
+   HIỆN PDF
+-----------------------------------------------------*/
+function showPDF(data){
+    if(!data || !data.url){
+        tabContent.innerHTML = `
+            <div style="display:flex;justify-content:center;align-items:center;height:600px;color:#ff3131;font-size:20px;">
+                Chưa có dữ liệu PDF
+            </div>`;
+        return;
+    }
+
+    const pdfID = getDriveID(data.url);
+
+    tabContent.innerHTML = `
+    <div style="position:relative;width:100%;height:700px;border-radius:10px;overflow:hidden;
+                background:#fcf8e8;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <iframe src="https://drive.google.com/file/d/${pdfID}/preview"
+            style="width:100%;height:100%;border:none;"></iframe>
+        <div class="watermark">Thư Viện Số Trung đoàn 24</div>
+    </div>`;
+}
+
+/* ---------------------------------------------------
+   TAB CLICK
+-----------------------------------------------------*/
+tabs.forEach(tab=>{
+    tab.addEventListener("click",()=>{
+        document.querySelector(".tab-btn.active")?.classList.remove("active");
+        tab.classList.add("active");
+        showPDF(CURRENT_DATA);
+        updateUnderline(tab);
+    });
+});
+
+/* ---------------------------------------------------
+   LOAD DATA & TÌM ITEM THEO SLUG
+   - Nếu sheet có trường slug: dùng item.slug (đã normalize bằng toSlug)
+   - Nếu không có slug: sinh từ title bằng toSlug(title)
+   - So sánh với slugURL (lowercase kebab) 
+-----------------------------------------------------*/
+async function loadDetail(){
+    if(!slugURL){
+        docTitle.innerText = "Không có slug.";
+        tabContent.innerHTML = "<p>Thiếu dữ liệu trong URL. Ví dụ: ?slug=truyen-thong</p>";
+        return;
+    }
+
+    try{
+        // Lấy toàn bộ dữ liệu từ web app (apiGetAllData)
+        const res = await fetch(webAppUrl, { cache: 'no-store' });
+        const j = await res.json();
+        const dataRoot = j.data ? j.data : j;
+        // dùng TruyenThongDakTo hoặc HocTa... nếu bạn muốn thay đổi
+        const list = dataRoot.TaiLieuCongTacQuanSu || [];
+
+        // Tìm item: ưu tiên item.slug nếu có, còn không -> toSlug(item.title)
+        const found = list.find(item => {
+            const rawSlug = (item && item.slug) ? String(item.slug) : '';
+            const computed = rawSlug.trim() ? toSlug(rawSlug) : toSlug(item.title || '');
+            return computed === slugURL;
+        });
+
+        if(!found){
+            docTitle.innerText = "Không tìm thấy tài liệu";
+            tabContent.innerHTML = "<p>Dữ liệu không tồn tại. Kiểm tra lại slug (ví dụ: ?slug=truyen-thong).</p>";
+            return;
+        }
+
+        CURRENT_DATA = found;
+        docTitle.innerText = found.title || found.name || 'Tài liệu';
+        showPDF(found);
+
+    } catch(err){
+        console.error(err);
+        docTitle.innerText = "Lỗi tải dữ liệu";
+        tabContent.innerHTML = "<p>Không thể tải dữ liệu.</p>";
+    }
+}
+
+loadDetail();
+</script>
+
+</body>
+</html>
